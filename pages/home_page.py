@@ -3,9 +3,10 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+import plotly.graph_objects as go
 #pd.options.plotting.backend = "plotly"
 from numpy import genfromtxt
-
+import plotly.graph_objects as go
 import os
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -15,13 +16,6 @@ def test():
     fig = px.line(df, x="year", y="lifeExp", title='Life expectancy in Canada')
     return fig
 
-def data1():
-    lol = pd.read_csv("raw_data/ds1_truth.csv") 
-   # my_data = genfromtxt('../raw_data/ds1_truth.csv', delimiter=',')
-    print(lol)
-    fig = lol.plot()
-
-    return fig
 
 home_page = html.Div([
     dbc.Container(
@@ -36,13 +30,4 @@ home_page = html.Div([
             dcc.Link('Go to Data 3', href='/data3'),
         ])
     ]),
-    dbc.Container(
-    [
-        dbc.Row([
-            html.Div([
-                dcc.Graph(figure=data1())
-            ])
-
-        ])
-    ])
 ])

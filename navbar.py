@@ -7,7 +7,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Data 3", href="/data3")),  
     ],
     brand="AdaRel",
-    brand_href="#",
+    brand_href="/",
     color="secondary",
     dark=True,
 )
