@@ -17,7 +17,7 @@ def data():
 data1 = html.Div([
     dbc.Row([
         dbc.Col(
-            html.H3("Empirical Study 1 Plots"),
+            html.H3("Empirical Study 1"),
             width=4,
         ),
         dbc.Col(
