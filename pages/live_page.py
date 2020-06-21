@@ -9,6 +9,10 @@ from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import matplotlib.pyplot as plt
 import numpy as np
 from dateutil.parser import parse
+import sys
+sys.path.append("..")
+from dash.dependencies import Input, Output
+from app import app
 
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
@@ -61,13 +65,41 @@ live_page = html.Div([
     ]),
     dbc.Row([
         dbc.Col([
-            html.Div([
-                dcc.Input(
-            id="es_url",
-            type="text",
-            placeholder="https://<userName>:<password>@<url>/es/_search",
-        )
+        html.Div([
+            html.H4("Custom ES Cluster Details"),
+            html.P("The tool can connect to external ES cluster to fetch data.")
             ])
+        ])
+    ]),
+    dbc.Row([
+        dbc.Col(
+            html.Div([
+                dbc.FormGroup([
+                    dbc.Label("Enter your ElasticSearch Cluster URL"),
+                    dbc.Input(id="es_url",type="text",
+                    placeholder="https://<userName>:<password>@<url>/es/_search",
+                    )    
+                ]),
+                dbc.FormGroup([
+                    dbc.Label("Enter your agent.hostname"),
+                    dbc.Input(id="agent_hostname",type="text",
+                    placeholder="agent-Hostname",
+                    ),
+                    dbc.FormText("Agent Hostname used as a filter to differenciate multiple agents sending logs to same ES Cluster")
+                ]),
+                dbc.Button("Fetch Data", color="primary", id="refresh_data")
+                ]), width=5)
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.Div([html.Div(id="out-all-types")])
         ])
     ])
 ])
+
+@app.callback(
+    Output("out-all-types", "children"),
+    [Input("es_url", "value")]
+)
+def cb_render(vals):
+    return vals
