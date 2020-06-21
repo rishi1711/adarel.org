@@ -129,7 +129,7 @@ def _error_query_500(interval='1d'):
             "filter": [
                 {
                     "term": {
-                        "agent.hostname": "RDCkf"
+                        "agent.hostname": "kf6-stage"
                     }
                 }   
             ],
@@ -331,7 +331,7 @@ def _access_query(interval='1d'):
             "filter": [
                 {
                     "term": {
-                        "agent.hostname": "RDCkf"
+                        "agent.hostname": "kf6-stage"
                     }
                 }
             ],
