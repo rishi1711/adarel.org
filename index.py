@@ -9,8 +9,10 @@ from pages.home_page import home_page
 from pages.data1 import data1
 from pages.data2 import data2
 from pages.data3 import data3
+from pages.live_page import live_page
 import callbacks
 import serve_static
+app.title="AdaRel"
 
 app.layout = html.Div(children=[
     navbar,
@@ -35,8 +37,10 @@ def router(pathname):
         return data2
     elif pathname == '/data3':
         return data3
+    elif pathname == '/live':
+        return live_page
     else:
         return '404'
 if __name__ == '__main__':
-    serve(app.server, host="0.0.0.0", port="8080") # prod
-    #app.run_server(debug=True) # Development 
+    #serve(app.server, host="0.0.0.0", port="8080") # prod
+    app.run_server(debug=True) # Development 
