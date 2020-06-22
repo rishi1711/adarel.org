@@ -34,11 +34,11 @@ def gen_plot_forecast():
     fig.add_trace(go.Scatter(x=range(1, len(rel_data)),
                     y=rel_data,
                     mode='lines',
-                    name="Data in window"))
+                    name="Observed Reliability"))
     fig.add_trace(go.Scatter(x=range(1, len(fitted_values)),
                     y=fitted_values,
                     mode='lines',
-                    name="Previous Predictions"))
+                    name="Predicted Reliability"))
     print (datetime.datetime.now())
     sys.stdout.flush()
     return fig, predicted_data, last_bucket
