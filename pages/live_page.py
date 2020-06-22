@@ -15,7 +15,7 @@ from dash.dependencies import Input, Output
 from app import app
 from app import cache
 import datetime
-@cache.memoize(timeout=20)
+@cache.memoize(timeout=900)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
@@ -47,7 +47,7 @@ fig, predicted_data, last_bucket = gen_plot_forecast()
 live_page = html.Div([
     dcc.Interval(
             id='interval-component',
-            interval=1*1000, # in milliseconds
+            interval=60*1000, # in milliseconds
             n_intervals=0
         ),
     dbc.Row([

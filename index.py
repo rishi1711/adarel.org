@@ -27,7 +27,8 @@ def serve_layout():
     
     ])
 app.layout = serve_layout
-
+# making it an instance of function makes it update every load
+# https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def router(pathname):
@@ -45,4 +46,5 @@ def router(pathname):
         return '404'
 if __name__ == '__main__':
     #serve(app.server, host="0.0.0.0", port="8080") # prod
+    # remember to clear the cache-direcotry on startup in prod
     app.run_server(debug=True) # Development 
