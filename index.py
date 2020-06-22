@@ -13,8 +13,9 @@ from pages.live_page import live_page
 import callbacks
 import serve_static
 app.title="AdaRel"
+def serve_layout():
 
-app.layout = html.Div(children=[
+    return html.Div(children=[
     navbar,
     dbc.Container([
         dbc.Row([
@@ -24,7 +25,8 @@ app.layout = html.Div(children=[
         html.Div(id='page-content')
     ]),
     
-])
+    ])
+app.layout = serve_layout
 
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])

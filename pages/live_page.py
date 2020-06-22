@@ -13,7 +13,9 @@ import sys
 sys.path.append("..")
 from dash.dependencies import Input, Output
 from app import app
-
+from app import cache
+import datetime
+@cache.memoize(timeout=20)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
@@ -36,12 +38,18 @@ def gen_plot_forecast():
                     y=fitted_values,
                     mode='lines',
                     name="Previous Predictions"))
+    print(datetime.datetime.now())
     return fig, predicted_data, last_bucket
 
 
 fig, predicted_data, last_bucket = gen_plot_forecast()
 
 live_page = html.Div([
+    dcc.Interval(
+            id='interval-component',
+            interval=1*1000, # in milliseconds
+            n_intervals=0
+        ),
     dbc.Row([
         dbc.Col(
             html.H3("Live data from one of our servers."),
@@ -58,9 +66,7 @@ live_page = html.Div([
 
     dbc.Row([
         dbc.Col([
-        html.Div([
-            dcc.Graph(figure=fig)
-            ])
+        html.Div(id="graph-div")
         ])
     ]),
     dbc.Row([
@@ -103,3 +109,11 @@ live_page = html.Div([
 )
 def cb_render(vals):
     return vals
+
+@app.callback(Output('graph-div', 'children'),
+              [Input('interval-component', 'n_intervals')])
+def update_metrics(n):
+    fig, predicted_data, last_bucket = gen_plot_forecast()
+    return [
+        dcc.Graph(figure=fig)
+    ]
