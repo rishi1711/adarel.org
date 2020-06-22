@@ -16,7 +16,7 @@ from app import app
 from app import cache
 import datetime
 
-@cache.memoize(timeout=20)
+@cache.memoize(timeout=60)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
@@ -39,7 +39,8 @@ def gen_plot_forecast():
                     y=fitted_values,
                     mode='lines',
                     name="Previous Predictions"))
-    print(datetime.datetime.now())
+    print (datetime.datetime.now())
+    sys.stdout.flush()
     return fig, predicted_data, last_bucket
 
 
@@ -48,7 +49,7 @@ fig, predicted_data, last_bucket = gen_plot_forecast()
 live_page = html.Div([
     dcc.Interval(
             id='interval-component',
-            interval=1*1000, # in milliseconds
+            interval=60*1000, # in milliseconds
             n_intervals=0
         ),
     dbc.Row([

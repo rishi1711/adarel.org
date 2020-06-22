@@ -4,4 +4,4 @@ deploy, change lines in index.py
 Flask-Caching==1.7.2
 
 
-nohup python index.py &
+nohup python -u index.py > adarel.out 2>&1 &
