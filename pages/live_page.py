@@ -46,7 +46,7 @@ def gen_plot_forecast():
     return fig, predicted_data, last_bucket, tm
 
 
-fig, predicted_data, last_bucket,tm = gen_plot_forecast()
+#fig, predicted_data, last_bucket,tm = gen_plot_forecast()
 
 live_page = html.Div([
     dcc.Interval(
