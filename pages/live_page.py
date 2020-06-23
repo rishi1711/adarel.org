@@ -16,13 +16,14 @@ from app import app
 from app import cache
 import datetime
 
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=240)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
     df = df.sort_values('buckets', ascending=True)
     data_in_window = df.tail(1000)
     rel_data = data_in_window["reliability"].to_numpy()
+    date_data = data_in_window["buckets"].to_numpy()
     last_bucket = parse(data_in_window["buckets"].iloc[-1])
     if np.isnan(np.sum(rel_data)):
         print("NaN in data")
@@ -31,11 +32,11 @@ def gen_plot_forecast():
     predicted_data = np.average(simple_exp_model.forecast(5))
     fitted_values = simple_exp_model.fittedvalues
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=range(1, len(rel_data)),
+    fig.add_trace(go.Scatter(x=date_data,
                     y=rel_data,
                     mode='lines',
                     name="Observed Reliability"))
-    fig.add_trace(go.Scatter(x=range(1, len(fitted_values)),
+    fig.add_trace(go.Scatter(x=date_data,
                     y=fitted_values,
                     mode='lines',
                     name="Predicted Reliability"))
@@ -49,7 +50,7 @@ fig, predicted_data, last_bucket = gen_plot_forecast()
 live_page = html.Div([
     dcc.Interval(
             id='interval-component',
-            interval=60*1000, # in milliseconds
+            interval=120*1000, # in milliseconds
             n_intervals=0
         ),
     dbc.Row([
@@ -57,10 +58,7 @@ live_page = html.Div([
             html.H3("Live data from one of our servers."),
             width=5,
         ),
-        dbc.Col(html.Div([
-            html.P("Next Prediction: " + str(round(predicted_data, 3))),
-            html.P("Latest data on : "+last_bucket.strftime("%a %b %d %H:%M:%S %Y %Z"))
-        ]),
+        dbc.Col(html.Div(id="next-prediction-div"),
             width=4,
         )
     ],
@@ -114,8 +112,18 @@ def cb_render(vals):
 
 @app.callback(Output('graph-div', 'children'),
               [Input('interval-component', 'n_intervals')])
-def update_metrics(n):
+def update_metrics_graph(n):
     fig, predicted_data, last_bucket = gen_plot_forecast()
     return [
         dcc.Graph(figure=fig)
     ]
+
+
+@app.callback(Output('next-prediction-div', 'children'),
+              [Input('interval-component', 'n_intervals')])
+def update_metrics_prediction_div(n):
+    fig, predicted_data, last_bucket = gen_plot_forecast()
+    return [
+            html.P("Next Prediction: " + str(round(predicted_data, 3))),
+            html.P("Latest data on : "+last_bucket.strftime("%a %b %d %H:%M:%S %Y %Z"))
+        ]
