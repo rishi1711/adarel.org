@@ -42,10 +42,11 @@ def gen_plot_forecast():
                     name="Predicted Reliability"))
     print (datetime.datetime.now())
     sys.stdout.flush()
-    return fig, predicted_data, last_bucket
+    tm = datetime.datetime.now()
+    return fig, predicted_data, last_bucket, tm
 
 
-fig, predicted_data, last_bucket = gen_plot_forecast()
+fig, predicted_data, last_bucket,tm = gen_plot_forecast()
 
 live_page = html.Div([
     dcc.Interval(
@@ -113,7 +114,7 @@ def cb_render(vals):
 @app.callback(Output('graph-div', 'children'),
               [Input('interval-component', 'n_intervals')])
 def update_metrics_graph(n):
-    fig, predicted_data, last_bucket = gen_plot_forecast()
+    fig, predicted_data, last_bucket,tm = gen_plot_forecast()
     return [
         dcc.Graph(figure=fig)
     ]
@@ -122,8 +123,9 @@ def update_metrics_graph(n):
 @app.callback(Output('next-prediction-div', 'children'),
               [Input('interval-component', 'n_intervals')])
 def update_metrics_prediction_div(n):
-    fig, predicted_data, last_bucket = gen_plot_forecast()
+    fig, predicted_data, last_bucket,tm = gen_plot_forecast()
     return [
             html.P("Next Prediction: " + str(round(predicted_data, 3))),
-            html.P("Latest data on : "+last_bucket.strftime("%a %b %d %H:%M:%S %Y %Z"))
+            html.P("Latest data on : " + last_bucket.strftime("%a %b %d %H:%M:%S %Y %Z")),
+            html.P("Updated on: " + tm.strftime("%a %b %d %H:%M:%S %Y %Z"))
         ]
