@@ -31,6 +31,9 @@ def gen_plot_forecast():
     simple_exp_model = SimpleExpSmoothing(rel_data).fit(smoothing_level=.5)
     predicted_data = np.average(simple_exp_model.forecast(5))
     fitted_values = simple_exp_model.fittedvalues
+    for idx, val in enumerate(fitted_values):
+        if val < 0.5:
+            fitted_values[idx] = 0.5
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=date_data,
                     y=rel_data,
