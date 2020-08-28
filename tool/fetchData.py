@@ -126,12 +126,20 @@ def _error_query_500(interval='1d'):
                     }
                 }
             ],
-            "filter": [
+            "must": [
                 {
-                    "term": {
-                        "agent.hostname": "kf6-stage"
+                    "range": {
+                        "@timestamp" : {
+                            "gte" : "now-200d/d",
+                            "lt": "now/d"
+                        }
                     }
-                }   
+                },
+                {
+                    "match": {
+                        "host.hostname": "kf6-stage"
+                    }
+                }
             ],
             "must_not": [
                 {
@@ -328,10 +336,18 @@ def _access_query(interval='1d'):
                     }
                 }
             ],
-            "filter": [
+            "must": [
                 {
-                    "term": {
-                        "agent.hostname": "kf6-stage"
+                    "range": {
+                        "@timestamp" : {
+                            "gte" : "now-200d/d",
+                            "lt": "now/d"
+                        }
+                    }
+                },
+                {
+                    "match": {
+                        "host.hostname": "kf6-stage"
                     }
                 }
             ],
