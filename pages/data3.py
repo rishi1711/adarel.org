@@ -7,7 +7,7 @@ import pandas as pd
 def data():
     lol = pd.read_csv("raw_data/ds3.csv") 
     fig = go.Figure()
-    plots=['truth_value','adarel','sarima', 'SVR','Gaussian']
+    plots=['truth_values','lstm','gaussian','adarel','sarima','svr','rf']
     for plot in plots:
         fig.add_trace(go.Scatter(x=range(1, len(lol[plot].to_numpy())),
                     y=lol[plot].to_numpy(),

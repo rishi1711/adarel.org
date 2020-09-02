@@ -5,6 +5,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Data 1", href="/data1")),
         dbc.NavItem(dbc.NavLink("Data 2", href="/data2")),
         dbc.NavItem(dbc.NavLink("Data 3", href="/data3")),
+        dbc.NavItem(dbc.NavLink("Data 4", href="/data4")),
         dbc.NavItem(dbc.NavLink("Live Data", href="/live")),  
     ],
     brand="AdaRel",

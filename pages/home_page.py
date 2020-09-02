@@ -30,6 +30,9 @@ home_page = html.Div([
             dcc.Link('Go to Data 3', href='/data3'),
         ]),
         dbc.Row([
+            dcc.Link('Go to Data 4', href='/data4'),
+        ]),
+        dbc.Row([
             dcc.Link('Adarel on Live Data', href='/live'),
         ])
     ]),

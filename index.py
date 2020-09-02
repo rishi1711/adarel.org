@@ -9,6 +9,7 @@ from pages.home_page import home_page
 from pages.data1 import data1
 from pages.data2 import data2
 from pages.data3 import data3
+from pages.data4 import data4
 from pages.live_page import live_page
 import callbacks
 import serve_static
@@ -40,6 +41,8 @@ def router(pathname):
         return data2
     elif pathname == '/data3':
         return data3
+    elif pathname == '/data4':
+        return data4
     elif pathname == '/live':
         return live_page
     else:
