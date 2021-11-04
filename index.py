@@ -1,6 +1,6 @@
-import dash_core_components as dcc
+from dash import dcc
 from waitress import serve
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from navbar import navbar
@@ -13,6 +13,7 @@ from pages.data4 import data4
 from pages.live_page import live_page
 import callbacks
 import serve_static
+import os
 app.title="AdaRel"
 def serve_layout():
 
@@ -48,6 +49,9 @@ def router(pathname):
     else:
         return '404'
 if __name__ == '__main__':
-    #serve(app.server, host="0.0.0.0", port="8080") # prod
-    # remember to clear the cache-direcotry on startup in prod
-    app.run_server(debug=True) # Development 
+    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+    else:# prod
+        serve(app.server, host="0.0.0.0", port="8050") 
+        # remember to clear the cache-direcotry on startup in prod

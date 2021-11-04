@@ -4,8 +4,8 @@
 import fetchData
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import numpy as np
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 
 import plotly.graph_objects as go
@@ -22,11 +22,11 @@ def gen_plot_forecast():
     predicted_data = np.average(simple_exp_model.forecast(5))
     fitted_values = simple_exp_model.fittedvalues
     fig = go.figure()
-    fig.add_trace(go.Scatter(x=range(1, len(rel_data)),
+    fig.add_trace(go.Scatter(x=[*range(1, len(rel_data))],
                     y=rel_data,
                     mode='lines',
                     name="Data in window"))
-    fig.add_trace(go.Scatter(x=range(1, len(fitted_values)),
+    fig.add_trace(go.Scatter(x=[*range(1, len(fitted_values))],
                     y=fitted_values,
                     mode='lines',
                     name="Previous Predictions"))

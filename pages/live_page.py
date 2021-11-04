@@ -1,5 +1,5 @@
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 
 import plotly.graph_objects as go
@@ -84,19 +84,19 @@ live_page = html.Div([
     dbc.Row([
         dbc.Col(
             html.Div([
-                dbc.FormGroup([
+                [
                     dbc.Label("Enter your ElasticSearch Cluster URL"),
                     dbc.Input(id="es_url",type="text",
                     placeholder="https://<userName>:<password>@<url>/es/_search",
                     )    
-                ]),
-                dbc.FormGroup([
+                ],
+                [
                     dbc.Label("Enter your agent.hostname"),
                     dbc.Input(id="agent_hostname",type="text",
                     placeholder="agent-Hostname",
                     ),
                     dbc.FormText("Agent Hostname used as a filter to differenciate multiple agents sending logs to same ES Cluster")
-                ]),
+                ],
                 dbc.Button("Fetch Data", color="primary", id="refresh_data")
                 ]), width=5)
     ]),

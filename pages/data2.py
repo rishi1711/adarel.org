@@ -1,5 +1,5 @@
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 
 import plotly.graph_objects as go
@@ -9,7 +9,7 @@ def data():
     fig = go.Figure()
     plots=['truth_values','gaussian','adarel','sarima','rf']
     for plot in plots:
-        fig.add_trace(go.Scatter(x=range(1, len(lol[plot].to_numpy())),
+        fig.add_trace(go.Scatter(x=[*range(1, len(lol[plot].to_numpy()))],
                     y=lol[plot].to_numpy(),
                     mode='lines',
                     name=plot))

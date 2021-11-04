@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  web:
+    profiles: ['prod']
+    environment:
+      - DASH_DEBUG_MODE=False
+      - HOST=0.0.0.0
+    build: .
+    ports:
+      - "8050:8050"
+    volumes:
+      - .:/app
+
+  web-dev:
+    profiles: ['dev']
+    environment:
+      - DASH_DEBUG_MODE=True
+      - FLASK_ENV=development
+    build: .
+    ports:
+      - "8050:8050"
+    volumes:
+      - .:/app
