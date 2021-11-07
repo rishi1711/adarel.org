@@ -11,6 +11,9 @@ from pages.data2 import data2
 from pages.data3 import data3
 from pages.data4 import data4
 from pages.live_page import live_page
+
+from pages2021.dataset1 import dataset_1_page
+
 import callbacks
 import serve_static
 import os
@@ -46,6 +49,8 @@ def router(pathname):
         return data4
     elif pathname == '/live':
         return live_page
+    elif pathname == '/2021data1':
+        return dataset_1_page
     else:
         return '404'
 if __name__ == '__main__':
