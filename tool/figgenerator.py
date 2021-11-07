@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-import pages2021.datapaths as dp
+import tool.datapaths as dp
 
 from typing import List, Union
 from operator import itemgetter
