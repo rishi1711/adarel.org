@@ -405,7 +405,7 @@ class elasticSearch:
         self.URL = url
 
     def _fetch_data_from_es(self, query):
-        r = requests.get(url=self.URL, headers={'Content-type': 'application/json'}, data=query)
+        r = requests.get(url=self.URL, headers={'Content-type': 'application/json'}, data=query, verify=False)
         data = r.json()
         return data['aggregations']['group_by_time']['buckets']
 
