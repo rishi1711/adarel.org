@@ -84,19 +84,16 @@ live_page = html.Div([
     dbc.Row([
         dbc.Col(
             html.Div([
-                [
+                
                     dbc.Label("Enter your ElasticSearch Cluster URL"),
                     dbc.Input(id="es_url",type="text",
                     placeholder="https://<userName>:<password>@<url>/es/_search",
-                    )    
-                ],
-                [
+                    ),
                     dbc.Label("Enter your agent.hostname"),
                     dbc.Input(id="agent_hostname",type="text",
                     placeholder="agent-Hostname",
                     ),
-                    dbc.FormText("Agent Hostname used as a filter to differenciate multiple agents sending logs to same ES Cluster")
-                ],
+                    dbc.FormText("Agent Hostname used as a filter to differenciate multiple agents sending logs to same ES Cluster"),
                 dbc.Button("Fetch Data", color="primary", id="refresh_data")
                 ]), width=5)
     ]),
