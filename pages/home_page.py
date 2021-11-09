@@ -20,17 +20,31 @@ def test():
 home_page = html.Div([
     dbc.Container(
     [
+        ### Archive: these are from the old results
+        # dbc.Row([
+        #     dcc.Link('Go to Data 1', href='/data1'),
+        # ]),
+        # dbc.Row([
+        #     dcc.Link('Go to Data 2', href='/data2'),
+        # ]),
+        # dbc.Row([
+        #     dcc.Link('Go to Data 3', href='/data3'),
+        # ]),
+        # dbc.Row([
+        #     dcc.Link('Go to Data 4', href='/data4'),
+        # ]),
+
         dbc.Row([
-            dcc.Link('Go to Data 1', href='/data1'),
+            dcc.Link('Go to Data set 1', href='/2021data_1'),
         ]),
         dbc.Row([
-            dcc.Link('Go to Data 2', href='/data2'),
+            dcc.Link('Go to Data set 2', href='/2021data_2'),
         ]),
         dbc.Row([
-            dcc.Link('Go to Data 3', href='/data3'),
+            dcc.Link('Go to Data set 3', href='/2021data_3'),
         ]),
         dbc.Row([
-            dcc.Link('Go to Data 4', href='/data4'),
+            dcc.Link('Go to Data set SEC', href='/2021data_sec'),
         ]),
         dbc.Row([
             dcc.Link('Adarel on Live Data', href='/live'),
