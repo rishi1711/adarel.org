@@ -12,7 +12,7 @@ META_DATA_CSV = {
         'available_models': ['ses', 'svr', 'rf', 'gaussian', 'arima', 'prophet', 'silverkite', 'adarel']
     },
     'DataSetSEC': {
-        'path': "data2021/2021DataSet3.csv",
+        'path': "data2021/2021DataSetSEC.csv",
         'available_models': ['ses', 'arima', 'svr', 'nn', 'rf', 'prophet', 'silverkite', 'adarel']
     },
 }
