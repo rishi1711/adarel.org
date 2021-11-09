@@ -3,12 +3,36 @@ import numpy as np
 import plotly.graph_objects as go
 
 import tool.datapaths as dp
-
+from tool.datapathscsv import META_DATA_CSV
 from typing import List, Union
 from operator import itemgetter
 
 META_DATA = dp.META_DATA
 
+def get_fig_from_csv(dataset_name: str) -> go.Figure:
+    fig = go.Figure()
+    available_mods, file_path = itemgetter('available_models', 'path')(META_DATA_CSV[dataset_name])
+
+    df = pd.read_csv(file_path)
+    true_vals = df['true value'].to_numpy()
+    x_tick = df.iloc[:,0]
+    fig.add_trace( go.Scatter(
+        x = x_tick,
+        y = true_vals,
+        mode = 'lines',
+        name = 'true values'
+    ))
+
+    for mod in available_mods:
+        ys = df[mod].to_numpy()
+        fig.add_trace( go.Scatter(
+            x = x_tick,
+            y = ys,
+            mode = 'lines',
+            name = mod
+        ))
+    
+    return fig
 
 def get_fig(dataset_name: str) -> go.Figure:
     fig = go.Figure()
@@ -55,4 +79,5 @@ if __name__ == "__main__":
     # print(df.iloc[:4, :7])
     # result = get_prediction_points('DataSet1', 0)
     # print(result)
-    print(get_fig("DataSet1"))
+    # print(get_fig("DataSet1"))
+    print(get_fig_from_csv("DataSet3"))

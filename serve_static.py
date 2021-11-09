@@ -18,7 +18,22 @@ def serve_ds3():
 def serve_ds4():
     return flask.send_file("./raw_data/ds4.csv", mimetype="text")
 
-@app.server.route('/static/2021_DataSet1.xlsx')
+# @app.server.route('/static/2021_DataSet1.xlsx')
+# def serve_2021_dataset1():
+#     return flask.send_file("./data2021/2021 data set 1.xlsx", mimetype='text')
+@app.server.route('/static/2021_DataSet1.csv')
 def serve_2021_dataset1():
-    return flask.send_file("./data2021/2021 data set 1.xlsx", mimetype='text')
+    return flask.send_file("./data2021/2021DataSet1.csv", mimetype='text')
+
+@app.server.route('/static/2021_DataSet2.csv')
+def serve_2021_dataset2():
+    return flask.send_file("./data2021/2021DataSet2.csv", mimetype='text')
+
+@app.server.route('/static/2021_DataSet3.csv')
+def serve_2021_dataset3():
+    return flask.send_file("./data2021/2021DataSet3.csv", mimetype='text')
+
+@app.server.route('/static/2021_DataSetSEC.csv')
+def serve_2021_datasetsec():
+    return flask.send_file("./data2021/2021DataSetSEC.csv", mimetype='text')
 

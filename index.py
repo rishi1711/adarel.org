@@ -55,8 +55,6 @@ def router(pathname):
         return p21.dataset_2
     elif pathname == '/2021data_3':
         return p21.dataset_3
-    elif pathname == '/2021data_4':
-        return p21.dataset_4
     elif pathname == '/2021data_sec':
         return p21.dataset_sec
     else:

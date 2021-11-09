@@ -44,9 +44,6 @@ home_page = html.Div([
             dcc.Link('Go to Data set 3', href='/2021data_3'),
         ]),
         dbc.Row([
-            dcc.Link('Go to Data set 4', href='/2021data_4'),
-        ]),
-        dbc.Row([
             dcc.Link('Go to Data set SEC', href='/2021data_sec'),
         ]),
         dbc.Row([
