@@ -17,7 +17,6 @@ from app import cache
 import datetime
 from pytz import timezone
 
-@cache.memoize(timeout=240)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
@@ -125,7 +124,6 @@ def update_metrics_graph(n):
               [Input('interval-component', 'n_intervals')])
 def update_metrics_prediction_div(n):
     fig, predicted_data, last_bucket,tm = gen_plot_forecast()
-    print(last_bucket, file=sys.stderr)
     last_bucket_local = last_bucket.astimezone(timezone('EST'))
     tm_local = tm.astimezone(timezone('EST'))
     return [
