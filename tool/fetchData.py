@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-
+import sys
 
 def _error_query_500(interval='1d'):
     """
@@ -131,7 +131,7 @@ def _error_query_500(interval='1d'):
                     "range": {
                         "@timestamp" : {
                             "gte" : "now-200d/d",
-                            "lt": "now/d"
+                            "lt": "now"
                         }
                     }
                 },
@@ -341,7 +341,7 @@ def _access_query(interval='1d'):
                     "range": {
                         "@timestamp" : {
                             "gte" : "now-200d/d",
-                            "lt": "now/d"
+                            "lt": "now"
                         }
                     }
                 },
@@ -418,7 +418,6 @@ class elasticSearch:
 
         error_logs_histograms = self._fetch_data_from_es(_error_query_500(interval))
         access_logs_histograms = self._fetch_data_from_es(_access_query(interval))
-
         buckets = []
         error_counts = []
         for eachbucket in error_logs_histograms:
