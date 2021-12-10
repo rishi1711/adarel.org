@@ -63,7 +63,7 @@ live_page = html.Div([
             width=5,
         ),
         dbc.Col(html.Div(id="next-prediction-div"),
-            width=4,
+            width=5,
         )
     ],
     justify="between",),
@@ -126,8 +126,8 @@ def update_metrics_prediction_div(n):
     fig, predicted_data, last_bucket,tm = gen_plot_forecast()
     last_bucket_local = last_bucket.astimezone(timezone('EST'))
     tm_local = tm.astimezone(timezone('EST'))
+    next_bucket_time = last_bucket_local + datetime.timedelta(hours=1)
     return [
-            html.P("Next Prediction: " + str(round(predicted_data, 3))),
-            html.P("Latest data on : " + last_bucket_local.strftime("%a %b %d %H:%M:%S %Y %Z")),
-            html.P("Updated on: " + tm_local.strftime("%a %b %d %H:%M:%S %Y %Z"))
+            html.P(f'Prediction for {next_bucket_time.strftime("%a %b %d %H:%M:%S %Y %Z")} is {str(round(predicted_data, 3))} '),
+            html.P("Data analysed upto : " + last_bucket_local.strftime("%a %b %d %H:%M:%S %Y %Z"))
         ]
