@@ -16,12 +16,14 @@ from app import app
 from app import cache
 import datetime
 from pytz import timezone
+import dateutil.parser
 
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
     df = df.sort_values('buckets', ascending=True)
     data_in_window = df.tail(1000)
+    data_in_window['buckets'] = data_in_window['buckets'].apply(lambda x: str(dateutil.parser.isoparse(x).astimezone(timezone('EST'))))
     rel_data = data_in_window["reliability"].to_numpy()
     date_data = data_in_window["buckets"].to_numpy()
     last_bucket = parse(data_in_window["buckets"].iloc[-1])
