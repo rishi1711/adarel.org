@@ -18,6 +18,7 @@ import datetime
 from pytz import timezone
 import dateutil.parser
 
+#@cache.memoize(timeout=20)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
