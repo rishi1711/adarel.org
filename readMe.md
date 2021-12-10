@@ -26,9 +26,14 @@ python index.py
 ## Production
 ```
 
-docker-compose --profile prod up --build 
+docker-compose --profile prod up --build -d
 ```
-
+## Deployment
+- Ssh into Macmini with user : 'ninad'
+- cd to ~/Desktop/projects/adarel.org
+- git pull 
+- run command for running app in prod
+- If things dont update, delete the `__pycache__` directory
 ### Dont know why i had this earlier.
 gunicorn index:app.server -b :8080 --daemon
 

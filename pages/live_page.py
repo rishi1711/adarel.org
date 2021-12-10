@@ -15,8 +15,8 @@ from dash.dependencies import Input, Output
 from app import app
 from app import cache
 import datetime
+from pytz import timezone
 
-@cache.memoize(timeout=240)
 def gen_plot_forecast():
     es_conn = fetchData.elasticSearch(url="https://kibanaadmin:kibana@kf6-stage.ikit.org/es/_search")
     df = es_conn.get_nginx_reliability(interval='1h')
@@ -45,7 +45,7 @@ def gen_plot_forecast():
                     name="Predicted Reliability"))
     print (datetime.datetime.now())
     sys.stdout.flush()
-    tm = datetime.datetime.now()
+    tm = datetime.datetime.now(timezone('UTC'))
     return fig, predicted_data, last_bucket, tm
 
 
@@ -124,8 +124,10 @@ def update_metrics_graph(n):
               [Input('interval-component', 'n_intervals')])
 def update_metrics_prediction_div(n):
     fig, predicted_data, last_bucket,tm = gen_plot_forecast()
+    last_bucket_local = last_bucket.astimezone(timezone('EST'))
+    tm_local = tm.astimezone(timezone('EST'))
     return [
             html.P("Next Prediction: " + str(round(predicted_data, 3))),
-            html.P("Latest data on : " + last_bucket.strftime("%a %b %d %H:%M:%S %Y %Z")),
-            html.P("Updated on: " + tm.strftime("%a %b %d %H:%M:%S %Y %Z"))
+            html.P("Latest data on : " + last_bucket_local.strftime("%a %b %d %H:%M:%S %Y %Z")),
+            html.P("Updated on: " + tm_local.strftime("%a %b %d %H:%M:%S %Y %Z"))
         ]
