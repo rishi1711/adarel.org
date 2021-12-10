@@ -131,6 +131,7 @@ def update_metrics_prediction_div(n):
     tm_local = tm.astimezone(timezone('EST'))
     next_bucket_time = last_bucket_local + datetime.timedelta(hours=1)
     return [
-            html.P(f'Prediction for {next_bucket_time.strftime("%a %b %d %H:%M:%S %Y %Z")} is {str(round(predicted_data, 3))} '),
+
+            html.P(f'(1 Hour interval) reliability prediction for {next_bucket_time.strftime("%a %b %d %H:%M:%S %Y %Z")} is {str(round(predicted_data, 3))}'),
             html.P("Data analysed upto : " + last_bucket_local.strftime("%a %b %d %H:%M:%S %Y %Z"))
         ]
