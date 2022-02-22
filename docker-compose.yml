@@ -2,6 +2,7 @@ version: "3.9"
 services:
   web:
     profiles: ['prod']
+    restart: always
     environment:
       - DASH_DEBUG_MODE=False
       - HOST=0.0.0.0
