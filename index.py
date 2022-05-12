@@ -1,3 +1,4 @@
+from click import style
 from dash import dcc
 from waitress import serve
 from dash import html
@@ -20,19 +21,23 @@ import serve_static
 import os
 app.title="AdaRel"
 def serve_layout():
+    title_component = html.Div([
+        html.H1("AdaRel"),
+        html.P("a tool for reliability prediction")
+    ], id="index-title")
 
-    return html.Div(children=[
-    navbar,
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(html.H1("AdaRel tool for reliability prediction"),width={"size": 8, "offset": 3},)
+    content = html.Div([
+        navbar,
+        dbc.Container([                
+            title_component,
+            dcc.Location(id='url', refresh=False),
+            html.Div(id='page-content')
         ]),
-        dcc.Location(id='url', refresh=False),
-        html.Div(id='page-content')
-    ]),
-    
     ])
+    return content
+
 app.layout = serve_layout
+
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])

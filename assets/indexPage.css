@@ -8,3 +8,24 @@
     margin-bottom: 2rem;
     font-weight: lighter;
 }
+
+#index-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#index-title h1 {
+    font-size: 5rem;
+    font-weight: bolder;
+    line-height: 4rem;
+    margin-top: 1rem;
+}
+
+#index-title p {
+    font-size: 1.5rem;
+    line-height: 1rem;
+    font-weight: lighter;
+    font-style: italic;
+    margin: .2rem auto;
+}
