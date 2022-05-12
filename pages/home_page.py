@@ -18,8 +18,24 @@ def test():
 
 
 home_page = html.Div([
-    dbc.Container(
-    [
+    dbc.Row([
+        dbc.Col([
+            html.Div(dcc.Link('Go to Data set 1', href='/2021data_1')),
+            html.Div(dcc.Link('Go to Data set 2', href='/2021data_2')),
+            html.Div(dcc.Link('Go to Data set 3', href='/2021data_3')),
+            html.Div(dcc.Link('Go to Data set SEC', href='/2021data_sec')),
+            html.Div(dcc.Link('Adarel on Live Data', href='/live')),
+        ], width=8),
+
+        dbc.Col([
+            html.H4("Have your own data?"),
+            html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
+            html.Div([
+                dbc.Button("Try now!", color="info", href='/userplayground', )
+            ],style={"display": "flex", "flex-flow": "row-reverse nowrap"})
+        ], width=4, class_name="notice-card")
+    ], class_name="mt-4") 
+],)
         ### Archive: these are from the old results
         # dbc.Row([
         #     dcc.Link('Go to Data 1', href='/data1'),
@@ -33,21 +49,3 @@ home_page = html.Div([
         # dbc.Row([
         #     dcc.Link('Go to Data 4', href='/data4'),
         # ]),
-
-        dbc.Row([
-            dcc.Link('Go to Data set 1', href='/2021data_1'),
-        ]),
-        dbc.Row([
-            dcc.Link('Go to Data set 2', href='/2021data_2'),
-        ]),
-        dbc.Row([
-            dcc.Link('Go to Data set 3', href='/2021data_3'),
-        ]),
-        dbc.Row([
-            dcc.Link('Go to Data set SEC', href='/2021data_sec'),
-        ]),
-        dbc.Row([
-            dcc.Link('Adarel on Live Data', href='/live'),
-        ])
-    ]),
-])

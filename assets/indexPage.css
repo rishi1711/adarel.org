@@ -1,0 +1,10 @@
+.notice-card {
+    border-radius: .8rem;
+    background-color: rgb(255, 250, 245);
+    padding: .8rem;
+}
+
+.notice-card .description {
+    margin-bottom: 2rem;
+    font-weight: lighter;
+}
