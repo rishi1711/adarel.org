@@ -10,6 +10,7 @@ from pages.data1 import data1
 from pages.data2 import data2
 from pages.data3 import data3
 from pages.data4 import data4
+from pages import playground
 from pages.live_page import live_page
 
 from pages import pages2021 as p21
@@ -34,8 +35,7 @@ def serve_layout():
 app.layout = serve_layout
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
-@app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
 def router(pathname):
     if pathname == '/':
         return home_page
@@ -57,6 +57,8 @@ def router(pathname):
         return p21.dataset_3
     elif pathname == '/2021data_sec':
         return p21.dataset_sec
+    elif pathname == '/userplayground':
+        return playground.page
     else:
         return '404'
 if __name__ == '__main__':
