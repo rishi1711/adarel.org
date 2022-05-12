@@ -32,7 +32,7 @@ home_page = html.Div([
             html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
             html.Div([
                 dbc.Button("Try now!", color="info", href='/userplayground', )
-            ],style={"display": "flex", "flex-flow": "row-reverse nowrap"})
+            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
         ], width=4, class_name="notice-card")
     ], class_name="mt-4") 
 ],)
