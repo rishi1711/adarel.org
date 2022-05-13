@@ -33,18 +33,29 @@ parameter_component = html.Div([
         id="model-select", 
         options=[{"label": k, 'value': v} for k, v in AVAILABLE_MODELS.items()], 
         placeholder="select a model"),
+    html.Div(id="hyper-param-holder")
 ])
 
 page = html.Div([
     html.H2("Welcom to user playground!", style={"fontWeight": "bolder"}),
     html.Div("This is where you can use your own dataset to test our data."),
     browse_file_component,
-    html.Div(id='params-comp-holder')
+    html.Div(id='params-comp-holder'),
 ])
 
 @app.callback(
+    Output('hyper-param-holder', "children"),
+    Input('model-select', 'value')
+)
+def display_appropriate_hyper_param_options(value: str):
+    if not value is None:
+        component = html.Div(["options!", dbc.Button("Compute Result!!", id="compute-result")])
+        return component
+
+
+@app.callback(
     Output("uploaded-file", "children"),
-    Output("params-comp-holder","children"),
+    Output("params-comp-holder", "children"),
     Input('upload-data', "filename"),
     prevent_initial_call=True
 )
