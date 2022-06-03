@@ -1,4 +1,4 @@
-from click import style
+
 from dash import dcc
 from waitress import serve
 from dash import html
