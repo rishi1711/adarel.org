@@ -62,7 +62,6 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
     result = html.Div([
         html.Img(src=f'/2021data/mae_dist_fig/{dataset_name}', width='800px')
     ])
-
     return result
 
 dataset_1 = get_pages_obj_csv("Empirical Study 1", "DataSet1", get_MAE_dist_fig("DataSet1"))
