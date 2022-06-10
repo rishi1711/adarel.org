@@ -1,3 +1,7 @@
+import click
+from matplotlib import legend_handler
+from matplotlib.legend import Legend
+from matplotlib.pyplot import legend
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -8,6 +12,8 @@ from typing import List, Union
 from operator import itemgetter
 
 META_DATA = dp.META_DATA
+
+# models = ['ses', 'svr', 'nn', 'rf', 'arima', 'silverkite', 'prophet', 'adarel']
 
 def get_fig_from_csv(dataset_name: str) -> go.Figure:
     fig = go.Figure()
@@ -20,18 +26,51 @@ def get_fig_from_csv(dataset_name: str) -> go.Figure:
         x = x_tick,
         y = true_vals,
         mode = 'lines',
-        name = 'true values'
+        name = 'true value'
     ))
 
-    for mod in available_mods:
+    for mod in available_mods:  #change available_mods to models
         ys = df[mod].to_numpy()
         fig.add_trace( go.Scatter(
             x = x_tick,
             y = ys,
             mode = 'lines',
-            name = mod
+            name = mod,
+            legendrank=0
         ))
-    
+
+#---------------------------------------------Deselect Models which were not selected-----------------------------------------------------------#
+    # certain models
+    # deselect models
+    # for mod in available_mods:                
+    #     if mod not in models:
+    #         ys = df[mod].to_numpy()
+    #         fig.add_trace( go.Scatter(
+    #             x = x_tick,
+    #             y = ys,
+    #             mode = 'lines',
+    #             name = mod,
+    #             visible = "legendonly"
+    #     ))
+
+    # for mod in models:
+    #     if mod in available_mods:
+    #         ys = df[mod].to_numpy()
+    #         fig.add_trace( go.Scatter(
+    #             x = x_tick,
+    #             y = ys,
+    #             mode = 'lines',
+    #             name = mod
+    #         ))
+    #     else:
+    #         ys = df[mod].to_numpy()
+    #         fig.add_trace( go.Scatter(
+    #             x = x_tick,
+    #             y = ys,
+    #             mode = 'lines',
+    #             name = mod
+    #     ))
+#-------------------------------------------------------------------------------------------------------------------------#
     return fig
 
 def get_fig(dataset_name: str) -> go.Figure:
@@ -71,13 +110,3 @@ def get_prediction_points(name: str, sheet_num: int, with_ad: bool=False) -> np.
     col_name = "prediction" if not with_ad else "pred\nwo anomaly detection"
 
     return df[col_name].to_numpy()
-
-if __name__ == "__main__":
-    # path = itemgetter('path')(META_DATA['DataSet1'])
-    # df = pd.read_excel(path, engine='openpyxl', sheet_name=2, header=1)
-
-    # print(df.iloc[:4, :7])
-    # result = get_prediction_points('DataSet1', 0)
-    # print(result)
-    # print(get_fig("DataSet1"))
-    print(get_fig_from_csv("DataSet3"))
