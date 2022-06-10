@@ -1,9 +1,9 @@
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
-
+from app import app
 import tool.figgenerator as fgen
-
+from dash.dependencies import Input, Output
 def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
     html_div = html.Div([
         dbc.Row([
@@ -45,7 +45,7 @@ def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div
         dbc.Row([
             dbc.Col([ 
                 html.Div([
-                    dcc.Graph(figure= fgen.get_fig_from_csv(dataset_name))
+                    dcc.Graph(figure= fgen.get_fig_from_csv(dataset_name)),
                 ])
             ])
         ]),
@@ -62,8 +62,16 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
     result = html.Div([
         html.Img(src=f'/2021data/mae_dist_fig/{dataset_name}', width='800px')
     ])
-
     return result
+
+
+
+@app.callback(
+    Output('models', 'data'),
+    Input('modelsList', 'data')
+)
+def set_values(value):
+    return value
 
 dataset_1 = get_pages_obj_csv("Empirical Study 1", "DataSet1", get_MAE_dist_fig("DataSet1"))
 dataset_2 = get_pages_obj_csv("Empirical Study 2", "DataSet2", get_MAE_dist_fig("DataSet2"))
