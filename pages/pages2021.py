@@ -1,9 +1,13 @@
+from pkgutil import get_data
+from sre_parse import State
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 from app import app
 import tool.figgenerator as fgen
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+
+
 def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
     html_div = html.Div([
         dbc.Row([
@@ -28,7 +32,10 @@ def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
     ])
     return html_div
 
-def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div= None) -> html.Div :
+
+
+
+def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div= None, data=None) -> html.Div :
     itermediate = [
         dbc.Row([
             dbc.Col(
@@ -45,10 +52,11 @@ def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div
         dbc.Row([
             dbc.Col([ 
                 html.Div([
-                    dcc.Graph(figure= fgen.get_fig_from_csv(dataset_name)),
+                    dcc.Graph(figure= fgen.get_fig_from_csv(dataset_name, data)),
                 ])
             ])
         ]),
+        html.Div(id = "output", children=[], hidden=True)
     ]
 
     if additional_WebDom:
@@ -64,16 +72,37 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
     ])
     return result
 
-
-
+models = []
 @app.callback(
-    Output('models', 'data'),
-    Input('modelsList', 'data')
+    Output('output', 'children'),
+    [Input('modelsList', 'data'), Input('datasetName', 'data')]
 )
-def set_values(value):
-    return value
+def set_values(data, value):
+    # if not data == None:
+    #     dataset_1(data)
+    #     return data
+    if value=='1':
+        dataset_1(data)
+    elif value=='2':
+        dataset_2(data)
+    elif value=='3':
+        dataset_3(data)
+    elif value=='4':
+        dataset_sec(data)
+    else:
+        pass
 
-dataset_1 = get_pages_obj_csv("Empirical Study 1", "DataSet1", get_MAE_dist_fig("DataSet1"))
-dataset_2 = get_pages_obj_csv("Empirical Study 2", "DataSet2", get_MAE_dist_fig("DataSet2"))
-dataset_3 = get_pages_obj_csv("Empirical Study 3", "DataSet3")
-dataset_sec = get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"))
+
+def dataset_1(data):
+    return get_pages_obj_csv("Empirical Study 1", "DataSet1", get_MAE_dist_fig("DataSet1"), data)
+def dataset_2(data):
+    return get_pages_obj_csv("Empirical Study 2", "DataSet2", get_MAE_dist_fig("DataSet1"), data)
+def dataset_3(data):
+    return get_pages_obj_csv("Empirical Study 3", "DataSet3", data)
+def dataset_sec(data):
+    return get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"), data)
+
+# dataset_1 = get_pages_obj_csv("Empirical Study 1", "DataSet1", get_MAE_dist_fig("DataSet1"), models)
+# dataset_2 = get_pages_obj_csv("Empirical Study 2", "DataSet2", get_MAE_dist_fig("DataSet2"))
+# dataset_3 = get_pages_obj_csv("Empirical Study 3", "DataSet3")
+# dataset_sec = get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"))

@@ -13,12 +13,18 @@ from operator import itemgetter
 
 META_DATA = dp.META_DATA
 
-# models = ['ses', 'svr', 'nn', 'rf', 'arima', 'silverkite', 'prophet', 'adarel']
+s = ['ses', 'nn', 'adarel']
 
-def get_fig_from_csv(dataset_name: str) -> go.Figure:
+def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
     fig = go.Figure()
     available_mods, file_path = itemgetter('available_models', 'path')(META_DATA_CSV[dataset_name])
 
+    if data is not None:
+        models = list(data)
+    else:
+        models=[]
+
+    #print(type(s))
     df = pd.read_csv(file_path)
     true_vals = df['true value'].to_numpy()
     x_tick = df.iloc[:,0]
@@ -29,32 +35,45 @@ def get_fig_from_csv(dataset_name: str) -> go.Figure:
         name = 'true value'
     ))
 
-    for mod in available_mods:  #change available_mods to models
-        ys = df[mod].to_numpy()
-        fig.add_trace( go.Scatter(
-            x = x_tick,
-            y = ys,
-            mode = 'lines',
-            name = mod,
-            legendrank=0
-        ))
+    for mod in available_mods:  
+        if mod in models:
+            #print("Hi")
+            ys = df[mod].to_numpy()
+            fig.add_trace( go.Scatter(
+                x = x_tick,
+                y = ys,
+                mode = 'lines',
+                name = mod
+            ))
+        else:
+            #print("bye")
+            ys = df[mod].to_numpy()
+            fig.add_trace( go.Scatter(
+                x = x_tick,
+                y = ys,
+                mode = 'lines',
+                name = mod,
+                visible = "legendonly"
+            ))
 
-#---------------------------------------------Deselect Models which were not selected-----------------------------------------------------------#
-    # certain models
-    # deselect models
-    # for mod in available_mods:                
-    #     if mod not in models:
-    #         ys = df[mod].to_numpy()
-    #         fig.add_trace( go.Scatter(
-    #             x = x_tick,
-    #             y = ys,
-    #             mode = 'lines',
-    #             name = mod,
-    #             visible = "legendonly"
-    #     ))
 
-    # for mod in models:
-    #     if mod in available_mods:
+    # if not models==None:
+    #     for mod in available_mods:  
+    #         if mod not in models:
+    #             print("1")
+    #             ys = df[mod].to_numpy()
+    #             fig.add_trace( go.Scatter(
+    #                 x = x_tick,
+    #                 y = ys,
+    #                 mode = 'lines',
+    #                 name = mod,
+    #                 visible = "legendonly"
+    #             ))
+    
+    #     for mod in models:
+    #         print("4")
+    #         print(mod)   
+    #         print("2")
     #         ys = df[mod].to_numpy()
     #         fig.add_trace( go.Scatter(
     #             x = x_tick,
@@ -62,15 +81,9 @@ def get_fig_from_csv(dataset_name: str) -> go.Figure:
     #             mode = 'lines',
     #             name = mod
     #         ))
-    #     else:
-    #         ys = df[mod].to_numpy()
-    #         fig.add_trace( go.Scatter(
-    #             x = x_tick,
-    #             y = ys,
-    #             mode = 'lines',
-    #             name = mod
-    #     ))
-#-------------------------------------------------------------------------------------------------------------------------#
+    # else:
+    #     pass
+    
     return fig
 
 def get_fig(dataset_name: str) -> go.Figure:

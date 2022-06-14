@@ -150,15 +150,25 @@ def submit_dataset(n_clicks, value):
 
 
 #----------------------------------------------------Model Selection--------------------------------------------#
-# @app.callback(
-#     Output('modelsList', 'data'),
-#     Input('submit_id', 'n_clicks'),
-#     State('Model Selection', 'value')
-# )
+@app.callback(
+    Output('modelsList', 'data'),
+    Input('submit_id', 'n_clicks'),
+    State('Model Selection', 'value')
+)
+def set_models(n_clicks, value):
+    if not value == None:
+        return value
+    else:
+        pass
 
-# def set_models(n_clicks, value):
-#     # global models = value
-#     return value.to_json()
+models = []
+@app.callback(
+    Output('val', 'children'),
+    [Input('submit_id', 'n_clicks'),
+    Input('modelsList', 'data')]
+)
+def set_values(n_clicks,data):
+    return data
 
 #---------------------------------------------------------------------------------------------------------------#
 

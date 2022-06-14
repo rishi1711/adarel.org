@@ -63,25 +63,41 @@ def load_user(user_id):
 
 app.title="AdaRel"
 
-def serve_layout():
-    dcc.Store(id="datasetName")
-    dcc.Store(id="modelsList")
-    title_component = html.Div([
-        html.H1("AdaRel"),
-        html.P("a tool for reliability prediction")
-    ], id="index-title")
+# def serve_layout():
+#     dcc.Store(id="datasetName")
+#     dcc.Store(id="modelsList", storage_type = list, data=None)
+#     title_component = html.Div([
+#         html.H1("AdaRel"),
+#         html.P("a tool for reliability prediction")
+#     ], id="index-title")
 
-    content = html.Div([
+#     content = html.Div([
+#         navbar,
+#         dbc.Container([                
+#             title_component,
+#             dcc.Location(id='url', refresh=False),
+#             html.Div(id='page-content')
+#         ]),
+#     ])
+#     return content
+
+# app.layout = serve_layout
+
+app.layout = html.Div([
         navbar,
+        dcc.Store(id="datasetName", storage_type="session"),
+        dcc.Store(id="modelsList", storage_type="session"),  
         dbc.Container([                
-            title_component,
+            html.Div([
+                html.H1("AdaRel"),
+                html.P("a tool for reliability prediction")
+                ], id="index-title"),
             dcc.Location(id='url', refresh=False),
             html.Div(id='page-content')
         ]),
+        
     ])
-    return content
 
-app.layout = serve_layout
 
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
@@ -106,15 +122,15 @@ def router(pathname):
     # elif pathname == '/2021data_1':
     #     return p21.dataset_1
     elif pathname == '/2021data_2':
-        return p21.dataset_2
+        return p21.dataset_2(None)
     elif pathname == '/2021data_3':
-        return p21.dataset_3
+        return p21.dataset_3(None)
     elif pathname == '/2021data_sec':
-        return p21.dataset_sec
+        return p21.dataset_sec(None)
     elif pathname == '/userplayground':
         return playground.page
     elif pathname == '/2021data_1':
-        return p21.dataset_1
+        return p21.dataset_1(None)
     elif pathname == '/signup':
         return create
     elif pathname == '/login':
@@ -125,19 +141,19 @@ def router(pathname):
         return 'Error 404'
 
 
-if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    #DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8050") 
-
 # if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#    DEBUG = True
-#    if DEBUG:
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     #DEBUG = True
+#     if DEBUG:
 #         app.run_server(debug=True, host='0.0.0.0') # Development 
-#    else:# prod
-#         serve(app.server, host="0.0.0.0", port="8051") 
-#         # remember to clear the cache-directory on startup in prod
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
+
+if __name__ == '__main__':
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+   DEBUG = True
+   if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+   else:# prod
+        serve(app.server, host="0.0.0.0", port="8051") 
+        # remember to clear the cache-directory on startup in prod                                                                                                                                                                                                                                                        
