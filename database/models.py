@@ -1,4 +1,5 @@
 import sqlite3
+from flask_login import UserMixin
 from sqlalchemy import Table, create_engine
 from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
@@ -9,7 +10,7 @@ conn = sqlite3.connect('./database/data.sqlite')
 engine = create_engine('sqlite:///database/data.sqlite')
 db = SQLAlchemy()
 #class for the table Users
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable = False)
     password = db.Column(db.String(80))

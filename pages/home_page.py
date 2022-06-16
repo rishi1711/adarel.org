@@ -1,13 +1,15 @@
 from cProfile import label
 from sre_parse import State
 from dash import dcc
-from dash import html
+from dash import html, ctx
+import dash
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+from flask_login import login_required
 import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
-from numpy import genfromtxt
+from numpy import equal, genfromtxt
 import plotly.graph_objects as go
 from pages import pages2021 as p21
 from tool.datapathscsv import META_DATA_CSV
@@ -15,7 +17,7 @@ from operator import itemgetter
 import os
 from app import app
 import json
-
+from flask_login import current_user
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -25,6 +27,7 @@ def test():
     return fig
 
 #----------------------------------------------------------Demo Page----------------------------------------------------#
+
 home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
     dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
@@ -34,9 +37,9 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
                 dcc.Dropdown(
                     id = "Data Selection",
                     options=[{'label': 'Select DataSet', 'value' :'None'},
-                    {'label':'DataSet1', 'value' : '1'},
-                    {'label':'DataSet2', 'value' : '2'}, 
-                    {'label':'DataSet3', 'value' : '3'}, 
+                    {'label':'Dataset1', 'value' : '1'},
+                    {'label':'Dataset2', 'value' : '2'}, 
+                    {'label':'Dataset3', 'value' : '3'}, 
                     {'label':'DataSetSEC', 'value' : '4'},
                     {'label':'LiveData', 'value' : '5'}], 
                     placeholder = "Select Dataset",
@@ -64,7 +67,7 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
                     html.Button('Submit', id = 'submit_id', n_clicks=0)
             ])
         ])
-    ],class_name="notice-card"),
+    ],class_name="notice-card", style={"column-gap" : "40px"}),
 
 
 #------------------------------------------------------Sign Up Redirection-----------------------------------------------#
@@ -72,13 +75,22 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
         dbc.Col([
             html.H4("Have your own Data?"),
             html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
-            html.Div(id='val'),
             html.Div([
-                dbc.Button("Sign Up Now!", color="info", href="/signup", )
+                dbc.Button("Click here!", color="info", id='userplayground')
             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
             
-        ], width=4, class_name="notice-card")
-    ])
+        ], width=6, class_name="notice-card"),
+
+        dbc.Col([
+            html.H4("Do you want to create your own strategy?"),
+            # html.Div("Do you want to create a trategy", className = "strategy"),
+            html.Div([
+                dbc.Button("Click here!", color="info", id='strategy')
+            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
+            
+        ], width=5, class_name="notice-card")
+
+    ], style={"padding" : "20px", "column-gap" : "30px"})
 ],)
 #------------------------------------------------------------------------------------------------------------------------#
 
@@ -130,20 +142,37 @@ def set_dataset(value):
 #--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
 @app.callback(
     Output('url_new', 'pathname'),
-    Input('submit_id', 'n_clicks'),
+    [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
     State('Data Selection', 'value')
 )
-def submit_dataset(n_clicks, value):
-    if value == '1':
-        return "/2021data_1"
-    elif value == '2':
-        return "/2021data_2"
-    elif value == '3':
-        return "/2021data_3"  
-    elif value == '4':
-        return "/2021data_sec"     
+def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
+    id = ctx.triggered_id
+    if id == "strategy":
+        return '/strategy'
+        # if current_user.is_authenticated:
+        #     return '/strategy'
+        # else:
+        #     return '/signup'
+    elif id == "submit_id":
+        if value == '1':
+            return "/2021data_1"
+        elif value == '2':
+            return "/2021data_2"
+        elif value == '3':
+            return "/2021data_3"  
+        elif value == '4':
+            return "/2021data_sec"     
+        else:
+            return "/"
+    elif id == "userplayground":
+        if current_user.is_authenticated:
+            return '/userplayground'
+        else:
+            return '/signup'
     else:
-        return "/"
+        pass
+
+
 #-------------------------------------------------------------------------------------------------------------------------#
 
 

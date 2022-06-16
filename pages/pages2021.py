@@ -1,5 +1,4 @@
-from pkgutil import get_data
-from sre_parse import State
+
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
@@ -72,25 +71,26 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
     ])
     return result
 
-models = []
-@app.callback(
-    Output('output', 'children'),
-    [Input('modelsList', 'data'), Input('datasetName', 'data')]
-)
-def set_values(data, value):
-    # if not data == None:
-    #     dataset_1(data)
-    #     return data
-    if value=='1':
-        dataset_1(data)
-    elif value=='2':
-        dataset_2(data)
-    elif value=='3':
-        dataset_3(data)
-    elif value=='4':
-        dataset_sec(data)
-    else:
-        pass
+# models = []
+# @app.callback(
+#     Output('output', 'children'),
+#     [Input('datasetName', 'data')],
+#     State('modelsList', 'data')
+# )
+# def set_values(data, value):
+#     # if not data == None:
+#     #     dataset_1(data)
+#     #     return data
+#     if value=='1':
+#         dataset_1(data)
+#     elif value=='2':
+#         dataset_2(data)
+#     elif value=='3':
+#         dataset_3(data)
+#     elif value=='4':
+#         dataset_sec(data)
+#     else:
+#         pass
 
 
 def dataset_1(data):
@@ -98,7 +98,7 @@ def dataset_1(data):
 def dataset_2(data):
     return get_pages_obj_csv("Empirical Study 2", "DataSet2", get_MAE_dist_fig("DataSet1"), data)
 def dataset_3(data):
-    return get_pages_obj_csv("Empirical Study 3", "DataSet3", data)
+    return get_pages_obj_csv("Empirical Study 3", "DataSet3",None, data)
 def dataset_sec(data):
     return get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"), data)
 

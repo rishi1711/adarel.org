@@ -1,7 +1,7 @@
 from dash import dcc
 from waitress import serve
 from dash import html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from navbar import navbar
 
@@ -16,7 +16,7 @@ from pages import pages2021 as p21
 from pages.live_page import live_page
 from pages.login import login
 from pages.Register import create
-
+from pages import strategies
 from pages.Initial_page import first_page
 
 
@@ -53,11 +53,15 @@ login_manager.init_app(server)
 login_manager.login_view = '/login'
 #User as base
 # Create User class with UserMixin
-class Users(UserMixin, Users):
-    pass
+# class Users(UserMixin, Users):
+#     pass
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
+
+@login_manager.unauthorized_handler     
+def unauthorized_callback():            
+       return '/login'
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -101,14 +105,14 @@ app.layout = html.Div([
 
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
-@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
-def router(pathname):
+@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')], State('modelsList', 'data'))
+def router(pathname, data):
     # if pathname == '/':
     #     return first_page
     # elif pathname == '/home_page':
     #     return home_page
     if pathname == '/':
-         return home_page
+        return home_page
     elif pathname == '/data1':
         return data1
     elif pathname == '/data2':
@@ -122,38 +126,40 @@ def router(pathname):
     # elif pathname == '/2021data_1':
     #     return p21.dataset_1
     elif pathname == '/2021data_2':
-        return p21.dataset_2(None)
+        return p21.dataset_2(data)
     elif pathname == '/2021data_3':
-        return p21.dataset_3(None)
+        return p21.dataset_3(data)
     elif pathname == '/2021data_sec':
-        return p21.dataset_sec(None)
+        return p21.dataset_sec(data)
     elif pathname == '/userplayground':
         return playground.page
     elif pathname == '/2021data_1':
-        return p21.dataset_1(None)
+        return p21.dataset_1(data)
     elif pathname == '/signup':
         return create
     elif pathname == '/login':
         return login
+    elif pathname == '/strategy':
+        return strategies.strategy
     # elif pathname == './signup':
     #     return
     else:
         return 'Error 404'
 
 
-if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    #DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8050") 
-
 # if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#    DEBUG = True
-#    if DEBUG:
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     #DEBUG = True
+#     if DEBUG:
 #         app.run_server(debug=True, host='0.0.0.0') # Development 
-#    else:# prod
-#         serve(app.server, host="0.0.0.0", port="8051") 
-#         # remember to clear the cache-directory on startup in prod                                                                                                                                                                                                                                                        
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
+
+if __name__ == '__main__':
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+   DEBUG = True
+   if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+   else:# prod
+        serve(app.server, host="0.0.0.0", port="8051") 
+        # remember to clear the cache-directory on startup in prod                                                                                                                                                                                                                                                        
