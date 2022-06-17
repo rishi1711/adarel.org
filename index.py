@@ -55,8 +55,8 @@ login_manager.init_app(server)
 login_manager.login_view = '/login'
 #User as base
 # Create User class with UserMixin
-class Users(UserMixin, Users):
-    pass
+# class Users(UserMixin, Users):
+#     pass
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))

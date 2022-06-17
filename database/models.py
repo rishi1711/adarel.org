@@ -1,5 +1,6 @@
 
 import sqlite3
+from flask_login import UserMixin
 from sqlalchemy import ForeignKey, Table, create_engine, inspect
 from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
@@ -11,7 +12,7 @@ engine = create_engine('sqlite:///database/data.sqlite')
 insp = inspect(engine)
 db = SQLAlchemy()
 #class for the table Users
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable = False)
@@ -25,6 +26,7 @@ class Uploadedfiles(db.Model):
     file_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     filepath = db.Column(db.String(50), unique=True, nullable = False)
+    filename = db.Column(db.String(80), nullable = False)
 Uploaded_files_tbl = Table('files', Uploadedfiles.metadata)
 
 #create the table only once.

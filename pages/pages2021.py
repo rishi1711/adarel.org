@@ -54,8 +54,7 @@ def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div
                     dcc.Graph(figure= fgen.get_fig_from_csv(dataset_name, data)),
                 ])
             ])
-        ]),
-        html.Div(id = "output", children=[], hidden=True)
+        ])
     ]
 
     if additional_WebDom:
