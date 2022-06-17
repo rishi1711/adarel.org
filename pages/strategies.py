@@ -61,8 +61,6 @@ def set_parameters(value,children):
                     v = default[i]
                     l = label[i]
                     i = i+1
-                    # new_label = html.Label(l)
-                    # children.append(new_label)
                     new_dropdown =  html.Div([dbc.Row([
                                                 dbc.Col([
                                                     html.Label(l)
@@ -94,82 +92,9 @@ def set_parameters(value,children):
                                                 ])
                                             ])
                                     ])
-                                # [dbc.Row([
-                    #                 dbc.Col([
-                    #                     html.Label(l)
-                    #                 ]),
-                    #             dbc.Col([
-                    #                 dcc.Input(
-                    #                     id = key,
-                    #                     type='number',
-                    #                     value = v
-                    #                 )
-                    #             ])
-                    #         ])]
                     children.append(new_input)
-            print(children)
             return children
-
-        # print(label)
-        # print(parameters)
-        # print(default)
-        # print(required)
-        # print(dropdown)
     else:
         pass
         
 
-
-
-    # if value == 'SVR':
-    #     return html.Div([
-    #                 dbc.Row([
-    #                     dbc.Col([
-    #                         html.Label("Select the kernel value")
-    #                     ]),
-    #                     dbc.Col([
-    #                         dcc.Dropdown(
-    #                             id='kernel',
-    #                             options= ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
-    #                             value = 'linear'
-    #                         )
-    #                     ])
-    #                 ]),
-    #                 dbc.Row([
-    #                     dbc.Col([
-    #                         html.Label("Insert value of C")
-    #                     ]),
-    #                     dbc.Col([
-    #                         dcc.Input(
-    #                             id = 'C',
-    #                             type='text',
-    #                             value = '0.1'
-    #                         )
-    #                     ])
-    #                 ]),
-    #                 dbc.Row([
-    #                     dbc.Col([
-    #                         html.Label("Insert value of gamma")
-    #                     ]),
-    #                     dbc.Col([
-    #                         dcc.Input(
-    #                             id = 'gamma',
-    #     #                       placeholder= 'Insert value of gamma',
-    #                             type = 'text',
-    #                             value = '0.1'
-    #                         ),
-    #                     ])
-    #                 ]),
-    #                 dbc.Row([
-    #                     dbc.Col([
-    #                         html.Label("Insert value of epsilon")
-    #                     ]),
-    #                     dbc.Col([
-    #                         dcc.Input(
-    #                             id= 'epsilon',
-    #                             type = 'text',
-    #                             value = '0.0001'
-    #                         )
-    #                     ])
-    #                 ]),
-    #            ]) 

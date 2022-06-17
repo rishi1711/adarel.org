@@ -147,42 +147,36 @@ def set_dataset(value):
 
 
 #--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
-@app.callback(
-    Output('url_new', 'pathname'),
-    [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
-    State('Data Selection', 'value')
-)
-def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
-    id = ctx.triggered_id
-    if id == "strategy":
-        if current_user.is_authenticated:
-            return '/strategy'
-        else:
-            return '/signup'
-    elif id == "submit_id":
-        if value == '1':
-            return "/2021data_1"
-        elif value == '2':
-            return "/2021data_2"
-        elif value == '3':
-            return "/2021data_3"  
-        elif value == '4':
-            return "/2021data_sec"     
-        else:
-            return "/"
-    elif id == "userplayground":
-        if current_user.is_authenticated:
-            return '/userplayground'
-        else:
-            return '/signup'
-    else:
-        pass
-
-
-#-------------------------------------------------------------------------------------------------------------------------#
-
-
-
+# @app.callback(
+#     Output('url_new', 'pathname'),
+#     [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
+#     State('Data Selection', 'value')
+# )
+# def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
+#     id = ctx.triggered_id
+#     if id == "strategy":
+#         if current_user.is_authenticated:
+#             return '/strategy'
+#         else:
+#             return '/signup'
+#     elif id == "submit_id":
+#         if value == '1':
+#             return "/2021data_1"
+#         elif value == '2':
+    #         return "/2021data_2"
+    #     elif value == '3':
+    #         return "/2021data_3"  
+    #     elif value == '4':
+    #         return "/2021data_sec"     
+    #     else:
+    #         return "/"
+    # elif id == "userplayground":
+    #     if current_user.is_authenticated:
+    #         return '/userplayground'
+    #     else:
+    #         return '/signup'
+    # else:
+    #     pass
 
 @app.callback(
     [Output('modelsList', 'data'), Output('url_new', 'pathname')],
@@ -197,10 +191,25 @@ def submit_dataset(n_clicks, value1, value2):
     elif value1 == '3':
         return value2, "/2021data_3"
     elif value1 == '4':
-        return value2, "/2021data_sec"  
+        return value2, "/2021data_sec"
     else:
         return value2, "/"
 #-------------------------------------------------------------------------------------------------------------------------#
+
+
+
+
+# @app.callback(
+#     [Output('modelsList', 'data')],
+#     Input('submit_id', 'n_clicks'),
+#     [State('Model Selection', 'value')]
+# )
+# def set_models(n_clicks, value):
+#     if not value == None:
+#         return value
+#     else:
+#         pass
+# #-------------------------------------------------------------------------------------------------------------------------#
 
         ### Archive: these are from the old results
         # dbc.Row([
