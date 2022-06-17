@@ -1,5 +1,5 @@
+#from asyncio.windows_events import NULL
 from cProfile import label
-from sre_parse import State
 from dash import dcc
 from dash import html, ctx
 import dash
@@ -12,12 +12,15 @@ import plotly.graph_objects as go
 from numpy import equal, genfromtxt
 import plotly.graph_objects as go
 from pages import pages2021 as p21
-from tool.datapathscsv import META_DATA_CSV
+from app import app
+
 from operator import itemgetter
 import os
-from app import app
 import json
 from flask_login import current_user
+
+from tool.datapathscsv import META_DATA_CSV
+
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -41,7 +44,8 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
                     {'label':'Dataset2', 'value' : '2'}, 
                     {'label':'Dataset3', 'value' : '3'}, 
                     {'label':'DataSetSEC', 'value' : '4'},
-                    {'label':'LiveData', 'value' : '5'}], 
+                    #{'label':'LiveData', 'value' : '5'}
+                    ], 
                     placeholder = "Select Dataset",
                     value = 'None'
                 )
@@ -64,7 +68,7 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
         #--------------------------------------------------------------------------------------------------------------#
         dbc.Col([
             html.Div([
-                    html.Button('Submit', id = 'submit_id', n_clicks=0)
+                    html.Button('Predict', id = 'submit_id', n_clicks=0)
             ])
         ])
     ],class_name="notice-card", style={"column-gap" : "40px"}),
@@ -127,6 +131,9 @@ def show_next_dropdown(value):
     elif value == '4':
         models = itemgetter('available_models')(META_DATA_CSV["DataSetSEC"])
         return [{'label' : i, 'value' : i} for i in models]
+    # elif value =='5':
+    #     dcc.Link(id='live data', href='/live')
+    #     return None
     else:
         return []
 #-------------------------------------------------------------------------------------------------------------------------#
@@ -148,11 +155,10 @@ def set_dataset(value):
 def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
     id = ctx.triggered_id
     if id == "strategy":
-        return '/strategy'
-        # if current_user.is_authenticated:
-        #     return '/strategy'
-        # else:
-        #     return '/signup'
+        if current_user.is_authenticated:
+            return '/strategy'
+        else:
+            return '/signup'
     elif id == "submit_id":
         if value == '1':
             return "/2021data_1"
@@ -178,29 +184,23 @@ def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
 
 
 
-#----------------------------------------------------Model Selection--------------------------------------------#
 @app.callback(
-    Output('modelsList', 'data'),
+    [Output('modelsList', 'data'), Output('url_new', 'pathname')],
     Input('submit_id', 'n_clicks'),
-    State('Model Selection', 'value')
+    [State('Data Selection', 'value'), State('Model Selection', 'value')]
 )
-def set_models(n_clicks, value):
-    if not value == None:
-        return value
+def submit_dataset(n_clicks, value1, value2):
+    if value1 == '1':
+        return value2, "/2021data_1"
+    elif value1 == '2':
+        return value2, "/2021data_2"
+    elif value1 == '3':
+        return value2, "/2021data_3"
+    elif value1 == '4':
+        return value2, "/2021data_sec"  
     else:
-        pass
-
-models = []
-@app.callback(
-    Output('val', 'children'),
-    [Input('submit_id', 'n_clicks'),
-    Input('modelsList', 'data')]
-)
-def set_values(n_clicks,data):
-    return data
-
-#---------------------------------------------------------------------------------------------------------------#
-
+        return value2, "/"
+#-------------------------------------------------------------------------------------------------------------------------#
 
         ### Archive: these are from the old results
         # dbc.Row([

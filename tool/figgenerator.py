@@ -13,13 +13,10 @@ from operator import itemgetter
 
 META_DATA = dp.META_DATA
 
-
-
 def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
+
     fig = go.Figure()
     available_mods, file_path = itemgetter('available_models', 'path')(META_DATA_CSV[dataset_name])
-
-    #print(type(s))
     df = pd.read_csv(file_path)
     true_vals = df['true value'].to_numpy()
     x_tick = df.iloc[:,0]
@@ -29,12 +26,12 @@ def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
         mode = 'lines',
         name = 'true value'
     ))
+
     if not data == None:
         for mod in available_mods:  
             if mod in data:
-                #print("Hi")
                 ys = df[mod].to_numpy()
-                fig.add_traces( go.Scatter(
+                fig.add_trace( go.Scatter(
                     x = x_tick,
                     y = ys,
                     mode = 'lines',
@@ -42,7 +39,7 @@ def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
                 ))
             else:
                 ys = df[mod].to_numpy()
-                fig.add_traces( go.Scatter(
+                fig.add_trace( go.Scatter(
                     x = x_tick,
                     y = ys,
                     mode = 'lines',
@@ -51,34 +48,6 @@ def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
                 ))
     else:
         pass
-
-    # if not models==None:
-    #     for mod in available_mods:  
-    #         if mod not in models:
-    #             print("1")
-    #             ys = df[mod].to_numpy()
-    #             fig.add_trace( go.Scatter(
-    #                 x = x_tick,
-    #                 y = ys,
-    #                 mode = 'lines',
-    #                 name = mod,
-    #                 visible = "legendonly"
-    #             ))
-    
-    #     for mod in models:
-    #         print("4")
-    #         print(mod)   
-    #         print("2")
-    #         ys = df[mod].to_numpy()
-    #         fig.add_trace( go.Scatter(
-    #             x = x_tick,
-    #             y = ys,
-    #             mode = 'lines',
-    #             name = mod
-    #         ))
-    # else:
-    #     pass
-    
     return fig
 
 def get_fig(dataset_name: str) -> go.Figure:
