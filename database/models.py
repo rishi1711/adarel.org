@@ -28,6 +28,13 @@ class Uploadedfiles(db.Model):
     filepath = db.Column(db.String(50), unique=True, nullable = False)
 Uploaded_files_tbl = Table('files', Uploadedfiles.metadata)
 
+class Strategy(db.Model):
+    __tablename__ = 'strategy'
+    strategy_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    strategy_name = db.Column(db.String(50), unique=True, nullable = False)
+    strategy_data = db.Column(db.String, nullable = False)
+strategy_tbl = Table('strategy', Strategy.metadata)
 #create the table only once.
 #fuction to create table using Users class
 def create_users_table():
@@ -36,6 +43,8 @@ def create_users_table():
 def create_upload_table():
     Uploadedfiles.metadata.create_all(engine)
 
+def create_strategy_table():
+    Strategy.metadata.create_all(engine)
 # if not insp.has_table("Uploadedfiles", schema="db"):
 #     create_upload_table()
 # else:
@@ -44,6 +53,7 @@ def create_upload_table():
 if not database_exists('sqlite:////database/data.sqlite'):
     create_users_table()
     create_upload_table()
+    create_strategy_table()
 else:
     c = conn.cursor()
     df = pd.read_sql('select * from users', conn)

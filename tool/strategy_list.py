@@ -9,23 +9,35 @@ META_DATA_Val = {
     },
     'Holtwinter': {
         'name' : 'Holtwinter',
-        'label' : ["Select the trend", "Select the seasonal", "Select the seasonality_periods"],
-        'parameters' : {'trend' : 'dropdown', 'seasonal' : 'dropdown', 'seasonality_periods' : 'int'},
+        'label' : ["Select the trend", "Select the seasonal", "Enter the seasonality_periods"],
+        'parameters' : {'trend' : 'dropdown', 'seasonal' : 'dropdown', 'seasonality_periods' : 'input'},
         'default' : ['add', 'add', '0'],
         'dropdown' : [['add', 'mul', 'additive', 'multiplicative', None], ['add', 'mul', 'additive', 'multiplicative', None]],
         'required' : ['seasonality_periods']
     },
     'Arima' : {
         'name' : 'Arima',
-        'parameters' : {'order' : (0,0,0)}
+        'label' : ["Enter the Order tupple values", "Enter AutoRegressive", "Enter Difference", "Enter Moving Average Components"],
+        'parameters' : {'order' : 'tupple', 'Autoregressive' : 'input', 'Difference' : 'input', 'Moving Average Component' : 'input'},
+        'default' : ['None','0', '0', '0'],
+        'dropdown' : None,
+        'required' : None
     },
     'Sarimax' : {
         'name' : 'Sarimax',
-        'parameters' : {'order' : (0,0,0), 'seasonal_order' : (0,0,1,24)}
+        'label' : ["Enter the Order tupple values", "Enter AutoRegressive", "Enter Difference", "Enter Moving Average Components", "Enter Seasonal Order tupple values","Enter AR parameters", "Enter Differences", "Enter MA parameters","Enter periodicity"],
+        'parameters' : {'order' : 'tupple', 'Autoregressive' : 'input', 'Difference' : 'input', 'Moving Average Component' : 'input', 'Seasonal Order': 'tupple', 'AR parameters' : 'input', 'Diffrences' : 'input', 'MA parameters' : 'input', 'Periodicity' : 'input'},
+        'default' : ['None','0', '0', '0', None, '0','0', '1', '24'],
+        'dropdown' : None,
+        'required' : None
     },
     'SVR' : {
         'name' : 'Support Vector Machine Regressor',
-        'parameters' : {'kernel' : 'linear', 'C' : '0.1', 'gamma' : '0.1', 'epsilon' : '0.0001'}
+        'label' : ["Select the kernel type", "Enter Regularization parameter(C)", "Enter gamma values", "Enter Epsilon values"],
+        'parameters' : {'kernel' : 'dropdown', 'C' : 'input', 'gamma' : 'input', 'epsilon' : 'input'},
+        'default' : ['linear', '0.1', '0.1', '0.0001'],
+        'dropdown' : [['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']],
+        'required' : None
     },
     'GPR' : {
         'name' : 'Gaussian Process Regression',
@@ -37,6 +49,10 @@ META_DATA_Val = {
     },
     'RF' : {
         'name' : 'Random Forest Regressor',
-        'parameters' : {'n_estimators' : '100', 'max_depth' : '1', 'random_state' : '1'}
+        'label' : ["Select the kernel type", "Insert Regularization parameter(C)", "Insert gamma values", "Insert Epsilon values"],
+        'parameters' : {'kernel' : 'dropdown', 'C' : 'float', 'gamma' : 'float', 'epsilon' : 'float'},
+        'default' : ['linear', '0.1', '0.1', '0.0001'],
+        'dropdown' : [['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']],
+        'required' : None
     },
 }

@@ -74,6 +74,7 @@ app.layout = html.Div([
         navbar,
         dcc.Store(id="datasetName", storage_type="session"),
         dcc.Store(id="modelsList", storage_type="session"),  
+        dcc.Store(id="strategyData", storage_type="session"),
         dbc.Container([                
             html.Div([
                 html.H1("AdaRel"),
@@ -147,10 +148,10 @@ if __name__ == '__main__':
 
 
 # if __name__ == '__main__':
-#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     #DEBUG = True
+#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     DEBUG = True
 #     if DEBUG:
 #         app.run_server(debug=True, host='0.0.0.0') # Development 
-#    else:# prod
+#     else:# prod
 #         serve(app.server, host="0.0.0.0", port="8051") 
 #         # remember to clear the cache-directory on startup in prod  
