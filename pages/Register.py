@@ -10,7 +10,7 @@ from database.models import engine
 from pages.login import login
 
 create = html.Div([ dcc.Location(id='url_register', refresh=True),
-        html.H1('Register'),
+        html.H1('Sign Up'),
        # , dcc.Location(id='create_user', refresh=True)
        dbc.Row([
             dbc.Col([
@@ -31,7 +31,7 @@ create = html.Div([ dcc.Location(id='url_register', refresh=True),
             dbc.Col([
                 html.Button('Register', id='submit-val', n_clicks=0)
             ])
-       ]),
+       ], style={"column-gap" : "40px"}),
         html.Div([html.H2('Already have a user account?', style={"font-size": '20px', "padding" : "4px"}), dcc.Link('Click here to Log In', href='/login')])
     ],className='notice-card')#end div
 

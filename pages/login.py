@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
 
 login =  html.Div([dcc.Location(id='url_login', refresh=True)
-            , html.H2(''' Log In ''', id='h1'),
+            , html.H2(''' Sign In ''', id='h1'),
             dbc.Row([
                 dbc.Col([
                     dcc.Input(placeholder='Enter your Email',
@@ -29,7 +29,7 @@ login =  html.Div([dcc.Location(id='url_login', refresh=True)
                     type='submit',
                     id='login-button')
                 ], width=2),
-            ]),
+            ], style={"column-gap" : "40px"}),
             html.Div(children='', id='output-state')
         ], className="notice-card") #end div
    

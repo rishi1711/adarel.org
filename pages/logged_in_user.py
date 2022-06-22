@@ -1,5 +1,4 @@
-from fileinput import filename
-from dash import dcc
+from dash import dcc, dash_table
 from dash import html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
@@ -12,14 +11,15 @@ from urllib.parse import quote as urlquote
 from app import app
 import getpass
 from database.models import Uploaded_files_tbl
+from database.models import Uploadedfiles
 from database.models import engine
-import flask_login
-
-from flask import Flask, send_from_directory
+from flask_login import current_user
+from flask import g
+import sqlite3
+import io
+import json
 import dash
-from dash.dependencies import Input, Output
 
-UPLOAD_DIRECTORY = "/Users/patil24/adarel.org/user_data/"
 
 logged_in_user = html.Div([
     dbc.Row([
@@ -41,7 +41,6 @@ logged_in_user = html.Div([
             },
             #multiple=True,
         ),
-        html.H5("File List"),
         html.Ul(id="file-list"),
     ],),
 
@@ -52,101 +51,67 @@ logged_in_user = html.Div([
             html.Div([
                 dcc.Dropdown(
                     id = "Custom Data Selection",
-                    options=[{'label': 'Select DataSet', 'value' :'None'},
-                        {'label': 'Custom Dataset', 'value':'1'}
-                    ], 
+                    options=[],
                     placeholder = "Select DataSet",
                     value = 'None'
                 )
             ])
         ]),
-        #--------------------------------------------------------------------------------------------------------------#
+        #---------------------------------------------------------------------------------------------------------------#
         
-        #---------------------------------------Second Dropdown(Model Selection)---------------------------------------#
         dbc.Col([
             html.Div([
-                    dcc.Dropdown(
-                    id ="Custom Model Selection", 
-                    options=['arima'],
-                    placeholder = "Select Models",
-                    multi=True,
-                    disabled=True
-                )
-                ])
-        ]),
-        #--------------------------------------------------------------------------------------------------------------#
-        dbc.Col([
-            html.Div([
-                    html.Button('Predict', id = 'custom submit_id', n_clicks=0)
+                    html.Button('Create Strategy', id = 'custom submit_id', n_clicks=0)
             ])
-        ])
+        ]),
+
     ],class_name="notice-card"),
     ])
 
-#----------------------------------------------------Disable Property Unable-------------------------------------------#
+
 @app.callback(
-    Output(component_id='Custom Model Selection', component_property='disabled'), Input('Custom Data Selection', 'value')
+    Output(component_id='Custom Data Selection', component_property='options'),
+    [Input('upload-data', 'children')]
 )
-def show_next_dropdown(value):
-    if value == 'None':
-        return True
-    else:
-        return False
-#-----------------------------------------------------------------------------------------------------------------------#
-
-def download(path):
-    """Serve a file from the upload directory."""
-    return send_from_directory(UPLOAD_DIRECTORY, path, as_attachment=True)
-
-def save_file(name, content):
-    """Decode and store a file uploaded with Plotly Dash."""
-    data = content.encode("utf8").split(b";base64,")[1]
-    with open(os.path.join(UPLOAD_DIRECTORY, name), "wb") as fp:
-        fp.write(base64.decodebytes(data))
-
-def uploaded_files():
-    """List the files in the upload directory."""
-    files = []
-    for filename in os.listdir(UPLOAD_DIRECTORY):
-        path = os.path.join(UPLOAD_DIRECTORY, filename)
-        if os.path.isfile(path):
-            files.append(filename)
-    return files
-
-def file_download_link(filename):
-    """Create a Plotly Dash 'A' element that downloads a file from the app."""
-    location = "/download/{}".format(urlquote(filename))
-    return html.A(filename, href=location)
-
-# @app.callback(
-#     Output("file-list", "children"),
-#     [Input("upload-data", "filename")]
-# )
-# def update_output(namefile):
-#     """Save uploaded files and regenerate the file list."""
-
-#     if namefile is not None:
-#         location = UPLOAD_DIRECTORY+namefile
-#         # for name, data in zip(uploaded_filenames, uploaded_file_contents):
-#         #     save_file(name, data)
+def get_custom_datasets(filename):
+    conn = sqlite3.connect("./database/data.sqlite")
+    g.user = current_user.get_id()
+    id = g.user
+    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}'""".format(id), conn)
+    datasets = datasets.values.tolist()
+    datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
+    return datasets
 
 
-#     if namefile is not None:
-#         name = os.path.splitext(namefile)[0]
-#     else:
-#         name = None
-#     # name_of_user = getpass.getuser()
-#     name_of_user = flask_login.current_user
-#     print(name_of_user)
-#     if name is not None and location is not None and name_of_user is not None:
-#         ins = Uploaded_files_tbl.insert().values(user_id = name_of_user, filepath = location, filename = name)
-#         conn = engine.connect()
-#         conn.execute(ins)
-#         conn.close()
+@app.callback(
+    Output("file-list", "children"),
+    [Input('upload-data', 'filename'),
+    Input('upload-data', 'contents')],
+    prevent_initial_call=True
+)
+def update_output(filename,content):
+    path = "/Users/patil24/adarel.org/data2021/"+filename
 
-#flask_login.current_user
+    content_type, content_string = content.split(',')
+    decoded = base64.b64decode(content_string)
+    if 'txt' in filename:
+        data = content.encode("utf8").split(b";base64,")[1]
+        with open(path, "wb") as fp:
+            fp.write(base64.decodebytes(data))
+    elif 'csv' in filename:
+        # Assume that the user uploaded a CSV file
+        df = pd.read_csv(
+            io.StringIO(decoded.decode('utf-8')))
+        df.to_csv (path, index = False, header=True)
+    elif 'xls' in filename:
+        # Assume that the user uploaded an excel file
+        df = pd.read_excel(io.BytesIO(decoded))
 
-    # if len(files) == 0:
-    #     return [html.Li("No files yet!")]
-    # else:
-    #     return [html.Li(file_download_link(filename)) for filename in files]
+
+    
+    file_name=os.path.splitext(filename)[0]
+    if file_name is not None and current_user.get_id() is not None and path is not None:
+        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filename = file_name)
+        conn = engine.connect()
+        conn.execute(ins)
+        conn.close()

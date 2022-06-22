@@ -16,6 +16,7 @@ from pages import pages2021 as p21
 from pages.live_page import live_page
 from pages.login import login
 from pages.Register import create
+from pages import strategies
 from pages.logged_in_user import logged_in_user
 
 from pages.Initial_page import first_page
@@ -61,6 +62,10 @@ login_manager.login_view = '/login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
+@login_manager.unauthorized_handler     
+def unauthorized_callback():            
+       return '/login'
+
 #-------------------------------------------------------------------------------------------------------------------
 
 app.title="AdaRel"
@@ -87,7 +92,7 @@ app.layout = html.Div([
 [Input('url', 'pathname'), State('modelsList', 'data')], prevent_initial_call=True )
 def router(pathname, data):
     if pathname == '/':
-         return home_page
+        return home_page
     elif pathname == '/data1':
         return data1
     elif pathname == '/data2':
@@ -112,6 +117,10 @@ def router(pathname, data):
         return create
     elif pathname == '/login':
         return login
+    elif pathname == '/strategy':
+        return strategies.strategy
+    # elif pathname == './signup':
+    #     return
     elif pathname == '/logged_in_user':
         return logged_in_user
     else:
@@ -131,17 +140,17 @@ if __name__ == '__main__':
 #     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
 #    DEBUG = True
 #    if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0', port = "8051") # Development 
+#         app.run_server(debug=True, host='0.0.0.0', port="8051") # Development 
 #    else:# prod
 #         serve(app.server, host="0.0.0.0", port="8050") 
 #         # remember to clear the cache-directory on startup in prod 
 
 
 # if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#    DEBUG = True
-#    if DEBUG:
+#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     DEBUG = True
+#     if DEBUG:
 #         app.run_server(debug=True, host='0.0.0.0') # Development 
-#    else:# prod
+#     else:# prod
 #         serve(app.server, host="0.0.0.0", port="8051") 
 #         # remember to clear the cache-directory on startup in prod  
