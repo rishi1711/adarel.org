@@ -1,11 +1,19 @@
+
 from operator import itemgetter
+from re import L
 from turtle import width
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
+from requests import session
 from app import app
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL, MATCH
 from tool.strategy_list import META_DATA_Val
+import json
+from database.models import Strategy
+from database.models import strategy_tbl
+from flask_login import current_user
+from database.models import engine
 
 strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
                 html.H4("Try to create your own strategy"),
@@ -15,7 +23,8 @@ strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
                                 dcc.Input(
                                     id='strategy_name',
                                     placeholder="Enter the Strategy name",
-                                    type='text'
+                                    type='text',
+                                    required=True
                                 )
                         ])
                     ], width=4),
@@ -23,7 +32,7 @@ strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
                     dbc.Col([
                         html.Div([
                             dcc.Dropdown(
-                                id ="Model Selection", 
+                                id ="ModelSelection", 
                                 options=['SES','SVR', 'Holtwinter', 'Arima', 'Sarimax', 'GPR', 'NN', 'RF'],
                                 placeholder = "Select Models"
                             )
@@ -37,12 +46,13 @@ strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
                         )
                     ])
                 ], style={'column-gap' : '20px'}),
+                html.Div(id = "list")
             ])
 
 
 @app.callback(
     Output('parameters', 'children'),
-    Input('Model Selection', 'value'),
+    Input('ModelSelection', 'value'),
     State('parameters', 'children')
 )
 def set_parameters(value,children):
@@ -50,11 +60,21 @@ def set_parameters(value,children):
         
         label, parameters, default, dropdown, required = itemgetter('label', 'parameters', 'default', 'dropdown', 'required')(META_DATA_Val[value])
         if parameters == None:
-            return html.Div("No extra parameters")
+            children =  [html.Div("No extra parameters")]
+            new_button = html.Div([
+                            dbc.Col([
+                                html.Button(children='Create',
+                                    n_clicks=0,
+                                    type='submit',
+                                    id='strategy-button'
+                                )
+                            ])
+                        ])
+            children.append(new_button)
+            return children
         else:
             i=0
             children = [html.Div("Enter the following parameters:")]
-            print(children)
             for key in parameters:
                 if parameters[key] == 'dropdown':
                     dropdown_values = dropdown[i]
@@ -67,7 +87,10 @@ def set_parameters(value,children):
                                                 ]),
                                                 dbc.Col([
                                                     dcc.Dropdown(
-                                                        id= key,
+                                                        id= {
+                                                            'type':'dropdown',
+                                                            'index': key
+                                                        },
                                                         options= dropdown_values,
                                                         value = v
                                                     )
@@ -75,7 +98,7 @@ def set_parameters(value,children):
                                             ])
                                     ])
                     children.append(new_dropdown)
-                else:
+                elif parameters[key] == 'input':
                     l = label[i]
                     v = default[i]
                     i = i+1
@@ -85,7 +108,10 @@ def set_parameters(value,children):
                                                 ]),
                                                 dbc.Col([
                                                     dcc.Input(
-                                                        id = key,
+                                                        id = {
+                                                            'type':'input',
+                                                            'index' : key
+                                                        },
                                                         type='number',
                                                         value = v
                                                     )
@@ -93,8 +119,77 @@ def set_parameters(value,children):
                                             ])
                                     ])
                     children.append(new_input)
+                else:
+                    l = label[i]
+                    v = default[i]
+                    i = i+1
+                    new_tupple = html.Div([dbc.Row([
+                                                
+                                            html.Label(l)
+                                                
+                                        ], justify='between')
+                                ])
+                    children.append(new_tupple)
+            new_button = html.Div([
+                            dbc.Col([
+                                html.Button(children='Create',
+                                    n_clicks=0,
+                                    type='submit',
+                                    id='strategy-button'
+                                )
+                            ])
+                        ])
+            children.append(new_button)
             return children
     else:
         pass
         
 
+@app.callback(
+    Output('list', 'children'),
+    [Input('ModelSelection', 'value'), Input('strategy-button', 'n_clicks'), Input('strategy_name', 'value')],
+    [State({'type' : 'dropdown', 'index':ALL}, 'value'),State({'type' : 'input', 'index':ALL}, 'value')]
+)
+def store_database(value, n_clicks, strategy_name, dropdown, input):
+    parameters = itemgetter('parameters')(META_DATA_Val[value])
+    obj = {}
+    s_name = Strategy.query.filter_by(strategy_name = strategy_name).first()
+    if value == 'SES':
+        obj['name'] = value
+    else:
+        obj['name'] = value
+        i=0
+        for key in parameters:
+            if parameters[key] == 'dropdown':
+                obj[key] = dropdown[i]
+            elif parameters[key] == 'input':
+                obj[key] = input[i]
+                i=i+1   
+            else:
+                pass
+    json_obj = json.dumps(obj)
+    print(json_obj)
+    if s_name == None:
+        print("1")
+        ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+        # ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+    elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
+        print("2")
+        ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+        # ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+    else:
+        pass
+    conn = engine.connect()
+    conn.execute(ins)
+    conn.close()
+    return json_obj
+
+
+# @app.callback(
+#     Output('list', 'children'),
+#     Input('strategy-button', 'n_clicks')
+# )  
+# def populate_list(n_clicks):
+#     print("1")
+#     s_list = Strategy.query.filter_by(user_id = current_user.get_id()).first()    
+#     print(s_list)     

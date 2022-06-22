@@ -146,59 +146,6 @@ def set_dataset(value):
     return value
 
 
-#--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
-# @app.callback(
-#     Output('url_new', 'pathname'),
-#     [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
-#     State('Data Selection', 'value')
-# )
-# def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value):
-#     id = ctx.triggered_id
-#     if id == "strategy":
-#         if current_user.is_authenticated:
-#             return '/strategy'
-#         else:
-#             return '/signup'
-#     elif id == "submit_id":
-#         if value == '1':
-#             return "/2021data_1"
-#         elif value == '2':
-    #         return "/2021data_2"
-    #     elif value == '3':
-    #         return "/2021data_3"  
-    #     elif value == '4':
-    #         return "/2021data_sec"     
-    #     else:
-    #         return "/"
-    # elif id == "userplayground":
-    #     if current_user.is_authenticated:
-    #         return '/userplayground'
-    #     else:
-    #         return '/signup'
-    # else:
-    #     pass
-
-@app.callback(
-    [Output('modelsList', 'data'), Output('url_new', 'pathname')],
-    Input('submit_id', 'n_clicks'),
-    [State('Data Selection', 'value'), State('Model Selection', 'value')]
-)
-def submit_dataset(n_clicks, value1, value2):
-    if value1 == '1':
-        return value2, "/2021data_1"
-    elif value1 == '2':
-        return value2, "/2021data_2"
-    elif value1 == '3':
-        return value2, "/2021data_3"
-    elif value1 == '4':
-        return value2, "/2021data_sec"
-    else:
-        return value2, "/"
-#-------------------------------------------------------------------------------------------------------------------------#
-
-
-
-
 # @app.callback(
 #     [Output('modelsList', 'data')],
 #     Input('submit_id', 'n_clicks'),
@@ -209,6 +156,61 @@ def submit_dataset(n_clicks, value1, value2):
 #         return value
 #     else:
 #         pass
+
+#--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
+@app.callback(
+   [Output('url_new', 'pathname'), Output('modelsList', 'data')],
+    [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
+    [State('Data Selection', 'value'), State('Model Selection', 'value')]
+)
+def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
+    id = ctx.triggered_id
+    if id == "strategy":
+        if current_user.is_authenticated:
+            return '/strategy', value2
+        else:
+            return '/signup', value2
+    elif id == "submit_id":
+        if value1 == '1':
+            return "/2021data_1", value2
+        elif value1 == '2':
+            return "/2021data_2", value2
+        elif value1 == '3':
+            return "/2021data_3", value2  
+        elif value1 == '4':
+            return "/2021data_sec", value2     
+        else:
+            return "/", value2
+    elif id == "userplayground":
+        if current_user.is_authenticated:
+            return '/userplayground'
+        else:
+            return '/signup'
+    else:
+        pass
+
+# @app.callback(
+#     [Output('modelsList', 'data'), Output('url_new', 'pathname')],
+#     Input('submit_id', 'n_clicks'),
+#     [State('Data Selection', 'value'), State('Model Selection', 'value')]
+# )
+# def submit_dataset(n_clicks, value1, value2):
+#     if value1 == '1':
+#         return value2, "/2021data_1"
+#     elif value1 == '2':
+#         return value2, "/2021data_2"
+#     elif value1 == '3':
+#         return value2, "/2021data_3"
+#     elif value1 == '4':
+#         return value2, "/2021data_sec"
+#     else:
+#         return value2, "/"
+#-------------------------------------------------------------------------------------------------------------------------#
+
+
+
+
+
 # #-------------------------------------------------------------------------------------------------------------------------#
 
         ### Archive: these are from the old results

@@ -74,6 +74,7 @@ app.layout = html.Div([
         navbar,
         dcc.Store(id="datasetName", storage_type="session"),
         dcc.Store(id="modelsList", storage_type="session"),  
+        dcc.Store(id="strategyData", storage_type="session"),
         dbc.Container([                
             html.Div([
                 html.H1("AdaRel"),
