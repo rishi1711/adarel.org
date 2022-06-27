@@ -96,9 +96,12 @@ app.layout = html.Div([
 # https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'), 
 [Input('url', 'pathname'), 
-State('modelsList', 'data')], 
+State('modelsList', 'data'),
+State('customdataset', 'data'),
+State('customstrategy','data')], 
 prevent_initial_call=True )
-def router(pathname, data):
+
+def router(pathname, data, dataset, strategy):
     if pathname == '/':
         return home_page
     elif pathname == '/data1':
@@ -119,6 +122,10 @@ def router(pathname, data):
         return p21.dataset_3(data)
     elif pathname == '/2021data_sec':
         return p21.dataset_sec(data)
+
+    elif pathname == '/2021data':
+        return p21.custom_dataset(dataset, strategy)
+
     elif pathname == '/userplayground':
         return playground.page
     elif pathname == '/signup':
