@@ -3,7 +3,7 @@ from operator import itemgetter
 from re import L
 from turtle import width
 from dash import dcc
-from dash import html
+from dash import html, ctx
 import dash_bootstrap_components as dbc
 from requests import session
 from app import app
@@ -15,7 +15,7 @@ from database.models import strategy_tbl
 from flask_login import current_user
 from database.models import engine
 
-strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
+strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
                 html.H4("Try to create your own strategy"),
                 dbc.Row([
                     dbc.Col([
@@ -46,8 +46,27 @@ strategy = html.Div([dcc.Location(id = 'url_new', refresh=True),
                         )
                     ])
                 ], style={'column-gap' : '20px'}),
-                html.Div(id = "list")
-            ])
+                html.Div(id = "list"),
+                dbc.Row([
+                        dbc.Col([
+                                html.Button('Back to Home', id = 'go_login_home', n_clicks=0)
+                            ])
+                        ])
+                ])
+
+@app.callback(
+    Output('new_path', 'pathname'),
+    [Input('go_login_home', 'n_clicks')]
+)
+def go_to_login_home(nclicks):
+    id = ctx.triggered_id
+    if id == "go_login_home":
+        if current_user.is_authenticated:
+            return '/logged_in_user'
+        else:
+            pass
+    else:
+        pass
 
 
 @app.callback(
@@ -168,13 +187,13 @@ def store_database(value, n_clicks, strategy_name, dropdown, input):
             else:
                 pass
     json_obj = json.dumps(obj)
-    print(json_obj)
+    # print(json_obj)
     if s_name == None:
-        print("1")
+        # print("1")
         ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         # ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
     elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
-        print("2")
+        # print("2")
         ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         # ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
     else:
@@ -184,12 +203,3 @@ def store_database(value, n_clicks, strategy_name, dropdown, input):
     conn.close()
     return json_obj
 
-
-# @app.callback(
-#     Output('list', 'children'),
-#     Input('strategy-button', 'n_clicks')
-# )  
-# def populate_list(n_clicks):
-#     print("1")
-#     s_list = Strategy.query.filter_by(user_id = current_user.get_id()).first()    
-#     print(s_list)     

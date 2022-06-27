@@ -87,7 +87,6 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
 
         dbc.Col([
             html.H4("Do you want to create your own strategy?"),
-            # html.Div("Do you want to create a trategy", className = "strategy"),
             html.Div([
                 dbc.Button("Click here!", color="info", id='strategy')
             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})

@@ -1,5 +1,5 @@
 from dash import dcc, dash_table
-from dash import html
+from dash import html, ctx
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -22,7 +22,7 @@ import dash
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import numpy as np
 
-logged_in_user = html.Div([
+logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
     dbc.Row([
         html.H1("Want to Upload your Custom Data Set!"),
         dcc.Upload(
@@ -53,40 +53,94 @@ logged_in_user = html.Div([
                 dcc.Dropdown(
                     id = "Custom Data Selection",
                     options=[],
-                    placeholder = "Select DataSet",
-                    value = 'None'
+                    placeholder = "Select Custom DataSet",
+                    # value = 'None'
                 )
             ])
         ]),
         #---------------------------------------------------------------------------------------------------------------#
-        
+
+
+        #---------------------------------------Second Dropdown(Strategy Selection)---------------------------------------#
         dbc.Col([
             html.Div([
-                    html.Button('Create Strategy', id = 'custom submit_id', n_clicks=0)
+                dcc.Dropdown(
+                    id ="Strategy Selection", 
+                    options=[],
+                    placeholder = "Select Strategy",
+                    #disabled=True
+                )
             ])
         ]),
+        #----------------------------------------------------------------------------------------------------------------#
+
         dbc.Col([
             html.Div([
-                    html.Button('Predict', id = 'predict_id', n_clicks=0)
+                    html.Button('Predict', id = 'custom submit_id', n_clicks=0)
             ])
         ]),
-        html.Div(id="funct"),
     ],class_name="notice-card"),
+
+    dbc.Row([
+        # dbc.Col([
+        #     html.H4("Have your own Data?"),
+        #     html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
+        #     html.Div([
+        #         dbc.Button("Click here!", color="info", id='userplayground')
+        #     ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
+            
+        # ], width=6, class_name="notice-card"),
+
+        dbc.Col([
+            html.H4("Create your own strategy?"),
+            html.Div([
+                dbc.Button("Create Strategy!", color="info", id='create_strategy')
+            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
+            
+        ], width=5, class_name="notice-card")
+
+    ], style={"padding" : "20px", "column-gap" : "30px"})
     ])
+
+
+
 
 
 @app.callback(
     Output(component_id='Custom Data Selection', component_property='options'),
+    Output(component_id='Strategy Selection', component_property='options'),
     [Input('upload-data', 'children')]
 )
 def get_custom_datasets(filename):
     conn = sqlite3.connect("./database/data.sqlite")
     g.user = current_user.get_id()
     id = g.user
+
     datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}'""".format(id), conn)
     datasets = datasets.values.tolist()
     datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
-    return datasets
+
+    get_strategy = pd.read_sql("""select strategy_id, strategy_name from strategy where user_id = '{}'""".format(id), conn)
+    get_strategy = get_strategy.values.tolist()
+    get_strategy = [{'label' : i[1], 'value' : i[0]} for i in get_strategy]
+    return datasets, get_strategy
+
+@app.callback(
+    Output('customdataset', 'data'),
+    [Input('Custom Data Selection','value')],
+    prevent_initial_callback = True
+)
+def store_custom_dataset(value):
+    return value
+
+
+@app.callback(
+    Output('customstrategy', 'data'),
+    [Input('Strategy Selection','value')],
+    prevent_initial_callback = True
+)
+def store_custom_strategy(value):
+    return value
 
 
 @app.callback(
@@ -96,7 +150,7 @@ def get_custom_datasets(filename):
     prevent_initial_call=True
 )
 def update_output(filename,content):
-    path = "/Users/patil24/adarel.org/data2021/"+filename
+    path = os.getcwd()+"/data2021/"+filename
 
     content_type, content_string = content.split(',')
     decoded = base64.b64decode(content_string)
@@ -122,25 +176,42 @@ def update_output(filename,content):
         conn.execute(ins)
         conn.close()
 
-
 @app.callback(
-    Output('funct', 'children'),
-    Input('Custom Data Selection', 'value'), Input('predict_id', 'n_clicks')
+    Output(component_id='url_path', component_property='pathname'),
+    [Input('create_strategy', 'n_clicks'),Input('custom submit_id', 'n_clicks')],
+    [State('customdataset', 'data'), State('customstrategy', 'data')]
 )
-def call_predictions(value, n_clicks):
-    df = pd.read_csv('RawData/ds1.csv', encoding='utf-8')
-    columnName = 'strategy1'
+def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy):
+    id = ctx.triggered_id
+    if id == "create_strategy":
+        if current_user.is_authenticated:
+            return '/strategy'
+        else:
+            pass
+    elif id == "custom submit_id":
+        if current_user.is_authenticated:
+            call_predictions(dataset, strategy)
+            return '/2021data'
+        else:
+            pass
+    else:
+        pass
+
+
+def call_predictions(dataset, strategy):
+    conn = sqlite3.connect("./database/data.sqlite")
+    df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(dataset), conn)
+    df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy), conn) 
+    datasetPath = df_dataset["filepath"].loc[0]
+    strategyName = df_strategy["strategy_name"].loc[0]
+    df = pd.read_csv(datasetPath, encoding='utf-8')
+    columnName = strategyName
     j=0
-    df[columnName] = 0
-    print(df)
     for i in range(1000,len(df)):
         train = df.iloc[j:i]
         model = SimpleExpSmoothing(train['true value']).fit()
         data = np.array(model.forecast())
         df.loc[df.index[i], columnName] = data[0]
         j = j + 1
-    val = pd.DataFrame(df[columnName])
-    df.to_csv('RawData/ds1.csv', index=False)
-    print("1")
-    print(val)
+    df.to_csv(datasetPath, index=True)
     

@@ -75,6 +75,11 @@ app.layout = html.Div([
         dcc.Store(id="datasetName", storage_type="session"),
         dcc.Store(id="modelsList", storage_type="session"),  
         dcc.Store(id="strategyData", storage_type="session"),
+
+        dcc.Store(id="customdataset", storage_type="session"),
+        dcc.Store(id="customstrategy", storage_type="session"),
+
+
         dbc.Container([                
             html.Div([
                 html.H1("AdaRel"),
@@ -90,8 +95,13 @@ app.layout = html.Div([
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'), 
-[Input('url', 'pathname'), State('modelsList', 'data')], prevent_initial_call=True )
-def router(pathname, data):
+[Input('url', 'pathname'), 
+State('modelsList', 'data'),
+State('customdataset', 'data'),
+State('customstrategy','data')], 
+prevent_initial_call=True )
+
+def router(pathname, data, dataset, strategy):
     if pathname == '/':
         return home_page
     elif pathname == '/data1':
@@ -104,37 +114,39 @@ def router(pathname, data):
         return data4
     # elif pathname == '/live':
     #     return live_page
+    elif pathname == '/2021data_1':
+        return p21.dataset_1(data)
     elif pathname == '/2021data_2':
         return p21.dataset_2(data)
     elif pathname == '/2021data_3':
         return p21.dataset_3(data)
     elif pathname == '/2021data_sec':
         return p21.dataset_sec(data)
+
+    elif pathname == '/2021data':
+        return p21.custom_dataset(dataset, strategy)
+
     elif pathname == '/userplayground':
         return playground.page
-    elif pathname == '/2021data_1':
-        return p21.dataset_1(data)
     elif pathname == '/signup':
         return create
     elif pathname == '/login':
         return login
     elif pathname == '/strategy':
         return strategies.strategy
-    # elif pathname == './signup':
-    #     return
     elif pathname == '/logged_in_user':
         return logged_in_user
     else:
         return 'Error 404'
 
 
-# if __name__ == '__main__':
-#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     #DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8050") 
+if __name__ == '__main__':
+    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    #DEBUG = True
+    if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+    else:# prod
+        serve(app.server, host="0.0.0.0", port="8050") 
 
 
 # if __name__ == '__main__':
@@ -147,11 +159,11 @@ def router(pathname, data):
 #         # remember to clear the cache-directory on startup in prod 
 
 
-if __name__ == '__main__':
-    #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8051") 
-        # remember to clear the cache-directory on startup in prod  
+# if __name__ == '__main__':
+#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     DEBUG = True
+#     if DEBUG:
+#         app.run_server(debug=True, host='0.0.0.0') # Development 
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8051") 
+#         # remember to clear the cache-directory on startup in prod  
