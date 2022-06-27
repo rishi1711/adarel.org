@@ -128,13 +128,13 @@ def router(pathname, data):
         return 'Error 404'
 
 
-if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    #DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8050") 
+# if __name__ == '__main__':
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     #DEBUG = True
+#     if DEBUG:
+#         app.run_server(debug=True, host='0.0.0.0') # Development 
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
 
 
 # if __name__ == '__main__':
@@ -147,11 +147,11 @@ if __name__ == '__main__':
 #         # remember to clear the cache-directory on startup in prod 
 
 
-# if __name__ == '__main__':
-#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8051") 
-#         # remember to clear the cache-directory on startup in prod  
+if __name__ == '__main__':
+    #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    DEBUG = True
+    if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+    else:# prod
+        serve(app.server, host="0.0.0.0", port="8051") 
+        # remember to clear the cache-directory on startup in prod  

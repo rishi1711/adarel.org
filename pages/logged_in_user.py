@@ -1,5 +1,4 @@
-from fileinput import filename
-from dash import dcc
+from dash import dcc, dash_table
 from dash import html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
@@ -10,25 +9,22 @@ import os
 import base64
 from urllib.parse import quote as urlquote
 from app import app
-
-from flask import Flask, send_from_directory
+import getpass
+from database.models import Uploaded_files_tbl
+from database.models import Uploadedfiles
+from database.models import engine
+from flask_login import current_user
+from flask import g
+import sqlite3
+import io
+import json
 import dash
-from dash.dependencies import Input, Output
-
-__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__)))
-
-def test():
-    df = px.data.gapminder().query("country=='Canada'")
-    fig = px.line(df, x="year", y="lifeExp", title='Life expectancy in Canada')
-    return fig
-
-
-UPLOAD_DIRECTORY = "/Users/patil24/adarel.org/user_data/"
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+import numpy as np
 
 logged_in_user = html.Div([
     dbc.Row([
-        html.H1("Want to upload your Custom Data Set!"),
+        html.H1("Want to Upload your Custom Data Set!"),
         dcc.Upload(
             id="upload-data",
             children=html.Div(
@@ -44,12 +40,10 @@ logged_in_user = html.Div([
                 "textAlign": "center",
                 "margin": "10px",
             },
-            multiple=True,
+            #multiple=True,
         ),
-        html.H5("File List"),
         html.Ul(id="file-list"),
-    ],
-    style={"max-width": "500px"},),
+    ],),
 
     dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
@@ -57,82 +51,96 @@ logged_in_user = html.Div([
         dbc.Col([
             html.Div([
                 dcc.Dropdown(
-                    id = "Data Selection",
-                    options=[{'label': 'Select DataSet', 'value' :'None'},
-                    {'label':'DataSet1', 'value' : '1'},
-                    {'label':'DataSet2', 'value' : '2'}, 
-                    {'label':'DataSet3', 'value' : '3'}, 
-                    {'label':'DataSetSEC', 'value' : '4'},
-                    #{'label':'LiveData', 'value' : '5'}
-                    ], 
-                    placeholder = "Select Dataset",
+                    id = "Custom Data Selection",
+                    options=[],
+                    placeholder = "Select DataSet",
                     value = 'None'
                 )
             ])
         ]),
-        #--------------------------------------------------------------------------------------------------------------#
+        #---------------------------------------------------------------------------------------------------------------#
         
-        #---------------------------------------Second Dropdown(Model Selection)---------------------------------------#
         dbc.Col([
             html.Div([
-                    dcc.Dropdown(
-                    id ="Model Selection", 
-                    options=['SES','SVR'],
-                    placeholder = "Select Models",
-                    multi=True,
-                    disabled=True
-                )
-                ])
-        ]),
-        #--------------------------------------------------------------------------------------------------------------#
-        dbc.Col([
-            html.Div([
-                    html.Button('Predict', id = 'submit_id', n_clicks=0)
+                    html.Button('Create Strategy', id = 'custom submit_id', n_clicks=0)
             ])
-        ])
+        ]),
+        dbc.Col([
+            html.Div([
+                    html.Button('Predict', id = 'predict_id', n_clicks=0)
+            ])
+        ]),
+        html.Div(id="funct"),
     ],class_name="notice-card"),
     ])
 
 
+@app.callback(
+    Output(component_id='Custom Data Selection', component_property='options'),
+    [Input('upload-data', 'children')]
+)
+def get_custom_datasets(filename):
+    conn = sqlite3.connect("./database/data.sqlite")
+    g.user = current_user.get_id()
+    id = g.user
+    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}'""".format(id), conn)
+    datasets = datasets.values.tolist()
+    datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
+    return datasets
 
-def download(path):
-    """Serve a file from the upload directory."""
-    return send_from_directory(UPLOAD_DIRECTORY, path, as_attachment=True)
-
-def save_file(name, content):
-    """Decode and store a file uploaded with Plotly Dash."""
-    data = content.encode("utf8").split(b";base64,")[1]
-    with open(os.path.join(UPLOAD_DIRECTORY, name), "wb") as fp:
-        fp.write(base64.decodebytes(data))
-
-def uploaded_files():
-    """List the files in the upload directory."""
-    files = []
-    for filename in os.listdir(UPLOAD_DIRECTORY):
-        path = os.path.join(UPLOAD_DIRECTORY, filename)
-        if os.path.isfile(path):
-            files.append(filename)
-    return files
-
-def file_download_link(filename):
-    """Create a Plotly Dash 'A' element that downloads a file from the app."""
-    location = "/download/{}".format(urlquote(filename))
-    # return html.A(filename, href=location)
-    return filename
 
 @app.callback(
     Output("file-list", "children"),
-    [Input("upload-data", "filename"), Input("upload-data", "contents")],
+    [Input('upload-data', 'filename'),
+    Input('upload-data', 'contents')],
+    prevent_initial_call=True
 )
-def update_output(uploaded_filenames, uploaded_file_contents):
-    """Save uploaded files and regenerate the file list."""
+def update_output(filename,content):
+    path = "/Users/patil24/adarel.org/data2021/"+filename
 
-    if uploaded_filenames is not None and uploaded_file_contents is not None:
-        for name, data in zip(uploaded_filenames, uploaded_file_contents):
-            save_file(name, data)
+    content_type, content_string = content.split(',')
+    decoded = base64.b64decode(content_string)
+    if 'txt' in filename:
+        data = content.encode("utf8").split(b";base64,")[1]
+        with open(path, "wb") as fp:
+            fp.write(base64.decodebytes(data))
+    elif 'csv' in filename:
+        # Assume that the user uploaded a CSV file
+        df = pd.read_csv(
+            io.StringIO(decoded.decode('utf-8')))
+        df.to_csv (path, index = False, header=True)
+    elif 'xls' in filename:
+        # Assume that the user uploaded an excel file
+        df = pd.read_excel(io.BytesIO(decoded))
 
-    files = uploaded_files()
-    if len(files) == 0:
-        return [html.Li("No files yet!")]
-    else:
-        return [html.Li(file_download_link(filename)) for filename in files]
+
+    
+    file_name=os.path.splitext(filename)[0]
+    if file_name is not None and current_user.get_id() is not None and path is not None:
+        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filename = file_name)
+        conn = engine.connect()
+        conn.execute(ins)
+        conn.close()
+
+
+@app.callback(
+    Output('funct', 'children'),
+    Input('Custom Data Selection', 'value'), Input('predict_id', 'n_clicks')
+)
+def call_predictions(value, n_clicks):
+    df = pd.read_csv('RawData/ds1.csv', encoding='utf-8')
+    columnName = 'strategy1'
+    j=0
+    df[columnName] = 0
+    print(df)
+    for i in range(1000,len(df)):
+        train = df.iloc[j:i]
+        model = SimpleExpSmoothing(train['true value']).fit()
+        data = np.array(model.forecast())
+        df.loc[df.index[i], columnName] = data[0]
+        j = j + 1
+    val = pd.DataFrame(df[columnName])
+    df.to_csv('RawData/ds1.csv', index=False)
+    print("1")
+    print(val)
+    

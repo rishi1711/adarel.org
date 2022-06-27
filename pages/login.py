@@ -43,7 +43,7 @@ def successful(n_clicks, input1, input2):
         # if user.password == input2:
         if check_password_hash(user.password, input2):
             login_user(user)
-            return '/'
+            return '/logged_in_user'
         else:
             pass
     else:
