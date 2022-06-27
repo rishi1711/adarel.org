@@ -13,3 +13,9 @@ requests==2
 statsmodels==0.13.2
 matplotlib==3.4
 scipy==1.8.0
+
+#Pooja database
+sqlalchemy==1.4.37
+Flask-SQLAlchemy==2.5.1
+flask-login==0.6.1
+sqlalchemy_utils==0.38.2 

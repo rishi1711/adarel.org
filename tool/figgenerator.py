@@ -1,3 +1,7 @@
+import click
+from matplotlib import legend_handler
+from matplotlib.legend import Legend
+from matplotlib.pyplot import legend
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -9,10 +13,10 @@ from operator import itemgetter
 
 META_DATA = dp.META_DATA
 
-def get_fig_from_csv(dataset_name: str) -> go.Figure:
+def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
+
     fig = go.Figure()
     available_mods, file_path = itemgetter('available_models', 'path')(META_DATA_CSV[dataset_name])
-
     df = pd.read_csv(file_path)
     true_vals = df['true value'].to_numpy()
     x_tick = df.iloc[:,0]
@@ -20,18 +24,30 @@ def get_fig_from_csv(dataset_name: str) -> go.Figure:
         x = x_tick,
         y = true_vals,
         mode = 'lines',
-        name = 'true values'
+        name = 'true value'
     ))
 
-    for mod in available_mods:
-        ys = df[mod].to_numpy()
-        fig.add_trace( go.Scatter(
-            x = x_tick,
-            y = ys,
-            mode = 'lines',
-            name = mod
-        ))
-    
+    if not data == None:
+        for mod in available_mods:  
+            if mod in data:
+                ys = df[mod].to_numpy()
+                fig.add_trace( go.Scatter(
+                    x = x_tick,
+                    y = ys,
+                    mode = 'lines',
+                    name = mod
+                ))
+            else:
+                ys = df[mod].to_numpy()
+                fig.add_trace( go.Scatter(
+                    x = x_tick,
+                    y = ys,
+                    mode = 'lines',
+                    name = mod,
+                    visible = "legendonly"
+                ))
+    else:
+        pass
     return fig
 
 def get_fig(dataset_name: str) -> go.Figure:
@@ -71,13 +87,3 @@ def get_prediction_points(name: str, sheet_num: int, with_ad: bool=False) -> np.
     col_name = "prediction" if not with_ad else "pred\nwo anomaly detection"
 
     return df[col_name].to_numpy()
-
-if __name__ == "__main__":
-    # path = itemgetter('path')(META_DATA['DataSet1'])
-    # df = pd.read_excel(path, engine='openpyxl', sheet_name=2, header=1)
-
-    # print(df.iloc[:4, :7])
-    # result = get_prediction_points('DataSet1', 0)
-    # print(result)
-    # print(get_fig("DataSet1"))
-    print(get_fig_from_csv("DataSet3"))
