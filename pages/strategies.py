@@ -1,6 +1,5 @@
 
 from operator import itemgetter
-from re import L
 from turtle import width
 from dash import dcc
 from dash import html, ctx
@@ -75,8 +74,7 @@ def go_to_login_home(nclicks):
     State('parameters', 'children')
 )
 def set_parameters(value,children):
-    if not value == None:
-        
+    if not value == None:      
         label, parameters, default, dropdown, required = itemgetter('label', 'parameters', 'default', 'dropdown', 'required')(META_DATA_Val[value])
         if parameters == None:
             children =  [html.Div("No extra parameters")]
@@ -166,40 +164,43 @@ def set_parameters(value,children):
 
 @app.callback(
     Output('list', 'children'),
-    [Input('ModelSelection', 'value'), Input('strategy-button', 'n_clicks'), Input('strategy_name', 'value')],
-    [State({'type' : 'dropdown', 'index':ALL}, 'value'),State({'type' : 'input', 'index':ALL}, 'value')]
+    [Input('strategy-button', 'n_clicks')],
+    [State({'type' : 'dropdown', 'index':ALL}, 'value'),State({'type' : 'input', 'index':ALL}, 'value'), State('strategy_name', 'value'), State('ModelSelection', 'value'),],prevent_initial_call=True
 )
-def store_database(value, n_clicks, strategy_name, dropdown, input):
-    parameters = itemgetter('parameters')(META_DATA_Val[value])
-    obj = {}
-    s_name = Strategy.query.filter_by(strategy_name = strategy_name).first()
-    if value == 'SES':
-        obj['name'] = value
-    else:
-        obj['name'] = value
-        i=0
-        for key in parameters:
-            if parameters[key] == 'dropdown':
-                obj[key] = dropdown[i]
-            elif parameters[key] == 'input':
-                obj[key] = input[i]
-                i=i+1   
-            else:
-                pass
-    json_obj = json.dumps(obj)
-    # print(json_obj)
-    if s_name == None:
-        # print("1")
-        ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
-        # ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
-    elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
-        # print("2")
-        ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
-        # ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+def store_database(n_clicks, dropdown, input, strategy_name,value):
+    if n_clicks > 0:
+        parameters = itemgetter('parameters')(META_DATA_Val[value])
+        obj = {}
+        s_name = Strategy.query.filter_by(strategy_name = strategy_name).first()
+        if value == 'SES':
+            obj['name'] = value
+        else:
+            obj['name'] = value
+            i=0
+            for key in parameters:
+                if parameters[key] == 'dropdown':
+                    obj[key] = dropdown[i]
+                elif parameters[key] == 'input':
+                    obj[key] = input[i]
+                    i=i+1   
+                else:
+                    pass
+        json_obj = json.dumps(obj)
+        # print(json_obj)
+        if s_name == None:
+            # print("1")
+            ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+            # ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+        elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
+            # print("2")
+            ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+            # ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
+        else:
+            pass
+        conn = engine.connect()
+        conn.execute(ins)
+        conn.close()
+        return json_obj
     else:
         pass
-    conn = engine.connect()
-    conn.execute(ins)
-    conn.close()
-    return json_obj
 
