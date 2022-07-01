@@ -78,6 +78,7 @@ app.layout = html.Div([
 
         dcc.Store(id="customdataset", storage_type="session"),
         dcc.Store(id="customstrategy", storage_type="session"),
+        dcc.Store(id="trainingthreshold", storage_type="session"),
 
 
         dbc.Container([                
@@ -98,10 +99,11 @@ app.layout = html.Div([
 [Input('url', 'pathname'), 
 State('modelsList', 'data'),
 State('customdataset', 'data'),
-State('customstrategy','data')], 
+State('customstrategy','data'),
+State('trainingthreshold','data')], 
 prevent_initial_call=True )
 
-def router(pathname, data, dataset, strategy):
+def router(pathname, data, dataset, strategy, training_data_index):
     if pathname == '/':
         return home_page
     elif pathname == '/data1':
@@ -124,7 +126,7 @@ def router(pathname, data, dataset, strategy):
         return p21.dataset_sec(data)
 
     elif pathname == '/2021data':
-        return p21.custom_dataset(dataset, strategy)
+        return p21.custom_dataset(dataset, strategy, training_data_index)
 
     elif pathname == '/userplayground':
         return playground.page
@@ -140,13 +142,13 @@ def router(pathname, data, dataset, strategy):
         return 'Error 404'
 
 
-if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    #DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8050") 
+# if __name__ == '__main__':
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     #DEBUG = True
+#     if DEBUG:
+#         app.run_server(debug=True, host='0.0.0.0') # Development 
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
 
 
 # if __name__ == '__main__':
@@ -159,11 +161,11 @@ if __name__ == '__main__':
 #         # remember to clear the cache-directory on startup in prod 
 
 
-# if __name__ == '__main__':
-#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8051") 
-#         # remember to clear the cache-directory on startup in prod  
+if __name__ == '__main__':
+    #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    DEBUG = True
+    if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+    else:# prod
+        serve(app.server, host="0.0.0.0", port="8051") 
+        # remember to clear the cache-directory on startup in prod  
