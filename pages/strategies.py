@@ -129,7 +129,6 @@ def set_parameters(value,children):
                                                             'type':'input',
                                                             'index' : key
                                                         },
-                                                        type='number',
                                                         value = v
                                                     )
                                                 ])

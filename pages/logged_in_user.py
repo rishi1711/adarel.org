@@ -9,7 +9,6 @@ import os
 import base64
 from urllib.parse import quote as urlquote
 from app import app
-import getpass
 from database.models import Uploaded_files_tbl
 from database.models import Uploadedfiles
 from database.models import engine
@@ -21,7 +20,7 @@ import json
 import dash
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import numpy as np
-
+from PredictionModels.SelectionModels import predictOnSelectedModel
 logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
     dbc.Row([
         html.H1("Want to Upload your Custom Data Set!"),
@@ -201,17 +200,11 @@ def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy):
 def call_predictions(dataset, strategy):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(dataset), conn)
-    df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy), conn) 
+    df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy), conn)
     datasetPath = df_dataset["filepath"].loc[0]
     strategyName = df_strategy["strategy_name"].loc[0]
-    df = pd.read_csv(datasetPath, encoding='utf-8')
-    columnName = strategyName
-    j=0
-    for i in range(1000,len(df)):
-        train = df.iloc[j:i]
-        model = SimpleExpSmoothing(train['true value']).fit()
-        data = np.array(model.forecast())
-        df.loc[df.index[i], columnName] = data[0]
-        j = j + 1
-    df.to_csv(datasetPath, index=True)
+    strategyData = df_strategy["strategy_data"].loc[0]
+    json_val = json.loads(strategyData)
+    predictOnSelectedModel(datasetPath, strategyName, json_val)
+
     

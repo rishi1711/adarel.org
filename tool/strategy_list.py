@@ -39,20 +39,25 @@ META_DATA_Val = {
         'dropdown' : [['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']],
         'required' : None
     },
-    'GPR' : {
-        'name' : 'Gaussian Process Regression',
-        'parameters' : {'kernel' : '0.35 * RBF(length_scale=0.5) + WhiteKernel(noise_level=1, noise_level_bounds=(1e-10, 1e+1))', 'alpha' : '1e-6'}
-    },
-    'NN' : {
-        'name' : 'Neural Network',
-        'parameters' : {'hidden_layer_sizes' : '(32,16,8)', 'alpha' : '0.1', 'activation' : 'relu', 'solver' : 'lbfgs', 'learning_rate_init' : '0.001', 'random_state' : '1'}
-    },
     'RF' : {
         'name' : 'Random Forest Regressor',
         'label' : ["Select the kernel type", "Insert Regularization parameter(C)", "Insert gamma values", "Insert Epsilon values"],
-        'parameters' : {'kernel' : 'dropdown', 'C' : 'float', 'gamma' : 'float', 'epsilon' : 'float'},
+        'parameters' : {'kernel' : 'dropdown', 'C' : 'input', 'gamma' : 'input', 'epsilon' : 'input'},
         'default' : ['linear', '0.1', '0.1', '0.0001'],
         'dropdown' : [['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']],
         'required' : None
     },
+    'NN' : {
+        'name' : 'Neural Network',
+        'label' : ["Select Activation function", "Select solver", "Enter the hidden layer sizes(tupple)", "Enter L2 Regularization term(aplha)",  "Enter learning rate schedule", "Enter random number"],
+        'parameters' : {'activation' : 'dropdown', 'solver' : 'dropdown', 'hidden_layer_sizes' : 'input', 'alpha' : 'input', 'learning_rate_init' : 'input', 'random_state' : 'input'},
+        'default' : ['relu', 'lbfgs', '(32,16,8)', '0.1', '0.001', '1'],
+        'dropdown' : [['identity', 'logistic', 'tanh', 'relu'], ['lbfgs', 'sgd', 'adam']],
+        'required' : None
+    },
+    'GPR' : {
+        'name' : 'Gaussian Process Regression',
+        'parameters' : {'kernel' : '0.35 * RBF(length_scale=0.5) + WhiteKernel(noise_level=1, noise_level_bounds=(1e-10, 1e+1))', 'alpha' : '1e-6'}
+    },
+
 }
