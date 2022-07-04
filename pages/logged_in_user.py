@@ -219,7 +219,11 @@ def call_predictions(dataset, strategy, training_data_index):
         data = np.array(model.forecast())
         df.loc[df.index[i], columnName] = data[0]
         # j = j + 1
-    df.to_csv(datasetPath, index=True)
+    df_col = list(df.columns)
+    if "Unnamed" not in df_col[0]:
+        df.to_csv(datasetPath, index=True)
+    else:
+        df.to_csv(datasetPath, index=False)
 
 
 #---------------------------------------Number of Dataset used for training data--------------------------------------------#
