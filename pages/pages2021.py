@@ -80,7 +80,7 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
 
 
 
-def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None, dataset_path=None, strategy_name=None) -> html.Div :
+def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None, dataset_path=None, strategy_name=None, training_data_index=None) -> html.Div :
     itermediate = [
         dbc.Row([
             dbc.Col(
@@ -93,7 +93,7 @@ def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None,
         dbc.Row([
             dbc.Col([ 
                 html.Div([
-                    dcc.Graph(figure= fgen.get_fig_from_custom_csv(dataset_path, strategy_name)),
+                    dcc.Graph(figure= fgen.get_fig_from_custom_csv(dataset_path, strategy_name, training_data_index)),
                 ])
             ])
         ])
@@ -115,11 +115,11 @@ def dataset_3(data):
 def dataset_sec(data):
     return get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"), data)
 
-def custom_dataset(file__id, strategy__id):
+def custom_dataset(file__id, strategy__id, training_data_index):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(file__id), conn)
     df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy__id), conn)
     
     path = df_dataset["filepath"].loc[0]
     strat_name = df_strategy["strategy_name"].loc[0]
-    return get_graph_from_custom_dataset("Empirical Study", None, path, strat_name) 
+    return get_graph_from_custom_dataset("Empirical Study", None, path, strat_name, training_data_index) 

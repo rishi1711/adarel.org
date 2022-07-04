@@ -145,17 +145,6 @@ def set_dataset(value):
     return value
 
 
-# @app.callback(
-#     [Output('modelsList', 'data')],
-#     Input('submit_id', 'n_clicks'),
-#     [State('Model Selection', 'value')]
-# )
-# def set_models(n_clicks, value):
-#     if not value == None:
-#         return value
-#     else:
-#         pass
-
 #--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
 @app.callback(
    [Output('url_new', 'pathname'), Output('modelsList', 'data')],
@@ -182,46 +171,9 @@ def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
             return "/", value2
     elif id == "userplayground":
         if current_user.is_authenticated:
-            return '/userplayground'
+            return '/userplayground', None
         else:
-            return '/signup'
+            return '/signup', None
     else:
         pass
 
-# @app.callback(
-#     [Output('modelsList', 'data'), Output('url_new', 'pathname')],
-#     Input('submit_id', 'n_clicks'),
-#     [State('Data Selection', 'value'), State('Model Selection', 'value')]
-# )
-# def submit_dataset(n_clicks, value1, value2):
-#     if value1 == '1':
-#         return value2, "/2021data_1"
-#     elif value1 == '2':
-#         return value2, "/2021data_2"
-#     elif value1 == '3':
-#         return value2, "/2021data_3"
-#     elif value1 == '4':
-#         return value2, "/2021data_sec"
-#     else:
-#         return value2, "/"
-#-------------------------------------------------------------------------------------------------------------------------#
-
-
-
-
-
-# #-------------------------------------------------------------------------------------------------------------------------#
-
-        ### Archive: these are from the old results
-        # dbc.Row([
-        #     dcc.Link('Go to Data 1', href='/data1'),
-        # ]),
-        # dbc.Row([
-        #     dcc.Link('Go to Data 2', href='/data2'),
-        # ]),
-        # dbc.Row([
-        #     dcc.Link('Go to Data 3', href='/data3'),
-        # ]),
-        # dbc.Row([
-        #     dcc.Link('Go to Data 4', href='/data4'),
-        # ]),

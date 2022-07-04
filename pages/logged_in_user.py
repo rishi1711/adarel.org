@@ -67,28 +67,29 @@ logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
                     id ="Strategy Selection", 
                     options=[],
                     placeholder = "Select Strategy",
-                    #disabled=True
                 )
             ])
         ]),
         #----------------------------------------------------------------------------------------------------------------#
 
+
         dbc.Col([
             html.Div([
-                    html.Button('Predict', id = 'custom submit_id', n_clicks=0)
+                html.I("Input the threshold of the training data:"),
+                dcc.Input(id="traindata", type='number', placeholder="Enter Number"),
+                ])
+        ]),
+
+
+        dbc.Col([
+            html.Div([
+                    html.Button('Predict', id = 'custom submit_id', n_clicks=0),
+                    # dbc.Spinner(children=[dcc.Location(id="loading_output")], size="lg", color="primary", type="border", fullscreen=True,),
             ])
         ]),
     ],class_name="notice-card"),
 
     dbc.Row([
-        # dbc.Col([
-        #     html.H4("Have your own Data?"),
-        #     html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
-        #     html.Div([
-        #         dbc.Button("Click here!", color="info", id='userplayground')
-        #     ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
-            
-        # ], width=6, class_name="notice-card"),
 
         dbc.Col([
             html.H4("Create your own strategy?"),
@@ -166,8 +167,6 @@ def update_output(filename,content):
         # Assume that the user uploaded an excel file
         df = pd.read_excel(io.BytesIO(decoded))
 
-
-    
     file_name=os.path.splitext(filename)[0]
     if file_name is not None and current_user.get_id() is not None and path is not None:
         ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filename = file_name)
@@ -177,10 +176,15 @@ def update_output(filename,content):
 
 @app.callback(
     Output(component_id='url_path', component_property='pathname'),
-    [Input('create_strategy', 'n_clicks'),Input('custom submit_id', 'n_clicks')],
-    [State('customdataset', 'data'), State('customstrategy', 'data')]
+    # Output('loading_output', 'pathname'),
+    [Input('create_strategy', 'n_clicks'),
+    Input('custom submit_id', 'n_clicks')],
+    [State('customdataset', 'data'), 
+    State('customstrategy', 'data'),
+    State('trainingthreshold', 'data')],
+    prevent_initial_callback = True
 )
-def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy):
+def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy, training_data_index):
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
@@ -189,7 +193,8 @@ def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy):
             pass
     elif id == "custom submit_id":
         if current_user.is_authenticated:
-            call_predictions(dataset, strategy)
+            #add gif until the data is being processed.
+            call_predictions(dataset, strategy,training_data_index)
             return '/2021data'
         else:
             pass
@@ -197,7 +202,7 @@ def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy):
         pass
 
 
-def call_predictions(dataset, strategy):
+def call_predictions(dataset, strategy, training_data_index):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(dataset), conn)
     df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy), conn)
@@ -205,6 +210,16 @@ def call_predictions(dataset, strategy):
     strategyName = df_strategy["strategy_name"].loc[0]
     strategyData = df_strategy["strategy_data"].loc[0]
     json_val = json.loads(strategyData)
-    predictOnSelectedModel(datasetPath, strategyName, json_val)
-
+    predictOnSelectedModel(datasetPath, strategyName, json_val, training_data_index)
     
+
+
+#---------------------------------------Number of Dataset used for training data--------------------------------------------#
+@app.callback(
+    Output(component_id='trainingthreshold', component_property='data'),
+    [Input('traindata', 'value')],
+    prevent_initial_callback = True
+)
+def get_threshold(value):
+    return value
+#-----------------------------------------------------------------------------------------------------------------#
