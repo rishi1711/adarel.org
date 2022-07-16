@@ -47,27 +47,34 @@ def get_fig_from_csv(dataset_name: str, data: list) -> go.Figure:
                     visible = "legendonly"
                 ))
     else:
-        pass
+        for mod in available_mods:  
+            ys = df[mod].to_numpy()
+            fig.add_trace( go.Scatter(
+                x = x_tick,
+                y = ys,
+                mode = 'lines',
+                name = mod
+            ))
     return fig
 
-def get_fig_from_custom_csv(dataset_path, strategy_name, training_data_index) -> go.Figure:
+def get_fig_from_custom_csv(dataset_path, strategy_name) -> go.Figure:
 
     fig = go.Figure()
     df = pd.read_csv(dataset_path)
     true_vals = df['true value'].to_numpy()
-    x_tick = df.iloc[training_data_index:,0]
+    x_tick = df.iloc[1000:,0]
     fig.add_trace( go.Scatter(
         x = x_tick,
-        y = true_vals[training_data_index:],
+        y = true_vals[1000:],
         mode = 'lines',
         name = 'true value'
     ))
 
     strategy_vals = df[strategy_name].to_numpy()
-    x_tick = df.iloc[training_data_index:,0]
+    x_tick = df.iloc[1000:,0]
     fig.add_trace( go.Scatter(
         x = x_tick,
-        y = strategy_vals[training_data_index:],
+        y = strategy_vals[1000:],
         mode = 'lines',
         name = strategy_name
     ))

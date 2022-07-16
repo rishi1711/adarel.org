@@ -5,11 +5,11 @@ from sklearn.svm import SVR
 import pandas as pd
 import numpy as np
 
-def predictOnSelectedModel(datasetPath, strategyName, strategyData, training_data_index):
+def predictOnSelectedModel(datasetPath, strategyName, strategyData):
     df = pd.read_csv(datasetPath, encoding='utf-8') 
     columnName = strategyName
     if strategyData['name'] == 'SES':
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             train = df.iloc[0:i]
             model = SimpleExpSmoothing(train['true value']).fit()
             data = np.array(model.forecast())
@@ -20,7 +20,7 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData, training_dat
         seasonal = strategyData['seasonal']
         seasonality_periods = strategyData['seasonality_periods']
         seasonality_periods = int(seasonality_periods)
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             train = df.iloc[0:i]
             model =  ExponentialSmoothing(train['true value'], trend= trend, seasonal = seasonal, seasonal_periods = seasonality_periods).fit()
             data = np.array(model.forecast())
@@ -31,7 +31,7 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData, training_dat
         b = int(strategyData['Difference'])
         c = int(strategyData['Moving Average Component'])
         order1 = (a,b,c)
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             train = df.iloc[0:i]
             model =  ARIMA(train['true value'], order = order1).fit()
             data = np.array(model.forecast())
@@ -48,7 +48,7 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData, training_dat
         c = int(strategyData['MA parameters'])
         d = int(strategyData['Periodicity'])
         seasonal_order1 = (a,b,c,d)
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             train = df.iloc[0:i]
             model =  ARIMA(train['true value'], order = order1, seasonal_order = seasonal_order1).fit()
             data = np.array(model.forecast())

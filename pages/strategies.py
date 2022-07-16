@@ -61,7 +61,7 @@ def go_to_login_home(nclicks):
     id = ctx.triggered_id
     if id == "go_login_home":
         if current_user.is_authenticated:
-            return '/logged_in_user'
+            return '/login_user_1'
         else:
             pass
     else:

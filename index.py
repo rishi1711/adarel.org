@@ -17,7 +17,9 @@ from pages.live_page import live_page
 from pages.login import login
 from pages.Register import create
 from pages import strategies
-from pages.logged_in_user import logged_in_user
+from pages.login_user_1 import login_user_1
+from pages.login_user_2 import login_user_2
+from pages.login_user_3 import login_user_3
 
 from pages.Initial_page import first_page
 
@@ -76,9 +78,11 @@ app.layout = html.Div([
         dcc.Store(id="modelsList", storage_type="session"),  
         dcc.Store(id="strategyData", storage_type="session"),
 
+        # dcc.Store(id="trainingdataset", storage_type="session"),
+        # dcc.Store(id="trainingstrategy", storage_type="session"),
+
         dcc.Store(id="customdataset", storage_type="session"),
         dcc.Store(id="customstrategy", storage_type="session"),
-        dcc.Store(id="trainingthreshold", storage_type="session"),
 
 
         dbc.Container([                
@@ -99,11 +103,10 @@ app.layout = html.Div([
 [Input('url', 'pathname'), 
 State('modelsList', 'data'),
 State('customdataset', 'data'),
-State('customstrategy','data'),
-State('trainingthreshold','data')], 
+State('customstrategy','data')], 
 prevent_initial_call=True )
 
-def router(pathname, data, dataset, strategy, training_data_index):
+def router(pathname, data, dataset, strategy):
     if pathname == '/':
         return home_page
     elif pathname == '/data1':
@@ -126,7 +129,7 @@ def router(pathname, data, dataset, strategy, training_data_index):
         return p21.dataset_sec(data)
 
     elif pathname == '/2021data':
-        return p21.custom_dataset(dataset, strategy, training_data_index)
+        return p21.custom_dataset(dataset, strategy)
 
     elif pathname == '/userplayground':
         return playground.page
@@ -136,15 +139,19 @@ def router(pathname, data, dataset, strategy, training_data_index):
         return login
     elif pathname == '/strategy':
         return strategies.strategy
-    elif pathname == '/logged_in_user':
-        return logged_in_user
+    elif pathname == '/login_user_1':
+        return login_user_1
+    elif pathname == '/login_user_2':
+        return login_user_2
+    elif pathname == '/login_user_3':
+        return login_user_3
     else:
         return 'Error 404'
 
 
 if __name__ == '__main__':
     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    #DEBUG = True
+    # DEBUG = True
     if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
     else:# prod
@@ -160,12 +167,3 @@ if __name__ == '__main__':
 #         serve(app.server, host="0.0.0.0", port="8050") 
 #         # remember to clear the cache-directory on startup in prod 
 
-
-# if __name__ == '__main__':
-#     #DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8051") 
-#         # remember to clear the cache-directory on startup in prod  
