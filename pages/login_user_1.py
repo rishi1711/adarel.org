@@ -119,13 +119,13 @@ def get_training_datasets(filename):
 #---------------------------------------------------------------------------------------------------------------------------#
 
 
-# @app.callback(
-#     Output('trainingdataset', 'data'),
-#     [Input('Training Data Selection','value')],
-#     prevent_initial_callback = True
-# )
-# def store_training_dataset(value):
-#     return value
+@app.callback(
+    Output('trainingdataset', 'data'),
+    [Input('Training Data Selection','value')],
+    prevent_initial_callback = True
+)
+def store_training_dataset(value):
+    return value
 
 
 # @app.callback(

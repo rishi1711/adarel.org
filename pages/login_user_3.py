@@ -158,10 +158,11 @@ def update_custom_output(filename, content):
     Output(component_id='url_path_3', component_property='pathname'),
     [Input('custom submit_id', 'n_clicks')],
     [State('customdataset', 'data'), 
-    State('customstrategy', 'data')],
+    State('customstrategy', 'data'),
+    State('trainingdataset', 'data')],
     prevent_initial_callback = True
 )
-def custom_redirection(n_clicks1, dataset, strategy):
+def custom_redirection(n_clicks1, dataset, strategy, trainingdata):
     id = ctx.triggered_id
     if id == "custom submit_id":
         if current_user.is_authenticated:

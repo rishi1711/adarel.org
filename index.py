@@ -78,7 +78,7 @@ app.layout = html.Div([
         dcc.Store(id="modelsList", storage_type="session"),  
         dcc.Store(id="strategyData", storage_type="session"),
 
-        # dcc.Store(id="trainingdataset", storage_type="session"),
+        dcc.Store(id="trainingdataset", storage_type="session"),
         # dcc.Store(id="trainingstrategy", storage_type="session"),
 
         dcc.Store(id="customdataset", storage_type="session"),
@@ -166,4 +166,3 @@ if __name__ == '__main__':
 #    else:# prod
 #         serve(app.server, host="0.0.0.0", port="8050") 
 #         # remember to clear the cache-directory on startup in prod 
-
