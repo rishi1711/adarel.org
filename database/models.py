@@ -26,6 +26,7 @@ class Uploadedfiles(db.Model):
     file_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     filepath = db.Column(db.String(80))
+    filetype = db.Column(db.String(80))
     filename = db.Column(db.String(80), nullable = False)
 Uploaded_files_tbl = Table('files', Uploadedfiles.metadata)
 

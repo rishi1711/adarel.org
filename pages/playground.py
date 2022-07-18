@@ -37,7 +37,7 @@ parameter_component = html.Div([
 ])
 
 page = html.Div([
-    html.H2("Welcom to user playground!", style={"fontWeight": "bolder"}),
+    html.H2("Welcome to user playground!", style={"fontWeight": "bolder"}),
     html.Div("This is where you can use your own dataset to test our data."),
     browse_file_component,
     html.Div(id='params-comp-holder'),

@@ -21,11 +21,13 @@ import dash
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
-logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
+
+login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
     dbc.Row([
-        html.H1("Want to Upload your Custom Data Set!"),
+        html.H1("Upload Training Data!"),
         dcc.Upload(
-            id="upload-data",
+            # id="upload-data",
+            id = "upload-training-data",
             children=html.Div(
                 ["Drag and drop or click to select a file to upload."]
             ),
@@ -46,14 +48,13 @@ logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
 
     dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
-        html.H4("Lets Get Started!"),
+        html.H4("Train-Dataset"),
         dbc.Col([
             html.Div([
                 dcc.Dropdown(
-                    id = "Custom Data Selection",
+                    id = "Training Data Selection",
                     options=[],
-                    placeholder = "Select Custom DataSet",
-                    # value = 'None'
+                    placeholder = "Select Training DataSet"
                 )
             ])
         ]),
@@ -63,8 +64,8 @@ logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
         #---------------------------------------Second Dropdown(Strategy Selection)---------------------------------------#
         dbc.Col([
             html.Div([
-                dcc.Dropdown(
-                    id ="Strategy Selection", 
+                dcc.Dropdown( 
+                    id ="Training Strategy Selection",
                     options=[],
                     placeholder = "Select Strategy",
                 )
@@ -72,19 +73,9 @@ logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
         ]),
         #----------------------------------------------------------------------------------------------------------------#
 
-
         dbc.Col([
             html.Div([
-                html.I("Input the threshold of the training data:"),
-                dcc.Input(id="traindata", type='number', placeholder="Enter Number"),
-                ])
-        ]),
-
-
-        dbc.Col([
-            html.Div([
-                    html.Button('Predict', id = 'custom submit_id', n_clicks=0),
-                    # dbc.Spinner(children=[dcc.Location(id="loading_output")], size="lg", color="primary", type="border", fullscreen=True,),
+                    html.Button('Train Data', id = 'training submit_id', n_clicks=0),
             ])
         ]),
     ],class_name="notice-card"),
@@ -105,18 +96,19 @@ logged_in_user = html.Div([dcc.Location(id = 'url_path', refresh=True),
 
 
 
-
+#---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
 @app.callback(
-    Output(component_id='Custom Data Selection', component_property='options'),
-    Output(component_id='Strategy Selection', component_property='options'),
-    [Input('upload-data', 'children')]
+    Output(component_id='Training Data Selection', component_property='options'),
+    Output(component_id='Training Strategy Selection', component_property='options'),
+    [Input('upload-training-data', 'children')]
 )
-def get_custom_datasets(filename):
+def get_training_datasets(filename):
     conn = sqlite3.connect("./database/data.sqlite")
     g.user = current_user.get_id()
     id = g.user
 
-    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}'""".format(id), conn)
+    # datasets = pd.read_sql("""select file_id, filename from files where user_id and filetype= '{}'""".format(id, "Training"), conn)
+    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Training"), conn)
     datasets = datasets.values.tolist()
     datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
 
@@ -124,32 +116,34 @@ def get_custom_datasets(filename):
     get_strategy = get_strategy.values.tolist()
     get_strategy = [{'label' : i[1], 'value' : i[0]} for i in get_strategy]
     return datasets, get_strategy
-
-@app.callback(
-    Output('customdataset', 'data'),
-    [Input('Custom Data Selection','value')],
-    prevent_initial_callback = True
-)
-def store_custom_dataset(value):
-    return value
+#---------------------------------------------------------------------------------------------------------------------------#
 
 
 @app.callback(
-    Output('customstrategy', 'data'),
-    [Input('Strategy Selection','value')],
+    Output('trainingdataset', 'data'),
+    [Input('Training Data Selection','value')],
     prevent_initial_callback = True
 )
-def store_custom_strategy(value):
+def store_training_dataset(value):
     return value
 
 
+# @app.callback(
+#     Output('trainingstrategy', 'data'),
+#     [Input('Training Strategy Selection','value')],
+#     prevent_initial_callback = True
+# )
+# def store_training_strategy(value):
+#     return value
+
+#--------------------------------------store the uploaded dataset path in the database and file in data2021 folder-----------------------------------------#
 @app.callback(
     Output("file-list", "children"),
-    [Input('upload-data', 'filename'),
-    Input('upload-data', 'contents')],
+    [Input('upload-training-data', 'filename'),
+    Input('upload-training-data', 'contents')],
     prevent_initial_call=True
 )
-def update_output(filename,content):
+def update_training_output(filename,content):
     path = os.getcwd()+"/data2021/"+filename
 
     content_type, content_string = content.split(',')
@@ -169,40 +163,38 @@ def update_output(filename,content):
 
     file_name=os.path.splitext(filename)[0]
     if file_name is not None and current_user.get_id() is not None and path is not None:
-        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filename = file_name)
+        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = "Training", filename = file_name)
         conn = engine.connect()
         conn.execute(ins)
         conn.close()
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 @app.callback(
-    Output(component_id='url_path', component_property='pathname'),
-    # Output('loading_output', 'pathname'),
+    Output(component_id='url_path_1', component_property='pathname'),
     [Input('create_strategy', 'n_clicks'),
-    Input('custom submit_id', 'n_clicks')],
-    [State('customdataset', 'data'), 
-    State('customstrategy', 'data'),
-    State('trainingthreshold', 'data')],
+    Input('training submit_id', 'n_clicks')],
+    [State('Training Data Selection', 'value'), 
+    State('Training Strategy Selection', 'value')],
     prevent_initial_callback = True
 )
-def create_the_new_strategy(n_clicks1, n_clicks2, dataset, strategy, training_data_index):
+def training_redirection(n_clicks1, n_clicks2, dataset, strategy):
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
             return '/strategy'
         else:
             pass
-    elif id == "custom submit_id":
+    elif id == "training submit_id":
         if current_user.is_authenticated:
-            #add gif until the data is being processed.
-            call_predictions(dataset, strategy,training_data_index)
-            return '/2021data'
+            call_predictions(dataset, strategy)
+            return '/login_user_2'
         else:
             pass
     else:
         pass
 
 
-def call_predictions(dataset, strategy, training_data_index):
+def call_predictions(dataset, strategy):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(dataset), conn)
     df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy), conn)
@@ -210,16 +202,5 @@ def call_predictions(dataset, strategy, training_data_index):
     strategyName = df_strategy["strategy_name"].loc[0]
     strategyData = df_strategy["strategy_data"].loc[0]
     json_val = json.loads(strategyData)
-    predictOnSelectedModel(datasetPath, strategyName, json_val, training_data_index)
+    predictOnSelectedModel(datasetPath, strategyName, json_val)
     
-
-
-#---------------------------------------Number of Dataset used for training data--------------------------------------------#
-@app.callback(
-    Output(component_id='trainingthreshold', component_property='data'),
-    [Input('traindata', 'value')],
-    prevent_initial_callback = True
-)
-def get_threshold(value):
-    return value
-#-----------------------------------------------------------------------------------------------------------------#

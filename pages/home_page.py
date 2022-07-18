@@ -155,9 +155,9 @@ def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
     id = ctx.triggered_id
     if id == "strategy":
         if current_user.is_authenticated:
-            return '/strategy', value2
+            return '/strategy', None
         else:
-            return '/signup', value2
+            return '/signup', None
     elif id == "submit_id":
         if value1 == '1':
             return "/2021data_1", value2
@@ -168,7 +168,7 @@ def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
         elif value1 == '4':
             return "/2021data_sec", value2     
         else:
-            return "/", value2
+            return "/", None
     elif id == "userplayground":
         if current_user.is_authenticated:
             return '/userplayground', None
