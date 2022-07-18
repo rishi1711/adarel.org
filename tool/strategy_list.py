@@ -41,17 +41,17 @@ META_DATA_Val = {
     },
     'RF' : {
         'name' : 'Random Forest Regressor',
-        'label' : ["Select the kernel type", "Insert Regularization parameter(C)", "Insert gamma values", "Insert Epsilon values"],
-        'parameters' : {'kernel' : 'dropdown', 'C' : 'input', 'gamma' : 'input', 'epsilon' : 'input'},
-        'default' : ['linear', '0.1', '0.1', '0.0001'],
-        'dropdown' : [['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']],
+        'label' : ["Enter the n_estimatore", "Enter maximum depth", "Enter random state"],
+        'parameters' : {'n_estimators' : 'input', 'max_depth' : 'input', 'random_state' : 'input'},
+        'default' : ['100', '1', '1'],
+        'dropdown' : None,
         'required' : None
     },
     'NN' : {
         'name' : 'Neural Network',
         'label' : ["Select Activation function", "Select solver", "Enter the hidden layer sizes(tupple)", "Enter L2 Regularization term(aplha)",  "Enter learning rate schedule", "Enter random number"],
         'parameters' : {'activation' : 'dropdown', 'solver' : 'dropdown', 'hidden_layer_sizes' : 'input', 'alpha' : 'input', 'learning_rate_init' : 'input', 'random_state' : 'input'},
-        'default' : ['relu', 'lbfgs', '(32,16,8)', '0.1', '0.001', '1'],
+        'default' : ['relu', 'lbfgs', '32,16,8', '0.1', '0.001', '1'],
         'dropdown' : [['identity', 'logistic', 'tanh', 'relu'], ['lbfgs', 'sgd', 'adam']],
         'required' : None
     },

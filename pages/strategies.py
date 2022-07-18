@@ -169,6 +169,7 @@ def set_parameters(value,children):
 def store_database(n_clicks, dropdown, input, strategy_name,value):
     if n_clicks > 0:
         parameters = itemgetter('parameters')(META_DATA_Val[value])
+        print(parameters)
         obj = {}
         s_name = Strategy.query.filter_by(strategy_name = strategy_name).first()
         if value == 'SES':
@@ -176,10 +177,13 @@ def store_database(n_clicks, dropdown, input, strategy_name,value):
         else:
             obj['name'] = value
             i=0
+            j=0
             for key in parameters:
                 if parameters[key] == 'dropdown':
-                    obj[key] = dropdown[i]
+                    obj[key] = dropdown[j]
+                    j = j+1
                 elif parameters[key] == 'input':
+                    print(i)
                     obj[key] = input[i]
                     i=i+1   
                 else:
