@@ -29,3 +29,28 @@
     font-style: italic;
     margin: .2rem auto;
 }
+
+.login-card {
+    background-image: radial-gradient(closest-side, rgb(249, 249, 183), white);
+    width : 35rem;
+    height : 29rem;
+    border : none;
+    align-items: center;
+    padding-top: 2rem;
+    margin: 0 auto;
+}
+.register-card {
+    background-image: radial-gradient(closest-side, rgb(191, 226, 191), white);
+    width : 35rem;
+    height : 39rem;
+    border : none;
+    align-items: center;
+    padding-top: 2rem;
+    margin: 0 auto;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: rgb(178, 175, 175);
+    opacity: 1; /* Firefox */
+  }
+  

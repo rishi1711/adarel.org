@@ -9,42 +9,64 @@ from database.models import Users_tbl
 from database.models import engine
 from pages.login import login
 
-create = html.Div([ dcc.Location(id='url_register', refresh=True),
-        html.H1('Sign Up'),
-       # , dcc.Location(id='create_user', refresh=True)
-       dbc.Row([
-            dbc.Col([
-                dcc.Input(id="username"
-                    , type="email"
-                    , placeholder="Email")
-            ], width=2),
-            dbc.Col([
-                dcc.Input(id="password"
-                    , type="password"
-                    , placeholder="password")
-            ], width=2),
-            dbc.Col([
-                dcc.Input(id="companyName"
-                    , type="text"
-                    , placeholder="Company Name")
-            ], width=2),
-            dbc.Col([
-                html.Button('Register', id='submit-val', n_clicks=0)
+
+create = dbc.Card([
+            dbc.CardBody([dcc.Location(id='url_register', refresh=True),
+                html.H1('Sign Up', style={'text-align' : 'center', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem'}),
+                html.Div("Create an account so you can use our prediction modelson your own dataset and compare the results", style={'padding-bottom' : '2rem', 'font-weight' : 'normal', 'color' : '#808080', 'text-align' : 'left', 'width': '18rem'}),
+                dbc.Row([
+                    dcc.Input(id="firstname",
+                        type="text",
+                        placeholder="First Name",
+                        style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
+                ], style={'padding-bottom' : '0.25rem' }),
+                dbc.Row([
+                    dcc.Input(id="lastname",
+                        type="text",
+                        placeholder="Last Name",
+                        style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
+                ], style={'padding-bottom' : '0.25rem' }),
+
+                dbc.Row([
+                    dcc.Input(id="username",
+                        type="email",
+                        placeholder="Email Address",
+                        style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
+                ], style={'padding-bottom' : '0.25rem' }),
+                dbc.Row([
+                    dcc.Input(id="password",
+                        type="password",
+                        placeholder="Password",
+                        style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
+                ], style={'padding-bottom' : '0.25rem' }),
+                dbc.Row([
+                    dcc.Input(id="companyName",
+                        type="text",
+                        placeholder="Organization Name",
+                        style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
+                ], style={'padding-bottom' : '0.75rem' }),
+                dbc.Row([
+                     html.Button('Register', 
+                        id='submit-val', 
+                        n_clicks=0,
+                        style= {'background-color' : '#009933', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px'})
+                ])
             ])
-       ], style={"column-gap" : "40px"}),
-        html.Div([html.H2('Already have a user account?', style={"font-size": '20px', "padding" : "4px"}), dcc.Link('Click here to Log In', href='/login')])
-    ],className='notice-card')#end div
+
+], className='register-card')
+
 
 
 @app.callback(
     Output('url_register', "pathname")
     , [Input('submit-val', 'n_clicks')]
-    , [State('username', 'value'), State('password', 'value'), State('companyName', 'value')])
-def insert_users(n_clicks, un, pw, cn):
+    , [State('firstname', 'value'), State('lastname', 'value'), State('username', 'value'), 
+        State('password', 'value'), State('companyName', 'value')])
+def insert_users(n_clicks, fn, ln, un, pw, cn):
     if pw is not None:
         hashed_password = generate_password_hash(pw, method='pbkdf2:sha256', salt_length=16)
-    if un is not None and pw is not None and cn is not None:
-        ins = Users_tbl.insert().values(username=un,  password=hashed_password, companyName= cn)
+    if fn is not None and ln is not None and un is not None and pw is not None and cn is not None:
+        ins = Users_tbl.insert().values(firstname=fn, lastname=ln, username=un,  password=hashed_password, companyName=cn)
         conn = engine.connect()
         conn.execute(ins)
         conn.close()

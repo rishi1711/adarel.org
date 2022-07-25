@@ -15,6 +15,8 @@ db = SQLAlchemy()
 class Users(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(80), nullable = False)
+    lastname = db.Column(db.String(80), nullable = False)
     username = db.Column(db.String(50), unique=True, nullable = False)
     password = db.Column(db.String(80))
     companyName = db.Column(db.String(80))

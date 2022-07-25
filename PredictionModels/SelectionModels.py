@@ -63,7 +63,7 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData):
         b = float(strategyData['C'])
         c = float(strategyData['gamma'])
         d = float(strategyData['epsilon'])
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             trainX = df['true value'].iloc[0:i].values
             trainY = df['true value'].iloc[1:i+1].values
             trainX = trainX.reshape(-1,1)
@@ -93,7 +93,7 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData):
         e = float(strategyData['learning_rate_init'])
         f = int(strategyData['random_state'])
         print(a,b,c,d,e,f)
-        for i in range(training_data_index,len(df)):
+        for i in range(1000,len(df)):
             trainX = df['true value'].iloc[0:i].values
             trainY = df['true value'].iloc[1:i+1].values
             trainX = trainX.reshape(-1,1)
