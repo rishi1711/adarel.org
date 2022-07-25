@@ -5,20 +5,29 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.gaussian_process.kernels import ConstantKernel, RBF, WhiteKernel, Matern, RationalQuadratic, ExpSineSquared, DotProduct, Product, Sum, Exponentiation 
-
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 import pandas as pd
 import numpy as np
 
-def predictOnSelectedModel(datasetPath, strategyName, strategyData):
-    df = pd.read_csv(datasetPath, encoding='utf-8') 
+def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, strategyData, type):
+    df = pd.read_csv(datasetPath_train, encoding='utf-8') 
     columnName = strategyName
     if strategyData['name'] == 'SES':
-        for i in range(1000,len(df)):
-            train = df.iloc[0:i]
-            model = SimpleExpSmoothing(train['true value']).fit()
-            data = np.array(model.forecast())
-            df.loc[df.index[i], columnName] = data[0]
-
+        if type == "training":
+            index = int((len(df) * 70) / 100)
+            print(index)
+            df = train_models(df, index, strategyData, strategyName)
+            mae = calculate_mae(df, index, strategyName)
+            rmse = calculate_rmse(df, index, strategyName)
+            return [mae, rmse]
+        elif type == "testing":
+            df2 = pd.read_csv(datasetPath_test, encoding='utf-8') 
+            index2 = len(df)
+            dataset = pd.concat([df, df2], ignore_index=True)
+            dataset = train_models(dataset, index2, strategyData, strategyName)
+            print("20")
+            print(dataset.iloc[index2:])
     elif strategyData['name'] == 'Holtwinter':
         trend = strategyData['trend']
         seasonal = strategyData['seasonal']
@@ -103,9 +112,33 @@ def predictOnSelectedModel(datasetPath, strategyName, strategyData):
             print(data)
             df.loc[df.index[i], columnName] = data[0]
     df_col = list(df.columns)
-    if "Unnamed" not in df_col[0]:
-        df.to_csv(datasetPath, index=True)
+    # if "Unnamed" not in df_col[0]:
+    #     df.to_csv(datasetPath, index=True)
+    # else:
+    #     df.to_csv(datasetPath, index=False)       
+
+
+def train_models(df, index, strategyData, columnName):
+    if strategyData['name'] == 'SES':
+        for i in range(index,len(df)):
+            train = df.iloc[0:i]
+            model = SimpleExpSmoothing(train['true value']).fit()
+            data = np.array(model.forecast())
+            df.loc[df.index[i], columnName] = data[0]
+        return df
     else:
-        df.to_csv(datasetPath, index=False)       
+        pass
 
 
+def calculate_mae(df, index, columnName):
+    value1 = df['true value'].iloc[index : len(df)]
+    value2 = df[columnName].iloc[index : len(df)]
+    aes = np.array([abs(u - v) for u, v in zip(value1, value2)])
+    mae = np.average(aes)
+    return mae
+
+def calculate_rmse(df, index, columnName):
+    value1 = df['true value'].iloc[index : len(df)]
+    value2 = df[columnName].iloc[index : len(df)]
+    rmse =  sqrt(mean_squared_error(value1,value2))
+    return rmse
