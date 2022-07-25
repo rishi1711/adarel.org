@@ -9,7 +9,7 @@ import os
 import base64
 from urllib.parse import quote as urlquote
 from app import app
-from database.models import Uploaded_files_tbl
+from database.models import Uploaded_files_tbl, user_scenario_tbl
 from database.models import Uploadedfiles
 from database.models import engine
 from flask_login import current_user
@@ -43,7 +43,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
             },
             #multiple=True,
         ),
-        html.Ul(id="file-list"),
+        html.Ul(id="file-list_t"),
     ],),
 
     dbc.Row([
@@ -90,7 +90,51 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
             
         ], width=5, class_name="notice-card")
 
-    ], style={"padding" : "20px", "column-gap" : "30px"})
+    ], style={"padding" : "20px", "column-gap" : "30px"}),
+
+    dbc.Row([
+        html.H1("Upload Custom Data!"),
+        dcc.Upload(
+            id = "upload-custom-data",
+            children=html.Div(
+                ["Drag and drop or click to select a file to upload."]
+            ),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            },
+            #multiple=True,
+        ),
+        html.Ul(id="file-list_c"),
+    ],),
+
+    dbc.Row([
+        #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
+        html.H4(" Predict the Dataset"),
+        dbc.Col([
+            html.Div([
+                dcc.Dropdown(
+                    id = "Custom Data Selection",
+                    options=[],
+                    placeholder = "Select DataSet"
+                )
+            ])
+        ]),
+    
+        #---------------------------------------------------------------------------------------------------------------#
+
+        dbc.Col([
+            html.Div([
+                    html.Button('Predict', id = 'custom submit_id', n_clicks=0),
+            ])
+        ]),
+    ],class_name="notice-card"),
     ])
 
 
@@ -118,27 +162,9 @@ def get_training_datasets(filename):
     return datasets, get_strategy
 #---------------------------------------------------------------------------------------------------------------------------#
 
-
-@app.callback(
-    Output('trainingdataset', 'data'),
-    [Input('Training Data Selection','value')],
-    prevent_initial_callback = True
-)
-def store_training_dataset(value):
-    return value
-
-
-# @app.callback(
-#     Output('trainingstrategy', 'data'),
-#     [Input('Training Strategy Selection','value')],
-#     prevent_initial_callback = True
-# )
-# def store_training_strategy(value):
-#     return value
-
 #--------------------------------------store the uploaded dataset path in the database and file in data2021 folder-----------------------------------------#
 @app.callback(
-    Output("file-list", "children"),
+    Output("file-list_t", "children"),
     [Input('upload-training-data', 'filename'),
     Input('upload-training-data', 'contents')],
     prevent_initial_call=True
@@ -169,15 +195,70 @@ def update_training_output(filename,content):
         conn.close()
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+
+
+#---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
+@app.callback(
+    Output(component_id='Custom Data Selection', component_property='options'),
+    [Input('upload-custom-data', 'children')]
+)
+def get_custom_datasets(filename):
+    conn = sqlite3.connect("./database/data.sqlite")
+    g.user = current_user.get_id()
+    id = g.user
+
+    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Custom"), conn)
+    datasets = datasets.values.tolist()
+    datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
+    return datasets
+#---------------------------------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------store the uploaded dataset path in the database and file in data2021 folder-----------------------------------------#
+@app.callback(
+    Output("file-list_c", "children"),
+    [Input('upload-custom-data', 'filename'),
+    Input('upload-custom-data', 'contents')],
+    prevent_initial_call=True
+)
+def update_custom_output(filename, content):
+    path = os.getcwd()+"/data2021/"+filename
+
+    content_type, content_string = content.split(',')
+    decoded = base64.b64decode(content_string)
+    if 'txt' in filename:
+        data = content.encode("utf8").split(b";base64,")[1]
+        with open(path, "wb") as fp:
+            fp.write(base64.decodebytes(data))
+    elif 'csv' in filename:
+        # Assume that the user uploaded a CSV file
+        df = pd.read_csv(
+            io.StringIO(decoded.decode('utf-8')))
+        df.to_csv (path, index = False, header=True)
+    elif 'xls' in filename:
+        # Assume that the user uploaded an excel file
+        df = pd.read_excel(io.BytesIO(decoded))
+
+    file_name=os.path.splitext(filename)[0]
+    if file_name is not None and current_user.get_id() is not None and path is not None:
+        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = "Custom" ,filename = file_name)
+        conn = engine.connect()
+        conn.execute(ins)
+        conn.close()
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 @app.callback(
     Output(component_id='url_path_1', component_property='pathname'),
     [Input('create_strategy', 'n_clicks'),
-    Input('training submit_id', 'n_clicks')],
-    [State('Training Data Selection', 'value'), 
-    State('Training Strategy Selection', 'value')],
+    Input('training submit_id', 'n_clicks'),
+    Input('custom submit_id', 'n_clicks')],
+    [State('Training Data Selection', 'value'),
+    State('Training Strategy Selection', 'value'),
+    State('Custom Data Selection', 'value')],
     prevent_initial_callback = True
 )
-def training_redirection(n_clicks1, n_clicks2, dataset, strategy):
+def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset):
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
@@ -186,8 +267,33 @@ def training_redirection(n_clicks1, n_clicks2, dataset, strategy):
             pass
     elif id == "training submit_id":
         if current_user.is_authenticated:
-            call_predictions(dataset, strategy)
+            if t_dataset is not None and strategy is not None:
+                ins = user_scenario_tbl.delete()
+                conn = engine.connect()
+                conn.execute(ins)
+                conn.close()
+
+            if t_dataset is not None and strategy is not None:
+                ins = user_scenario_tbl.insert().values(user_id = current_user.get_id(), trainingdata = t_dataset, strategyopted = strategy)
+                conn = engine.connect()
+                conn.execute(ins)
+                conn.close()
+            call_predictions(t_dataset, strategy)
             return '/login_user_2'
+        else:
+            pass
+    elif id == "custom submit_id":
+        if current_user.is_authenticated:
+            if c_dataset is not None:
+                ins = user_scenario_tbl.update().values(testingdata = c_dataset)
+                conn = engine.connect()
+                conn.execute(ins)
+                conn.close()
+                conn = sqlite3.connect("./database/data.sqlite")
+                strategy__id = pd.read_sql("""select strategyopted from user_scenario where user_id = '{}'""".format(current_user.get_id()), conn)
+                strategy__id = strategy__id["strategyopted"].loc[0]
+                call_predictions(c_dataset, strategy__id)
+            return '/2021data'
         else:
             pass
     else:
@@ -204,3 +310,7 @@ def call_predictions(dataset, strategy):
     json_val = json.loads(strategyData)
     predictOnSelectedModel(datasetPath, strategyName, json_val)
     
+
+
+
+

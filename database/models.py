@@ -37,6 +37,17 @@ class Strategy(db.Model):
     strategy_name = db.Column(db.String(50), unique=True, nullable = False)
     strategy_data = db.Column(db.String, nullable = False)
 strategy_tbl = Table('strategy', Strategy.metadata)
+
+class user_scenario(db.Model):
+    __tablename__ = 'user_scenario'
+    user_scenario_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    trainingdata = db.Column(db.String(50), nullable = False)
+    testingdata = db.Column(db.String(50))
+    strategyopted = db.Column(db.String(50), nullable = False)
+user_scenario_tbl = Table('user_scenario', user_scenario.metadata)
+
+
 #create the table only once.
 #fuction to create table using Users class
 def create_users_table():
