@@ -39,6 +39,7 @@
     padding-top: 2rem;
     margin: 0 auto;
 }
+
 .register-card {
     background-image: radial-gradient(closest-side, rgb(191, 226, 191), white);
     width : 35rem;
@@ -48,6 +49,50 @@
     padding-top: 2rem;
     margin: 0 auto;
 }
+
+.main_page-card1{
+    width : 65rem;
+    border : none;
+    align-items: left;
+    padding-top: 4rem;
+}
+
+.main_page-card2{
+    padding-top: 8rem;
+    padding-left: 0rem;
+    text-align: center;
+    background-image: radial-gradient(closest-side, rgb(60, 199, 224), rgb(255, 255, 255));
+}
+
+.about-card{
+    padding-top: 4rem;
+    width : 40rem;
+    text-align: left;
+}
+
+.demo-card{
+    /* background-color: skyblue ; */
+    padding-top: 4rem;
+    border : none;
+    text-align: center;
+    align-items: center;
+    margin: 0 auto;
+
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: rgb(178, 175, 175);

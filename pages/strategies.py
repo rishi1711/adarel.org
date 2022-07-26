@@ -202,15 +202,10 @@ def store_database(n_clicks, dropdown, input, strategy_name,value):
                 else:
                     pass
         json_obj = json.dumps(obj)
-        # print(json_obj)
         if s_name == None:
-            # print("1")
             ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
-            # ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
-            # print("2")
             ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
-            # ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         else:
             pass
         conn = engine.connect()

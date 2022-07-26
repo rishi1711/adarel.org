@@ -1,3 +1,4 @@
+from tkinter import HIDDEN
 from dash import dcc, dash_table
 from dash import html, ctx
 from dash.dependencies import Input, Output, State
@@ -76,6 +77,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
         dbc.Col([
             html.Div([
                     html.Button('Train Data', id = 'training submit_id', n_clicks=0),
+                    html.Div(id="loading_t", className="loader", hidden='HIDDEN')
             ])
         ]),
     ],class_name="notice-card"),
@@ -132,6 +134,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
         dbc.Col([
             html.Div([
                     html.Button('Predict', id = 'custom submit_id', n_clicks=0),
+                    html.Div(id="loading_c", className="loader", hidden='HIDDEN')
             ])
         ]),
     ],class_name="notice-card"),
@@ -246,8 +249,29 @@ def update_custom_output(filename, content):
         conn.execute(ins)
         conn.close()
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
+@app.callback(
+    Output('loading_t', 'hidden'),
+    Input('Training Strategy Selection', 'value'),
+    prevent_initial_callback = True
+)
+def showLoader1(value):
+    if value is None:
+        return 'HIDDEN'
+    else:
+        return False 
 
+@app.callback(
+    Output('loading_c', 'hidden'),
+    Input('Custom Data Selection', 'value'),
+    prevent_initial_callback = True
+)
+def showLoader2(value):
+    if value is None:
+        return 'HIDDEN'
+    else:
+        return False 
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     [Output('url_path_1', 'pathname'), Output('mae_measure', 'data'), Output('rmse_measure', 'data')],
     [Input('create_strategy', 'n_clicks'),
@@ -279,9 +303,8 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
                     conn = engine.connect()
                     conn.execute(ins)
                     conn.close()
-                    
+                 
                 errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-                print(errors)
                 return '/login_user_2', errors[0], errors[1]
             else:
                 pass
@@ -308,8 +331,6 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
 
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     conn = sqlite3.connect("./database/data.sqlite")
-    print(train_dataset_id)
-    print(test_dataset_id)
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(train_dataset_id), conn)
     df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy_id), conn)
     datasetPath_train = df_dataset["filepath"].loc[0]
