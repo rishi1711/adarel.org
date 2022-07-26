@@ -262,7 +262,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
-            return '/strategy'
+            return '/strategy', None, None
         else:
             pass
     elif id == "training submit_id":
@@ -281,7 +281,6 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
                     conn.close()
                     
                 errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-                print(errors)
                 return '/login_user_2', errors[0], errors[1]
             else:
                 pass
@@ -308,8 +307,6 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
 
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     conn = sqlite3.connect("./database/data.sqlite")
-    print(train_dataset_id)
-    print(test_dataset_id)
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(train_dataset_id), conn)
     df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy_id), conn)
     datasetPath_train = df_dataset["filepath"].loc[0]
