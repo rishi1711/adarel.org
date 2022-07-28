@@ -18,7 +18,6 @@ from pages.login import login
 from pages.Register import create
 from pages import strategies
 from pages.login_user_1 import login_user_1
-from pages.login_user_2 import login_user_2
 from pages.main_page import main_page
 from pages.about import about
 import sqlite3
@@ -81,6 +80,10 @@ app.layout = html.Div([
         dcc.Store(id="mae_measure", storage_type="session"),
         dcc.Store(id="rmse_measure", storage_type="session"),
 
+        dcc.Store(id="trainingdata", storage_type="session"),
+        dcc.Store(id="testingdata", storage_type="session"),
+        dcc.Store(id="sstrategy", storage_type="session"),
+
 
         dbc.Container([                
             html.Div([
@@ -97,12 +100,14 @@ app.layout = html.Div([
 # making it an instance of function makes it update every load
 # https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'), 
-[Input('url', 'pathname'), 
+[Input('url', 'pathname')], 
 State('modelsList', 'data'),
-], 
+[State('trainingdata', 'data'),
+State('sstrategy', 'data'),
+State('testingdata', 'data')],
 prevent_initial_call=True )
 
-def router(pathname, data):
+def router(pathname, data, training, strategy, testing):
     if pathname == '/':
         return main_page
     elif pathname == '/home_page':
@@ -128,7 +133,7 @@ def router(pathname, data):
     elif pathname == '/2021data_sec':
         return p21.dataset_sec(data)
     elif pathname == '/2021data':
-        return p21.custom_dataset()
+        return p21.custom_dataset(training, strategy, testing)
 
     elif pathname == '/userplayground':
         return playground.page
@@ -140,15 +145,13 @@ def router(pathname, data):
         return strategies.strategy
     elif pathname == '/login_user_1':
         return login_user_1
-    elif pathname == '/login_user_2':
-        return login_user_2
     else:
         return 'Error 404'
 
 
 if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    # DEBUG = True
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    DEBUG = True
     if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
     else:# prod
