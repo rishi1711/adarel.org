@@ -34,12 +34,13 @@ def test():
 home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
     dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
-        html.H4("Try our Reliability Predition tool on our Demo Data!"),
+        html.H4("DEMO DATA"),
+        html.Div("You will be able to see how AdaRel performs on our collected dataset."),
         dbc.Col([
             html.Div([
                 dcc.Dropdown(
                     id = "Data Selection",
-                    options=[{'label': 'Select DataSet', 'value' :'None'},
+                    options=[{'label': 'Select Demo Data', 'value' :'None'},
                     {'label':'Dataset1', 'value' : '1'},
                     {'label':'Dataset2', 'value' : '2'}, 
                     {'label':'Dataset3', 'value' : '3'}, 
@@ -68,35 +69,38 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
         #--------------------------------------------------------------------------------------------------------------#
         dbc.Col([
             html.Div([
-                    html.Button('Predict', id = 'submit_id', n_clicks=0)
+                    html.Button('Predict',
+                        id = 'submit_id', 
+                        n_clicks=0,
+                        style= {'background-color' : '#5D5C78', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px'})
             ])
         ])
-    ],class_name="notice-card", style={"column-gap" : "40px"}),
+    ],class_name="demo-card", style={"column-gap" : "10px"}),
 
 
-#------------------------------------------------------Sign Up Redirection-----------------------------------------------#
-    dbc.Row([
-        dbc.Col([
-            html.H4("Have your own Data?"),
-            html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
-            html.Div([
-                dbc.Button("Click here!", color="info", id='userplayground')
-            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
+# #------------------------------------------------------Sign Up Redirection-----------------------------------------------#
+#     dbc.Row([
+#         dbc.Col([
+#             html.H4("Have your own Data?"),
+#             html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
+#             html.Div([
+#                 dbc.Button("Click here!", color="info", id='userplayground')
+#             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
             
-        ], width=6, class_name="notice-card"),
+#         ], width=6, class_name="notice-card"),
 
-        dbc.Col([
-            html.H4("Do you want to create your own strategy?"),
-            html.Div([
-                dbc.Button("Click here!", color="info", id='strategy')
-            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
+#         dbc.Col([
+#             html.H4("Do you want to create your own strategy?"),
+#             html.Div([
+#                 dbc.Button("Click here!", color="info", id='strategy')
+#             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
             
-        ], width=5, class_name="notice-card")
+#         ], width=5, class_name="notice-card")
 
-    ], style={"padding" : "20px", "column-gap" : "30px"})
-],)
-#------------------------------------------------------------------------------------------------------------------------#
-
+#     ], style={"padding" : "20px", "column-gap" : "30px"})
+# ],)
+# #------------------------------------------------------------------------------------------------------------------------#
+])
 
 
 #------------------------Enable the second dropdown after first dropdown value is selected------------------- -----------#
@@ -148,17 +152,23 @@ def set_dataset(value):
 #--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
 @app.callback(
    [Output('url_new', 'pathname'), Output('modelsList', 'data')],
-    [Input('submit_id', 'n_clicks'), Input('userplayground', 'n_clicks'), Input('strategy', 'n_clicks')],
+    [Input('submit_id', 'n_clicks'), 
+    # Input('userplayground', 'n_clicks'), 
+    # Input('strategy', 'n_clicks')
+    ],
     [State('Data Selection', 'value'), State('Model Selection', 'value')]
 )
-def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
+
+# def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
+def submit_dataset(n_clicks1, value1, value2):
     id = ctx.triggered_id
-    if id == "strategy":
-        if current_user.is_authenticated:
-            return '/strategy', None
-        else:
-            return '/signup', None
-    elif id == "submit_id":
+    # if id == "strategy":
+    #     if current_user.is_authenticated:
+    #         return '/strategy', None
+    #     else:
+    #         return '/signup', None
+    # elif id == "submit_id":
+    if id == "submit_id":
         if value1 == '1':
             return "/2021data_1", value2
         elif value1 == '2':
@@ -168,12 +178,12 @@ def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
         elif value1 == '4':
             return "/2021data_sec", value2     
         else:
-            return "/", None
-    elif id == "userplayground":
-        if current_user.is_authenticated:
-            return '/userplayground', None
-        else:
-            return '/signup', None
+            return "/home_page", None
+    # elif id == "userplayground":
+    #     if current_user.is_authenticated:
+    #         return '/userplayground', None
+    #     else:
+    #         return '/signup', None
     else:
         pass
 

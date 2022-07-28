@@ -19,7 +19,8 @@ from pages.Register import create
 from pages import strategies
 from pages.login_user_1 import login_user_1
 from pages.login_user_2 import login_user_2
-from pages.Initial_page import first_page
+from pages.main_page import main_page
+from pages.about import about
 import sqlite3
 import pandas as pd
 
@@ -103,7 +104,11 @@ prevent_initial_call=True )
 
 def router(pathname, data):
     if pathname == '/':
+        return main_page
+    elif pathname == '/home_page':
         return home_page
+    elif pathname == '/about':
+        return about
     elif pathname == '/data1':
         return data1
     elif pathname == '/data2':
