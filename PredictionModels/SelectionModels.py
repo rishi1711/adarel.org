@@ -15,7 +15,6 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
     columnName = strategyName
     if type == "training":
         index = int((len(df) * 70) / 100)
-        print(index)
         df = train_models(df, index, strategyData, strategyName)
         value1 = df['true value'].iloc[index : len(df)]
         value2 = df[columnName].iloc[index : len(df)]
