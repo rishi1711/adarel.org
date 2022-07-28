@@ -62,19 +62,19 @@ def get_fig_from_custom_csv(dataset_path, strategy_name) -> go.Figure:
     fig = go.Figure()
     df = pd.read_csv(dataset_path)
     true_vals = df['true value'].to_numpy()
-    x_tick = df.iloc[1000:,0]
+    x_tick = df.iloc[0:,0]
     fig.add_trace( go.Scatter(
         x = x_tick,
-        y = true_vals[1000:],
+        y = true_vals[0:],
         mode = 'lines',
         name = 'true value'
     ))
 
     strategy_vals = df[strategy_name].to_numpy()
-    x_tick = df.iloc[1000:,0]
+    x_tick = df.iloc[0:,0]
     fig.add_trace( go.Scatter(
         x = x_tick,
-        y = strategy_vals[1000:],
+        y = strategy_vals[0:],
         mode = 'lines',
         name = strategy_name
     ))

@@ -308,7 +308,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
-            return '/strategy'
+            return '/strategy', None, None
         else:
             pass
     elif id == "custom submit_id":
