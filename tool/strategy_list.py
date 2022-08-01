@@ -57,7 +57,11 @@ META_DATA_Val = {
     },
     'GPR' : {
         'name' : 'Gaussian Process Regression',
-        'parameters' : {'kernel' : '0.35 * RBF(length_scale=0.5) + WhiteKernel(noise_level=1, noise_level_bounds=(1e-10, 1e+1))', 'alpha' : '1e-6'}
+        'label' : ["Enter alpha values", "Select values for kernel:", "Enter coefficient for RBF:", "Enter length_scale:", "Enter coefficient for White Kernel:",  "Enter noise level:", "Enter noise level bounds(tupple):"],
+        'parameters' : {'alpha' : 'input', 'kernel' : 'tupple', 'RBF_Coefficient' : 'input', 'length_scale' : 'input', 'WhiteKernel_coefficient' : 'input', 'noise_level' : 'input', 'noise_level_bounds' : 'input'},
+        'default' : ['1e-6', None, '0.35', '0.5', '1', '1', '1e-10,1e+1'],
+        'dropdown' : None,
+        'required' : None
     },
 
 }
