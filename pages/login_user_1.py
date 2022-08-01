@@ -1,4 +1,5 @@
 from tkinter import HIDDEN
+from dash.exceptions import PreventUpdate
 from dash import dcc, dash_table
 from dash import html, ctx
 from dash.dependencies import Input, Output, State
@@ -10,8 +11,7 @@ import os
 import base64
 from urllib.parse import quote as urlquote
 from app import app
-from database.models import Uploaded_files_tbl, user_scenario_tbl
-from database.models import Uploadedfiles
+from database.models import Uploaded_files_tbl
 from database.models import engine
 from flask_login import current_user
 from flask import g
@@ -77,7 +77,11 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
         dbc.Col([
             html.Div([
                     html.Button('Train Data', id = 'training submit_id', n_clicks=0),
-                    html.Div(id="loading_t", className="loader", hidden='HIDDEN')
+                    html.Div(id="loading_t", className="loader", hidden='HIDDEN'),
+                    html.Div([
+                        html.Div(id = "p1"),
+                        html.Div(id = "p2"),
+                    ])
             ])
         ]),
     ],class_name="notice-card"),
@@ -249,37 +253,55 @@ def update_custom_output(filename, content):
         conn.execute(ins)
         conn.close()
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
-@app.callback(
-    Output('loading_t', 'hidden'),
-    Input('Training Strategy Selection', 'value'),
-    prevent_initial_callback = True
-)
-def showLoader1(value):
-    if value is None:
-        return 'HIDDEN'
-    else:
-        return False 
+
+# @app.callback(
+#     Output('loading_t', 'hidden'),
+#     Input('training submit_id', 'n_clicks'),
+#     Input('p1', 'hidden'),
+#     prevent_initial_callback = True
+# )
+# def showLoader1(nclicks, value):
+#     id = ctx.triggered_id
+#     if id=='training submit_id':
+#         if current_user.is_authenticated:
+#             if nclicks == 0:
+#                 return True
+#             else:
+#                 return False 
+#         else:
+#             pass
+#     elif id=='p1':
+#         if current_user.is_authenticated:
+#             if value == False:
+#                 return True
+#             else:
+#                 return False
+#         else:
+#             pass
+#     else:
+#         pass
+
 
 @app.callback(
     Output('loading_c', 'hidden'),
-    Input('Custom Data Selection', 'value'),
+    Input('custom submit_id', 'n_clicks'),
     prevent_initial_callback = True
 )
-def showLoader2(value):
-    if value is None:
-        return 'HIDDEN'
+def showLoader2(nclicks):
+    if nclicks==0:
+        return True
     else:
         return False 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
-    [Output('url_path_1', 'pathname'), Output('mae_measure', 'data'), Output('rmse_measure', 'data')],
-    [Input('create_strategy', 'n_clicks'),
+    Output('url_path_1', 'pathname'),
+    Input('create_strategy', 'n_clicks'),
     Input('training submit_id', 'n_clicks'),
-    Input('custom submit_id', 'n_clicks')],
-    [State('Training Data Selection', 'value'),
-    State('Training Strategy Selection', 'value'),
-    State('Custom Data Selection', 'value')],
+    Input('custom submit_id', 'n_clicks'),
+    State('trainingdata', 'data'),
+    State('sstrategy', 'data'),
+    State('testingdata', 'data'),
     prevent_initial_callback = True
 )
 def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset):
@@ -289,44 +311,13 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
             return '/strategy', None, None
         else:
             pass
-    elif id == "training submit_id":
-        if n_clicks2 > 0:
-            if current_user.is_authenticated:
-                if t_dataset is not None and strategy is not None:
-                    ins = user_scenario_tbl.delete()
-                    conn = engine.connect()
-                    conn.execute(ins)
-                    conn.close()
-
-                if t_dataset is not None and strategy is not None:
-                    ins = user_scenario_tbl.insert().values(user_id = current_user.get_id(), trainingdata = t_dataset, strategyopted = strategy)
-                    conn = engine.connect()
-                    conn.execute(ins)
-                    conn.close()
-                 
-                errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-                return '/login_user_2', errors[0], errors[1]
-            else:
-                pass
-        else:
-            pass
     elif id == "custom submit_id":
         if current_user.is_authenticated:
-            if c_dataset is not None:
-                ins = user_scenario_tbl.update().values(testingdata = c_dataset)
-                conn = engine.connect()
-                conn.execute(ins)
-                conn.close()
-                conn = sqlite3.connect("./database/data.sqlite")
-                strategy__id = pd.read_sql("""select strategyopted from user_scenario where user_id = '{}'""".format(current_user.get_id()), conn)
-                strategy__id = strategy__id["strategyopted"].loc[0]
-                t_dataset = pd.read_sql("""select trainingdata from user_scenario where user_id = '{}'""".format(current_user.get_id()), conn)
-                t_dataset= t_dataset["trainingdata"].loc[0]
-                call_predictions(t_dataset, c_dataset, strategy__id, "testing")
-            return '/2021data', None, None
+            call_predictions(t_dataset, c_dataset, strategy, "testing")
+            return '/2021data'
         else:
             pass
-    return dash.no_update, dash.no_update, dash.no_update
+    raise PreventUpdate
 
 
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
@@ -344,3 +335,61 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     json_val = json.loads(strategyData)
     errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type)
     return errors
+
+
+@app.callback(
+    Output('trainingdata', 'data'),
+    Input('Training Data Selection', 'value'),
+    prevent_initial_callback = True
+)
+def store_trainingdata(value):
+    return value
+
+@app.callback(
+    Output('testingdata', 'data'),
+    Input('Custom Data Selection', 'value'),
+    prevent_initial_callback = True
+)
+def store_testingdata(value):
+    return value
+
+@app.callback(
+    Output('sstrategy', 'data'),
+    Input('Training Strategy Selection', 'value'),
+    prevent_initial_callback = True
+)
+def store_strategy(value):
+    return value
+
+@app.callback(
+    Output('mae_measure', 'data'), Output('rmse_measure', 'data'),
+    Input('training submit_id', 'n_clicks'),
+    [State('trainingdata', 'data'),
+    State('sstrategy', 'data'),
+    State('testingdata', 'data')],
+    prevent_initial_callback = True
+)
+
+def get_error_values(nclicks, t_dataset, strategy, c_dataset):
+    if nclicks>0:
+        if current_user.is_authenticated:
+            errors = call_predictions(t_dataset, c_dataset, strategy, "training")
+            return errors[0], errors[1]
+        else:
+            pass
+    else:
+        pass
+    return dash.no_update
+
+@app.callback(
+    [Output('p1','hidden'),Output('p2','hidden'),Output('p1', 'children'), Output('p2', 'children')],
+    Input('mae_measure', 'data'), Input('rmse_measure', 'data'),
+    prevent_initial_callback = True
+)
+def show_error(data1,data2):
+    e1 = "Mean Average Error:   " + str('{0:.6g}'.format(data1))
+    e2 = "Root Mean Squared Error:   " + str('{0:.6g}'.format(data2))
+    if data1 is None:
+        return 'HIDDEN','HIDDEN',e1,e2
+    else:
+        return False,False,e1,e2

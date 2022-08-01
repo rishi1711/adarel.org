@@ -115,17 +115,12 @@ def dataset_3(data):
 def dataset_sec(data):
     return get_pages_obj_csv("Empirical Study SEC", "DataSetSEC", get_MAE_dist_fig("DataSetSEC"), data)
 
-def custom_dataset():
+def custom_dataset(training, strategy, testing):
     conn = sqlite3.connect("./database/data.sqlite")
-
-    file__id = pd.read_sql("""select testingdata from user_scenario where user_id = '{}'""".format(current_user.get_id()), conn)
-    strategy__id = pd.read_sql("""select strategyopted from user_scenario where user_id = '{}'""".format(current_user.get_id()), conn)
-    file__id = file__id["testingdata"].loc[0]
-    strategy__id = strategy__id["strategyopted"].loc[0]
-
-    df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(file__id), conn)
-    df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy__id), conn)
+    df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(testing), conn)
+    df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy), conn)
     path = df_dataset["filepath"].loc[0]
     strat_name = df_strategy["strategy_name"].loc[0]
-    
+    # print(training,testing,strategy)
+    # print(path, strat_name)
     return get_graph_from_custom_dataset("Empirical Study", None, path, strat_name) 
