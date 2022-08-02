@@ -83,7 +83,7 @@ app.layout = html.Div([
         dcc.Store(id="trainingdata", storage_type="session"),
         dcc.Store(id="testingdata", storage_type="session"),
         dcc.Store(id="sstrategy", storage_type="session"),
-
+        dcc.Store(id = "bar_graph_values", storage_type="session"),
 
         dbc.Container([                
             html.Div([
@@ -149,22 +149,22 @@ def router(pathname, data, training, strategy, testing):
         return 'Error 404'
 
 
-# if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8050") 
-
-
 if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    # DEBUG = True
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    DEBUG = True
     if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
     else:# prod
         serve(app.server, host="0.0.0.0", port="8050") 
+
+
+# if __name__ == '__main__':
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     # DEBUG = True
+#     if DEBUG:
+#         app.run_server(debug=True, host='0.0.0.0') # Development 
+#     else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
 
 
 # if __name__ == '__main__':

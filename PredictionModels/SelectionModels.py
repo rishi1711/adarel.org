@@ -19,9 +19,10 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
         df = train_models(df, index, strategyData, strategyName)
         value1 = df['true value'].iloc[index : len(df)]
         value2 = df[columnName].iloc[index : len(df)]
+        summary = get_prediction(value1, value2)
         mae = calculate_mae(value1, value2)
         rmse = calculate_rmse(value1, value2)
-        return [mae, rmse]
+        return [mae, rmse, summary]
     elif type == "testing":
         df2 = pd.read_csv(datasetPath_test, encoding='utf-8') 
         index2 = len(df)
@@ -176,3 +177,27 @@ def calculate_rmse(value1, value2):
     rmse =  sqrt(mean_squared_error(value1,value2))
     return rmse
 
+def get_prediction(value1, value2):
+    aes = np.array([abs(u - v) for u, v in zip(value1, value2)])
+    cnt1 = [0] * 9
+    for i in aes:
+        if i>=0 and i<=0.0005:
+            cnt1[0] += 1
+        elif i>0.0005 and i<=0.001:
+            cnt1[1] += 1
+        elif i>0.001 and i<=0.005:
+            cnt1[2] += 1   
+        elif i>0.005 and i<=0.01:
+            cnt1[3] += 1
+        elif i>0.01 and i<=0.05:
+            cnt1[4] += 1
+        elif i>0.05 and i<=0.1:
+            cnt1[5] += 1
+        elif i>0.1 and i<=0.5:
+            cnt1[6] += 1
+        elif i>0.5 and i<=1:
+            cnt1[7] += 1
+        else:
+            cnt1[8] += 1
+    return cnt1
+        

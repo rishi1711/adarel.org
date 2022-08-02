@@ -10,6 +10,8 @@ import plotly.graph_objects as go
 import os
 import base64
 from urllib.parse import quote as urlquote
+
+from sqlalchemy import true
 from app import app
 from database.models import Uploaded_files_tbl
 from database.models import engine
@@ -22,6 +24,7 @@ import dash
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
+import plotly.express as px
 
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
     dbc.Row([
@@ -81,10 +84,12 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     html.Div([
                         html.Div(id = "p1"),
                         html.Div(id = "p2"),
-                    ])
+                    ]),
             ])
         ]),
     ],class_name="notice-card"),
+
+    dbc.Row([html.Div(id = "barGraph")]),
 
     dbc.Row([
 
@@ -362,19 +367,18 @@ def store_strategy(value):
     return value
 
 @app.callback(
-    Output('mae_measure', 'data'), Output('rmse_measure', 'data'),
+    Output('bar_graph_values', 'data'),Output('mae_measure', 'data'), Output('rmse_measure', 'data'), 
     Input('training submit_id', 'n_clicks'),
     [State('trainingdata', 'data'),
     State('sstrategy', 'data'),
     State('testingdata', 'data')],
     prevent_initial_callback = True
 )
-
 def get_error_values(nclicks, t_dataset, strategy, c_dataset):
     if nclicks>0:
         if current_user.is_authenticated:
             errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-            return errors[0], errors[1]
+            return errors[2], errors[0], errors[1]
         else:
             pass
     else:
@@ -382,14 +386,20 @@ def get_error_values(nclicks, t_dataset, strategy, c_dataset):
     return dash.no_update
 
 @app.callback(
-    [Output('p1','hidden'),Output('p2','hidden'),Output('p1', 'children'), Output('p2', 'children')],
-    Input('mae_measure', 'data'), Input('rmse_measure', 'data'),
+    [Output('p1','hidden'),Output('p2','hidden'),Output('barGraph','hidden'),Output('p1', 'children'), Output('p2', 'children'), Output('barGraph','children')],
+    [Input('mae_measure', 'data'), Input('rmse_measure', 'data'),Input('bar_graph_values', 'data')],
     prevent_initial_callback = True
 )
-def show_error(data1,data2):
+def show_error(data1,data2,data3):
     e1 = "Mean Average Error:   " + str('{0:.6g}'.format(data1))
     e2 = "Root Mean Squared Error:   " + str('{0:.6g}'.format(data2))
+    x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
+    df = px.data.tips()
+    fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'count'}, title="Summary")
+    fig.update_xaxes(type='category')
+    
+    final = dcc.Graph(figure = fig)
     if data1 is None:
-        return 'HIDDEN','HIDDEN',e1,e2
+        return 'HIDDEN','HIDDEN', 'HIDDEN' ,e1,e2,final
     else:
-        return False,False,e1,e2
+        return False,False,False,e1,e2,final
