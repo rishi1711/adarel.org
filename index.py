@@ -6,6 +6,7 @@ import dash_bootstrap_components as dbc
 from navbar import navbar
 
 from app import app
+from pages import first_page
 from pages.home_page import home_page
 from pages.data1 import data1
 from pages.data2 import data2
@@ -18,8 +19,10 @@ from pages.login import login
 from pages.Register import create
 from pages import strategies
 from pages.login_user_1 import login_user_1
+from pages.first_page import first_page
 from pages.main_page import main_page
 from pages.about import about
+from pages.create_data import create_data
 import sqlite3
 import pandas as pd
 
@@ -80,16 +83,22 @@ app.layout = html.Div([
         dcc.Store(id="mae_measure", storage_type="session"),
         dcc.Store(id="rmse_measure", storage_type="session"),
 
+        # make prediction page
         dcc.Store(id="trainingdata", storage_type="session"),
         dcc.Store(id="testingdata", storage_type="session"),
         dcc.Store(id="sstrategy", storage_type="session"),
 
+        # create data page
+        dcc.Store(id="dataframe", storage_type="session"),
+        dcc.Store(id="path", storage_type="session"),
+        dcc.Store(id="filename", storage_type="session"),
+        dcc.Store(id="type", storage_type="session"),
 
         dbc.Container([                
-            html.Div([
-                html.H1("AdaRel"),
-                html.P("a tool for reliability prediction")
-                ], id="index-title"),
+            # html.Div([
+            #     html.H1("AdaRel"),
+            #     html.P("a tool for reliability prediction")
+            #     ], id="index-title"),
             dcc.Location(id='url', refresh=False),
             html.Div(id='page-content')
         ]),
@@ -110,6 +119,8 @@ prevent_initial_call=True )
 def router(pathname, data, training, strategy, testing):
     if pathname == '/':
         return main_page
+    elif pathname == '/first_page':
+        return first_page 
     elif pathname == '/home_page':
         return home_page
     elif pathname == '/about':
@@ -145,13 +156,15 @@ def router(pathname, data, training, strategy, testing):
         return strategies.strategy
     elif pathname == '/login_user_1':
         return login_user_1
+    elif pathname == '/create_data':
+        return create_data
     else:
         return 'Error 404'
 
 
 if __name__ == '__main__':
-    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    DEBUG = True
+    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    # DEBUG = True
     if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
     else:# prod
