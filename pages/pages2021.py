@@ -40,10 +40,14 @@ def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
 def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div= None, data=None) -> html.Div :
     itermediate = [
         dbc.Row([
-            dbc.Col(
-                html.H3(title),
-                width = 4,
-            ),
+            html.H1("My Workspace > Prediction Result", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '', 'padding-top' : '20px'}),
+            html.Div("The prediction result on the selected dataset is shown in graph below." ,style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '20px'}),
+        ]),
+        dbc.Row([
+            # dbc.Col(
+            #     html.H3(title),
+            #     width = 4,
+            # ),
             dbc.Col( 
                 html.A(f"Download this data set ({dataset_name})", href=f"/2021data/{dataset_name}"),
                 width = 4,
@@ -75,12 +79,17 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
 def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None, dataset_path=None, strategy_name=None) -> html.Div :
     itermediate = [
         dbc.Row([
-            dbc.Col(
-                html.H3(title),
-                width = 4,
-            ),
-        ],
-        ),
+            html.H1("My Workspace > Prediction Result", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '', 'padding-top' : '20px'}),
+            html.Div("The prediction result on the selected dataset is shown in graph below." ,style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+        ]),
+        # dbc.Row([
+        #     dbc.Col(
+        #         html.H3(title),
+        #         width = 4,
+        #     ),
+        # ],
+        # ),
+
         dbc.Row([
             dbc.Col([ 
                 html.Div([

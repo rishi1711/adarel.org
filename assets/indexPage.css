@@ -36,7 +36,7 @@
     height : 29rem;
     border : none;
     align-items: center;
-    padding-top: 2rem;
+    padding-top: 4rem;
     margin: 0 auto;
 }
 
@@ -46,7 +46,7 @@
     height : 39rem;
     border : none;
     align-items: center;
-    padding-top: 2rem;
+    padding-top: 4rem;
     margin: 0 auto;
 }
 
@@ -62,17 +62,18 @@
     padding-left: 0rem;
     text-align: center;
     background-image: radial-gradient(closest-side, rgb(60, 199, 224), rgb(255, 255, 255));
+    border-radius: 10px;
 }
 
 .about-card{
-    padding-top: 4rem;
+    padding-top: 8rem;
     width : 40rem;
     text-align: left;
 }
 
 .demo-card{
     /* background-color: skyblue ; */
-    padding-top: 4rem;
+    padding-top: 8rem;
     border : none;
     text-align: center;
     align-items: center;
@@ -93,6 +94,48 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+.button-style {
+    width : 80rem;
+    height : 0rem;
+    border : none;
+    align-items: right;
+    padding-top: 2rem;
+    padding-left : 65rem;
+}
+
+.button_style_data_upload {
+    width : 80rem;
+    height : 0rem;
+    border : none;
+    align-items: right;
+    padding-left : 42rem;
+}
+
+.button__style__uploaddata {
+    position: relative;
+}
+
+.button__style__searchbutton{
+    position: relative;
+}
+
+.page-view {
+    background-color: #F8F8F8;
+    border-radius: 2%;
+}
+
+.first_row {
+    background-color: #ffffff;
+    padding-bottom :2rem;
+    border-radius: 2%;
+}
+
+.second_row {
+    background-color: #ffffff;
+    padding-bottom :2rem;
+    border-radius: 2%;
+}
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: rgb(178, 175, 175);

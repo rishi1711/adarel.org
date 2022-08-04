@@ -16,6 +16,10 @@ def test():
 
 
 main_page = html.Div([dcc.Location(id = 'url_home', refresh=True),
+    html.Div([
+        html.H1("AdaRel"),
+        html.P("a tool for reliability prediction")
+        ], id="index-title"),
     dbc.Row([
         dbc.Col([
             html.H4("Welcome to AdaRel!"),

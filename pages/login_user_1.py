@@ -1,4 +1,5 @@
 from tkinter import HIDDEN
+from turtle import width
 from dash.exceptions import PreventUpdate
 from dash import dcc, dash_table
 from dash import html, ctx
@@ -21,133 +22,149 @@ import sqlite3
 import io
 import json
 import dash
+import tool.figgenerator as fgen
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
 import plotly.express as px
 
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
-    dbc.Row([
-        html.H1("Upload Training Data!"),
-        dcc.Upload(
-            # id="upload-data",
-            id = "upload-training-data",
-            children=html.Div(
-                ["Drag and drop or click to select a file to upload."]
-            ),
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-            #multiple=True,
-        ),
-        html.Ul(id="file-list_t"),
-    ],),
+                dbc.Row([
+                        html.H1("My Workspace > Make New Predictions", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '', 'padding-top' : '20px'}),
+                        html.Div("In your workspace, you are able to experiment diffrent prediction strategies." ,style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+                        html.Div("To begin, try the combinations of data and strategies using a small subset of dataset. Later in step 3, the same strategy can be applied to entire dataset.", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '1rem'}),
+                ]),
+                dbc.Row([
+                    dbc.Row([
+                        html.H4("Step 1: Select Training Data"),
+                        html.Div("You can either select the data from your uploaded data pool, or upload a new one here.",style={'text-align' : 'left', 'color' : '#686868', 'padding-bottom':'10px'}),
+                        dbc.Col([
+                            html.Div([
+                                dcc.Dropdown(
+                                    id = "Training Data Selection",
+                                    options=[],
+                                    placeholder = "Select Training DataSet"
+                                )
+                            ])
+                        ]),
+                        dbc.Col([
+                            html.Div([
+                                html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                            ]),
+                        ],class_name = 'button__style__uploaddata'),
+                        dbc.Col([
+                            html.Div([
+                                html.Button('Connect to ElasticSearch', id = 'ElasticSearchbutton', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                            ]),
+                        ],class_name = 'button__style__searchbutton'),
+                    ],style = {'padding-bottom':'3rem', 'padding-top':'1rem'}),
 
-    dbc.Row([
-        #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
-        html.H4("Train-Dataset"),
-        dbc.Col([
-            html.Div([
-                dcc.Dropdown(
-                    id = "Training Data Selection",
-                    options=[],
-                    placeholder = "Select Training DataSet"
-                )
-            ])
-        ]),
-        #---------------------------------------------------------------------------------------------------------------#
+                    dbc.Row([
+                        html.H4("Step 2: Select a Prediction Strategy"),
+                        html.Div("A Strategy is the collection of prediction models and its parameters.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+                        html.Div("Either select an existing strategy or create a new one.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
+                        dbc.Col([
+                            html.Div([
+                                dcc.Dropdown( 
+                                    id ="Training Strategy Selection",
+                                    options=[],
+                                    placeholder = "Select Strategy",
+                                )
+                            ])
+                        ]),
 
+                        dbc.Col([
+                            html.Div([
+                                    html.Button('Train Data', id = 'training submit_id', n_clicks=0),
+                                    html.Div(id="loading_t", className="loader", hidden='HIDDEN'),
+                                    html.Div([
+                                        html.Div(id = "p1"),
+                                        html.Div(id = "p2"),
+                                    ]),
+                            ])
+                        ]),
+                    ],class_name="notice-card"),
 
-        #---------------------------------------Second Dropdown(Strategy Selection)---------------------------------------#
-        dbc.Col([
-            html.Div([
-                dcc.Dropdown( 
-                    id ="Training Strategy Selection",
-                    options=[],
-                    placeholder = "Select Strategy",
-                )
-            ])
-        ]),
-        #----------------------------------------------------------------------------------------------------------------#
+    # dbc.Row([html.Div(id = "barGraph")]),
 
-        dbc.Col([
-            html.Div([
-                    html.Button('Train Data', id = 'training submit_id', n_clicks=0),
-                    html.Div(id="loading_t", className="loader", hidden='HIDDEN'),
-                    html.Div([
-                        html.Div(id = "p1"),
-                        html.Div(id = "p2"),
+                    dbc.Row([
+                            dbc.Col([
+                                html.Div(id='temporary_div'),
+                            ]),
+                            
+                            dbc.Col([
+                                html.Div([
+                                    html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                ]),
+                            ]),
                     ]),
-            ])
-        ]),
-    ],class_name="notice-card"),
+                ],style = {'padding-bottom':'3rem'}),
 
-    dbc.Row([html.Div(id = "barGraph")]),
+                dbc.Row([
+                    dbc.Row([
+                        html.H3(id = 'strategy-title'),
+                    ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+                    dbc.Row([
+                        dbc.Col([
+                            html.Div(id = 'base-model', style={'text-align' : 'left', 'color' : '#686868'}),
+                            html.Div(id = 'param', style={'text-align' : 'left', 'color' : '#686868'}),
+                        ]),
+                        dbc.Col([
+                            html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
+                        ]),
+                    ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+                    # dbc.Row([
+                    #     html.Button('Get a Quick Summary of Training Data', id = 'train submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '400px',  'margin-left' : '880px'}),
+                    # ]),
+                ], class_name='first_row'),
 
-    dbc.Row([
+                dbc.Row([
+                    html.Div(id ='training_summary'),
+                ]),
 
-        dbc.Col([
-            html.H4("Create your own strategy?"),
-            html.Div([
-                dbc.Button("Create Strategy!", color="info", id='create_strategy')
-            ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
-            
-        ], width=5, class_name="notice-card")
+    # dbc.Row([
+    #     html.Div("", style={ 'background-color' : '#F8F8F8'}),
+    # ]),
 
-    ], style={"padding" : "20px", "column-gap" : "30px"}),
+    # dbc.Row([
+    #     dbc.Row([
+    #         html.H3("Training Result Summary"),
+    #     ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+    #     dbc.Row([
+    #         dbc.Col([
+    #             html.Div(id = 'p1', style={'text-align' : 'left', 'color' : '#686868'}),
+    #             html.Div(id = 'p2', style={'text-align' : 'left', 'color' : '#686868'}),
+    #         ]),
+    #         dbc.Col([
+    #             html.Div(id = 'get_graph'),
+    #         ]),
+    #     ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+    # ], class_name='second_row'),
 
-    dbc.Row([
-        html.H1("Upload Test Data!"),
-        dcc.Upload(
-            id = "upload-custom-data",
-            children=html.Div(
-                ["Drag and drop or click to select a file to upload."]
-            ),
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-            #multiple=True,
-        ),
-        html.Ul(id="file-list_c"),
-    ],),
-
-    dbc.Row([
-        #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
-        html.H4(" Predict the Dataset"),
-        dbc.Col([
-            html.Div([
-                dcc.Dropdown(
-                    id = "Custom Data Selection",
-                    options=[],
-                    placeholder = "Select DataSet"
-                )
-            ])
-        ]),
-    
-        #---------------------------------------------------------------------------------------------------------------#
-
-        dbc.Col([
-            html.Div([
-                    html.Button('Predict', id = 'custom submit_id', n_clicks=0),
-                    html.Div(id="loading_c", className="loader", hidden='HIDDEN')
-            ])
-        ]),
-    ],class_name="notice-card"),
-    ])
+                dbc.Row([
+                    html.Div(id ='file-list'),
+                ]),
+                dbc.Row([
+                    html.H4("Step 3: Proceed to Predict!"),
+                    html.Div("Strategy Selected in Step-1 is used here for prediction.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
+                    dbc.Col([
+                        html.Div([
+                            dcc.Dropdown(
+                                id = "Custom Data Selection",
+                                options=[],
+                                placeholder = "Select DataSet"
+                            ),
+                        ]),
+                    ]),
+                    dbc.Col([
+                        html.Div([
+                                html.Button('Predict Entire Dataset', id = 'custom submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '250px',  'margin-left' : '440px' }),
+                                html.Div(id="loading_c", className="loader", hidden='HIDDEN')
+                        ]),
+                    ]),
+                ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
+            ])#, class_name = 'page-view'),
+# ],style = {'padding-bottom':'2rem'})
 
 
 
@@ -156,154 +173,47 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 @app.callback(
     Output(component_id='Training Data Selection', component_property='options'),
     Output(component_id='Training Strategy Selection', component_property='options'),
-    [Input('upload-training-data', 'children')]
+    Output(component_id='Custom Data Selection', component_property='options'),
+    [Input('file-list', 'children')],
+    prevent_initial_callback = True
 )
 def get_training_datasets(filename):
     conn = sqlite3.connect("./database/data.sqlite")
     g.user = current_user.get_id()
     id = g.user
 
-    # datasets = pd.read_sql("""select file_id, filename from files where user_id and filetype= '{}'""".format(id, "Training"), conn)
-    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Training"), conn)
-    datasets = datasets.values.tolist()
-    datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
+    training_datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Training"), conn)
+    training_datasets = training_datasets.values.tolist()
+    training_datasets = [{'label' : i[1], 'value' : i[0]} for i in training_datasets]
 
     get_strategy = pd.read_sql("""select strategy_id, strategy_name from strategy where user_id = '{}'""".format(id), conn)
     get_strategy = get_strategy.values.tolist()
     get_strategy = [{'label' : i[1], 'value' : i[0]} for i in get_strategy]
-    return datasets, get_strategy
+
+    testing_datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Testing"), conn)
+    testing_datasets = testing_datasets.values.tolist()
+    testing_datasets = [{'label' : i[1], 'value' : i[0]} for i in testing_datasets] 
+
+    return training_datasets, get_strategy, testing_datasets
 #---------------------------------------------------------------------------------------------------------------------------#
-
-#--------------------------------------store the uploaded dataset path in the database and file in data2021 folder-----------------------------------------#
-@app.callback(
-    Output("file-list_t", "children"),
-    [Input('upload-training-data', 'filename'),
-    Input('upload-training-data', 'contents')],
-    prevent_initial_call=True
-)
-def update_training_output(filename,content):
-    path = os.getcwd()+"/data2021/"+filename
-
-    content_type, content_string = content.split(',')
-    decoded = base64.b64decode(content_string)
-    if 'txt' in filename:
-        data = content.encode("utf8").split(b";base64,")[1]
-        with open(path, "wb") as fp:
-            fp.write(base64.decodebytes(data))
-    elif 'csv' in filename:
-        # Assume that the user uploaded a CSV file
-        df = pd.read_csv(
-            io.StringIO(decoded.decode('utf-8')))
-        df.to_csv (path, index = False, header=True)
-    elif 'xls' in filename:
-        # Assume that the user uploaded an excel file
-        df = pd.read_excel(io.BytesIO(decoded))
-
-    file_name=os.path.splitext(filename)[0]
-    if file_name is not None and current_user.get_id() is not None and path is not None:
-        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = "Training", filename = file_name)
-        conn = engine.connect()
-        conn.execute(ins)
-        conn.close()
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-
-
-#---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
-@app.callback(
-    Output(component_id='Custom Data Selection', component_property='options'),
-    [Input('upload-custom-data', 'children')]
-)
-def get_custom_datasets(filename):
-    conn = sqlite3.connect("./database/data.sqlite")
-    g.user = current_user.get_id()
-    id = g.user
-
-    datasets = pd.read_sql("""select file_id, filename from files where user_id = '{}' and filetype = '{}'""".format(id, "Custom"), conn)
-    datasets = datasets.values.tolist()
-    datasets = [{'label' : i[1], 'value' : i[0]} for i in datasets]
-    return datasets
-#---------------------------------------------------------------------------------------------------------------------------#
-
-
-#--------------------------------------store the uploaded dataset path in the database and file in data2021 folder-----------------------------------------#
-@app.callback(
-    Output("file-list_c", "children"),
-    [Input('upload-custom-data', 'filename'),
-    Input('upload-custom-data', 'contents')],
-    prevent_initial_call=True
-)
-def update_custom_output(filename, content):
-    path = os.getcwd()+"/data2021/"+filename
-
-    content_type, content_string = content.split(',')
-    decoded = base64.b64decode(content_string)
-    if 'txt' in filename:
-        data = content.encode("utf8").split(b";base64,")[1]
-        with open(path, "wb") as fp:
-            fp.write(base64.decodebytes(data))
-    elif 'csv' in filename:
-        # Assume that the user uploaded a CSV file
-        df = pd.read_csv(
-            io.StringIO(decoded.decode('utf-8')))
-        df.to_csv (path, index = False, header=True)
-    elif 'xls' in filename:
-        # Assume that the user uploaded an excel file
-        df = pd.read_excel(io.BytesIO(decoded))
-
-    file_name=os.path.splitext(filename)[0]
-    if file_name is not None and current_user.get_id() is not None and path is not None:
-        ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = "Custom" ,filename = file_name)
-        conn = engine.connect()
-        conn.execute(ins)
-        conn.close()
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # @app.callback(
-#     Output('loading_t', 'hidden'),
-#     Input('training submit_id', 'n_clicks'),
-#     Input('p1', 'hidden'),
+#     Output('loading_c', 'hidden'),
+#     Input('custom submit_id', 'n_clicks'),
 #     prevent_initial_callback = True
 # )
-# def showLoader1(nclicks, value):
-#     id = ctx.triggered_id
-#     if id=='training submit_id':
-#         if current_user.is_authenticated:
-#             if nclicks == 0:
-#                 return True
-#             else:
-#                 return False 
-#         else:
-#             pass
-#     elif id=='p1':
-#         if current_user.is_authenticated:
-#             if value == False:
-#                 return True
-#             else:
-#                 return False
-#         else:
-#             pass
+# def showLoader2(nclicks):
+#     if nclicks==0:
+#         return True
 #     else:
-#         pass
-
-
-@app.callback(
-    Output('loading_c', 'hidden'),
-    Input('custom submit_id', 'n_clicks'),
-    prevent_initial_callback = True
-)
-def showLoader2(nclicks):
-    if nclicks==0:
-        return True
-    else:
-        return False 
+#         return False 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
     Input('create_strategy', 'n_clicks'),
-    Input('training submit_id', 'n_clicks'),
     Input('custom submit_id', 'n_clicks'),
+    Input('upload_dataset', 'n_clicks'),
     State('trainingdata', 'data'),
     State('sstrategy', 'data'),
     State('testingdata', 'data'),
@@ -311,7 +221,12 @@ def showLoader2(nclicks):
 )
 def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset):
     id = ctx.triggered_id
-    if id == "create_strategy":
+    if id == "upload_dataset":
+        if current_user.is_authenticated:
+            return '/create_data'
+        else:
+            pass
+    elif id == "create_strategy":
         if current_user.is_authenticated:
             return '/strategy'
         else:
@@ -322,7 +237,9 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
             return '/2021data'
         else:
             pass
-    raise PreventUpdate
+    else:
+        pass
+    return dash.no_update
 
 
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
@@ -341,7 +258,7 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type)
     return errors
 
-
+#-------------------------------------------------------dcc.store elements update------------------------------------------#
 @app.callback(
     Output('trainingdata', 'data'),
     Input('Training Data Selection', 'value'),
@@ -360,14 +277,31 @@ def store_testingdata(value):
 
 @app.callback(
     Output('sstrategy', 'data'),
+    Output('strategy-title', 'children'),
+    Output('base-model', 'children'),
+    Output('param', 'children'),
     Input('Training Strategy Selection', 'value'),
     prevent_initial_callback = True
 )
 def store_strategy(value):
-    return value
+    if value is not None:
+        conn = sqlite3.connect("./database/data.sqlite")
+        strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(value), conn)
+        strategy_title = strategy["strategy_name"].loc[0]
+        strategy_info = strategy["strategy_data"].loc[0]
+        info_dict = json.loads(strategy_info)
+        base_model = "Base Model: " + str(info_dict.get('name'))
+        del info_dict['name']
+        param = "Parameter: " + str(info_dict)
+        return value, strategy_title, base_model, param
+    return dash.no_update
+#----------------------------------------------------------------------------------------------------------------------------#
 
+
+#-------------------------------------------------------rmse and mae value update--------------------------------------------#
 @app.callback(
-    Output('bar_graph_values', 'data'),Output('mae_measure', 'data'), Output('rmse_measure', 'data'), 
+    # Output('bar_graph_values', 'data'),Output('mae_measure', 'data'), Output('rmse_measure', 'data'), 
+    Output('training_summary', 'children'),
     Input('training submit_id', 'n_clicks'),
     [State('trainingdata', 'data'),
     State('sstrategy', 'data'),
@@ -378,28 +312,39 @@ def get_error_values(nclicks, t_dataset, strategy, c_dataset):
     if nclicks>0:
         if current_user.is_authenticated:
             errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-            return errors[2], errors[0], errors[1]
+            # return errors[2], errors[0], errors[1]
+            return get_training_summary(errors[0], errors[1], errors[2])
         else:
             pass
     else:
         pass
     return dash.no_update
 
-@app.callback(
-    [Output('p1','hidden'),Output('p2','hidden'),Output('barGraph','hidden'),Output('p1', 'children'), Output('p2', 'children'), Output('barGraph','children')],
-    [Input('mae_measure', 'data'), Input('rmse_measure', 'data'),Input('bar_graph_values', 'data')],
-    prevent_initial_callback = True
-)
-def show_error(data1,data2,data3):
-    e1 = "Mean Absolute Error:   " + str('{0:.6g}'.format(data1))
-    e2 = "Root Mean Squared Error:   " + str('{0:.6g}'.format(data2))
+
+
+
+def get_training_summary(mae, rmse, graph_values) -> html.Div :
+    itermediate = [
+        dbc.Row([
+            html.H3("Training Result Summary"),
+        ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+
+        dbc.Row([
+            dbc.Col([
+                html.Div("Mean Absolute Error:   " + str('{0:.6g}'.format(mae))),
+                html.Div("Root Mean Squared Error:   " + str('{0:.6g}'.format(rmse))),
+            ], width=3),
+            dbc.Col([
+                html.Div([
+                    dcc.Graph(figure= get_bar_graph(graph_values)),
+                ])
+            ]),
+        ]),
+    ]
+    return itermediate
+#----------------------------------------------------------------------------------------------------------------------------#
+def get_bar_graph(data3):
     x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
-    df = px.data.tips()
-    fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'count'}, title="Summary")
+    fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'frequency'})
     fig.update_xaxes(type='category')
-    
-    final = dcc.Graph(figure = fig)
-    if data1 is None:
-        return 'HIDDEN','HIDDEN', 'HIDDEN' ,e1,e2,final
-    else:
-        return False,False,False,e1,e2,final
+    return fig

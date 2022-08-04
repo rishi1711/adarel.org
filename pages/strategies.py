@@ -1,4 +1,3 @@
-
 from operator import itemgetter
 from turtle import width
 from dash import dcc
@@ -15,7 +14,7 @@ from flask_login import current_user
 from database.models import engine
 
 strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
-                html.H1("Create strategy", style={'color' : '#686868', 'text-align' : 'center', 'padding-top' : '2rem'}),
+            html.H1("My Workspace > Create Strategy", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem', 'padding-top' : '40px'}),
                 dbc.Row([
                     dbc.Col([
                         dbc.Row([ 
@@ -36,7 +35,7 @@ strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
 
                     dbc.Col([
                         dbc.Row([ 
-                            html.Div("Enter Strategy Name:", style={'color' : '#686868', 'font-weight' : 'bold', 'padding-bottom' : '0.5rem', 'font-size' : '17px'})
+                            html.Div("Enter Models:", style={'color' : '#686868', 'font-weight' : 'bold', 'padding-bottom' : '0.5rem', 'font-size' : '17px'})
                         ]),
                         dbc.Row([ 
                             html.Div([
@@ -55,7 +54,7 @@ strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
                             children=[]
                         )
                     ])
-                ], style={'column-gap' : '20px'}),
+                ], style={'column-gap' : '20px', 'padding-top' : '40px'}),
                 html.Div(id = "list"),
                 # dbc.Row([
                 #         dbc.Col([
@@ -211,7 +210,7 @@ def store_database(n_clicks, dropdown, input, strategy_name,value):
         conn = engine.connect()
         conn.execute(ins)
         conn.close()
-        return '/login_user_1'
+        return '/first_page'
     else:
         pass
 
