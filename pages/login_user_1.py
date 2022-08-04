@@ -313,7 +313,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
     id = ctx.triggered_id
     if id == "create_strategy":
         if current_user.is_authenticated:
-            return '/strategy', None, None
+            return '/strategy'
         else:
             pass
     elif id == "custom submit_id":
@@ -391,7 +391,7 @@ def get_error_values(nclicks, t_dataset, strategy, c_dataset):
     prevent_initial_callback = True
 )
 def show_error(data1,data2,data3):
-    e1 = "Mean Average Error:   " + str('{0:.6g}'.format(data1))
+    e1 = "Mean Absolute Error:   " + str('{0:.6g}'.format(data1))
     e2 = "Root Mean Squared Error:   " + str('{0:.6g}'.format(data2))
     x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
     df = px.data.tips()
