@@ -10,9 +10,8 @@ from flask_login import current_user
 from flask import g
 import sqlite3
 import pandas as pd
-
-
 import tool.figgenerator as fgen
+
 
 def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
     html_div = html.Div([
@@ -27,7 +26,6 @@ def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
             ),
         ], justify='between',
         ),
-
         dbc.Row([
             dbc.Col([ 
                 html.Div([
@@ -37,8 +35,6 @@ def get_pages_obj(title: str, file_url: str, dataset_name: str) -> html.Div :
         ])
     ])
     return html_div
-
-
 
 
 def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div= None, data=None) -> html.Div :
@@ -58,7 +54,6 @@ def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div
             ),
         ], justify='between',
         ),
-
         dbc.Row([
             dbc.Col([ 
                 html.Div([
@@ -71,8 +66,7 @@ def get_pages_obj_csv(title: str, dataset_name: str, additional_WebDom: html.Div
     if additional_WebDom:
         itermediate.append(dbc.Row([dbc.Col([additional_WebDom])]))
 
-    html_div = html.Div(itermediate)
-        
+    html_div = html.Div(itermediate)        
     return html_div
 
 def get_MAE_dist_fig(dataset_name: str) -> html.Div:
@@ -80,8 +74,6 @@ def get_MAE_dist_fig(dataset_name: str) -> html.Div:
         html.Img(src=f'/2021data/mae_dist_fig/{dataset_name}', width='800px')
     ])
     return result
-
-
 
 
 def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None, dataset_path=None, strategy_name=None) -> html.Div :
@@ -110,8 +102,7 @@ def get_graph_from_custom_dataset(title: str, additional_WebDom: html.Div= None,
     if additional_WebDom:
         itermediate.append(dbc.Row([dbc.Col([additional_WebDom])]))
 
-    html_div = html.Div(itermediate)
-        
+    html_div = html.Div(itermediate)       
     return html_div
 
 def dataset_1(data):
