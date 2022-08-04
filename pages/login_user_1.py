@@ -29,142 +29,123 @@ from PredictionModels.SelectionModels import predictOnSelectedModel
 import plotly.express as px
 
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
-                dbc.Row([
-                        html.H1("My Workspace > Make New Predictions", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '', 'padding-top' : '20px'}),
-                        html.Div("In your workspace, you are able to experiment diffrent prediction strategies." ,style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
-                        html.Div("To begin, try the combinations of data and strategies using a small subset of dataset. Later in step 3, the same strategy can be applied to entire dataset.", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '1rem'}),
-                ]),
-                dbc.Row([
-                    dbc.Row([
-                        html.H4("Step 1: Select Training Data"),
-                        html.Div("You can either select the data from your uploaded data pool, or upload a new one here.",style={'text-align' : 'left', 'color' : '#686868', 'padding-bottom':'10px'}),
-                        dbc.Col([
-                            html.Div([
-                                dcc.Dropdown(
-                                    id = "Training Data Selection",
-                                    options=[],
-                                    placeholder = "Select Training DataSet"
-                                )
-                            ])
-                        ]),
-                        dbc.Col([
-                            html.Div([
-                                html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
-                            ]),
-                        ],class_name = 'button__style__uploaddata'),
-                        dbc.Col([
-                            html.Div([
-                                html.Button('Connect to ElasticSearch', id = 'ElasticSearchbutton', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
-                            ]),
-                        ],class_name = 'button__style__searchbutton'),
-                    ],style = {'padding-bottom':'3rem', 'padding-top':'1rem'}),
+    dbc.Row([
+            html.H1("My Workspace > Make New Predictions", 
+            style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '', 'padding-top' : '20px'}),
+            html.Div("In your workspace, you are able to experiment diffrent prediction strategies.",
+            style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+            html.Div("To begin, try the combinations of data and strategies using a small subset of dataset. Later in step 3, the same strategy can be applied to entire dataset.",
+            style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '1rem'}),
+           ]),
+dbc.Row([
+    dbc.Row([
+        html.H4("Step 1: Select Training Data"),
+        html.Div("You can either select the data from your uploaded data pool, or upload a new one here.",
+        style={'text-align' : 'left', 'color' : '#686868', 'padding-bottom':'10px'}),
+        dbc.Col([
+            html.Div([
+                dcc.Dropdown(
+                    id = "Training Data Selection",
+                    options=[],
+                    placeholder = "Select Training DataSet"
+                )
+            ])
+        ]),
+        dbc.Col([
+            html.Div([
+                html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, 
+                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+            ]),
+        ],class_name = 'button__style__uploaddata'),
+        dbc.Col([
+            html.Div([
+                html.Button('Connect to ElasticSearch', id = 'ElasticSearchbutton', n_clicks=0, 
+                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+            ]),
+        ],class_name = 'button__style__searchbutton'),
+    ],style = {'padding-bottom':'3rem', 'padding-top':'1rem'}),
 
-                    dbc.Row([
-                        html.H4("Step 2: Select a Prediction Strategy"),
-                        html.Div("A Strategy is the collection of prediction models and its parameters.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
-                        html.Div("Either select an existing strategy or create a new one.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
-                        dbc.Col([
-                            html.Div([
-                                dcc.Dropdown( 
-                                    id ="Training Strategy Selection",
-                                    options=[],
-                                    placeholder = "Select Strategy",
-                                )
-                            ])
-                        ]),
+    dbc.Row([
+        html.H4("Step 2: Select a Prediction Strategy"),
+        html.Div("A Strategy is the collection of prediction models and its parameters.",
+        style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+        html.Div("Either select an existing strategy or create a new one.",
+        style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
+        dbc.Col([
+            html.Div([
+                dcc.Dropdown( 
+                    id ="Training Strategy Selection",
+                    options=[],
+                    placeholder = "Select Strategy",
+                )
+            ])
+        ]),
 
-                        dbc.Col([
-                            html.Div([
-                                    html.Button('Train Data', id = 'training submit_id', n_clicks=0),
-                                    html.Div(id="loading_t", className="loader", hidden='HIDDEN'),
-                                    html.Div([
-                                        html.Div(id = "p1"),
-                                        html.Div(id = "p2"),
-                                    ]),
-                            ])
-                        ]),
-                    ],class_name="notice-card"),
+        # dbc.Col([
+        #     html.Div(id='temporary_div'),
+        # ]),
 
-    # dbc.Row([html.Div(id = "barGraph")]),
+        dbc.Col([
+            html.Div([
+                html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
+                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+          ]),
+        ]),
 
-                    dbc.Row([
-                            dbc.Col([
-                                html.Div(id='temporary_div'),
-                            ]),
-                            
-                            dbc.Col([
-                                html.Div([
-                                    html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
-                                ]),
-                            ]),
-                    ]),
-                ],style = {'padding-bottom':'3rem'}),
+        dbc.Col([
+            html.Div([
+                html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, 
+                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+            ]),
+        ]),
+    ],style = {'padding-bottom':'3rem'}),
 
-                dbc.Row([
-                    dbc.Row([
-                        html.H3(id = 'strategy-title'),
-                    ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
-                    dbc.Row([
-                        dbc.Col([
-                            html.Div(id = 'base-model', style={'text-align' : 'left', 'color' : '#686868'}),
-                            html.Div(id = 'param', style={'text-align' : 'left', 'color' : '#686868'}),
-                        ]),
-                        dbc.Col([
-                            html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
-                        ]),
-                    ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
-                    # dbc.Row([
-                    #     html.Button('Get a Quick Summary of Training Data', id = 'train submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '400px',  'margin-left' : '880px'}),
-                    # ]),
-                ], class_name='first_row'),
+    dbc.Row([
+        dbc.Row([
+            html.H3(id = 'strategy-title'),
+        ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+        dbc.Row([
+            dbc.Col([
+                html.Div(id = 'base-model', style={'text-align' : 'left', 'color' : '#686868'}),
+                html.Div(id = 'param', style={'text-align' : 'left', 'color' : '#686868'}),
+            ]),
+            dbc.Col([
+                html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
+            ]),
+        ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+        # dbc.Row([
+        #     html.Button('Get a Quick Summary of Training Data', id = 'training submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '400px',  'margin-left' : '880px'}),
+        # ]),
+    ], class_name='first_row'),
 
-                dbc.Row([
-                    html.Div(id ='training_summary'),
-                ]),
+    dbc.Row([
+        html.Div(id ='training_summary'),
+    ]),
 
-    # dbc.Row([
-    #     html.Div("", style={ 'background-color' : '#F8F8F8'}),
-    # ]),
-
-    # dbc.Row([
-    #     dbc.Row([
-    #         html.H3("Training Result Summary"),
-    #     ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
-    #     dbc.Row([
-    #         dbc.Col([
-    #             html.Div(id = 'p1', style={'text-align' : 'left', 'color' : '#686868'}),
-    #             html.Div(id = 'p2', style={'text-align' : 'left', 'color' : '#686868'}),
-    #         ]),
-    #         dbc.Col([
-    #             html.Div(id = 'get_graph'),
-    #         ]),
-    #     ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
-    # ], class_name='second_row'),
-
-                dbc.Row([
-                    html.Div(id ='file-list'),
-                ]),
-                dbc.Row([
-                    html.H4("Step 3: Proceed to Predict!"),
-                    html.Div("Strategy Selected in Step-1 is used here for prediction.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
-                    dbc.Col([
-                        html.Div([
-                            dcc.Dropdown(
-                                id = "Custom Data Selection",
-                                options=[],
-                                placeholder = "Select DataSet"
-                            ),
-                        ]),
-                    ]),
-                    dbc.Col([
-                        html.Div([
-                                html.Button('Predict Entire Dataset', id = 'custom submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '250px',  'margin-left' : '440px' }),
-                                html.Div(id="loading_c", className="loader", hidden='HIDDEN')
-                        ]),
-                    ]),
-                ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
-            ])#, class_name = 'page-view'),
-# ],style = {'padding-bottom':'2rem'})
+    dbc.Row([
+        html.Div(id ='file-list'),
+    ]),
+    dbc.Row([
+        html.H4("Step 3: Proceed to Predict!"),
+        html.Div("Strategy Selected in Step-1 is used here for prediction.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
+        dbc.Col([
+            html.Div([
+                dcc.Dropdown(
+                    id = "Custom Data Selection",
+                    options=[],
+                    placeholder = "Select DataSet"
+                ),
+            ]),
+        ]),
+        dbc.Col([
+            html.Div([
+                    html.Button('Predict Entire Dataset', id = 'custom submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '250px',  'margin-left' : '440px' }),
+                    html.Div(id="loading_c", className="loader", hidden='HIDDEN')
+            ]),
+        ]),
+    ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
+], class_name = 'page-view'),
+],style = {'padding-bottom':'2rem'})
 
 
 
@@ -319,8 +300,6 @@ def get_error_values(nclicks, t_dataset, strategy, c_dataset):
     else:
         pass
     return dash.no_update
-
-
 
 
 def get_training_summary(mae, rmse, graph_values) -> html.Div :
