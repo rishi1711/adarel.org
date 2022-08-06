@@ -11,7 +11,6 @@ import plotly.graph_objects as go
 import os
 import base64
 from urllib.parse import quote as urlquote
-
 from sqlalchemy import true
 from app import app
 from database.models import Uploaded_files_tbl
@@ -28,6 +27,7 @@ import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
 import plotly.express as px
 
+#-----Main layout-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                 dbc.Row([
                     html.H1("My Workspace > Make New Predictions", 
@@ -86,8 +86,6 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                             ]),
                         ]),
 
-
-                                
                         dbc.Col([
                             html.Div([
                                 html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
@@ -95,6 +93,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                         ]),
                     ],style = {'padding-bottom':'3rem'}),
 
+                    #The training summary and the details of the model selected are dynamically filled over here.  
                     html.Div(id ='training_details', children=[]),
 
                     dbc.Row([
@@ -130,9 +129,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
                 ])
             ])
-
-
-
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
 @app.callback(
@@ -163,18 +160,8 @@ def get_training_datasets(filename):
     return training_datasets, get_strategy, get_strategy, testing_datasets
 #---------------------------------------------------------------------------------------------------------------------------#
 
-# @app.callback(
-#     Output('loading_c', 'hidden'),
-#     Input('custom submit_id', 'n_clicks'),
-#     prevent_initial_callback = True
-# )
-# def showLoader2(nclicks):
-#     if nclicks==0:
-#         return True
-#     else:
-#         return False 
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
     Input('create_strategy', 'n_clicks'),
@@ -206,8 +193,9 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
     else:
         pass
     return dash.no_update
+#------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+#-------Driver to call the method for training and testing the data-----------------------------------------------------------------------------------------
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(train_dataset_id), conn)
@@ -223,6 +211,7 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     json_val = json.loads(strategyData)
     errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type)
     return errors
+#--------------------------------------------------------------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------dcc.store elements update------------------------------------------#
 @app.callback(
@@ -248,29 +237,10 @@ def store_testingdata(value):
 )
 def store_testingdata(value):
     return value
-
-# @app.callback(
-#     Output('sstrategy', 'data'), Output('strategy-title', 'children'), Output('base-model', 'children'), Output('param', 'children'),
-#     Input('Training Strategy Selection', 'value'),
-#     prevent_initial_callback = True
-# )
-# def store_strategy(value):
-#     if value is not None:
-#         print(value)
-#         conn = sqlite3.connect("./database/data.sqlite")
-#         strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(value), conn)
-#         strategy_title = strategy["strategy_name"].loc[0]
-#         strategy_info = strategy["strategy_data"].loc[0]
-#         info_dict = json.loads(strategy_info)
-#         base_model = "Base Model: " + str(info_dict.get('name'))
-#         del info_dict['name']
-#         param = "Parameter: " + str(info_dict)
-#         return value, strategy_title, base_model, param
-#     return dash.no_update
 #----------------------------------------------------------------------------------------------------------------------------#
 
 
-#-------------------------------------------------------rmse and mae value update--------------------------------------------#
+#--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
     Output('training_details', 'children'),
     [Input('training submit_id', 'n_clicks'),Input('Training Strategy Selection', 'value')],
@@ -287,9 +257,11 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                     html.Div()
                                 ]),
                                 dbc.Col([
-                                    html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
+                                    html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",
+                                    style={'text-align' : 'left', 'color' : '#686868'} ),
                                 ]),
                             ]),])]
+                #based on multiple strategies selected, display appropriate details
                 for i in value:
                     strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(i), conn)
                     strategy_title = strategy["strategy_name"].loc[0]
@@ -298,20 +270,23 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                     base_model = "Base Model: " + str(info_dict.get('name'))
                     del info_dict['name']
                     param = "Parameter: " + str(info_dict)
+                    #display information of strategy
                     intermediate = html.Div([dbc.Row([
                                     dbc.Row([
                                         html.H3(strategy_title),
-                                    ]),#, style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+                                    ]),
                                     dbc.Row([
                                         dbc.Col([
                                             html.Div(base_model, style={'text-align' : 'left', 'color' : '#686868'}),
                                             html.Div(param, style={'text-align' : 'left', 'color' : '#686868'}),
                                         ]),
 
-                                    ]),#, style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+                                    ]),
                                 ], class_name='first_row'),])
                     children.append(intermediate)
+                    #call method for training the model on training data
                     errors = call_predictions(t_dataset, c_dataset, i, "training")
+                    #the method to display the summary graph
                     children.append(get_training_summary(errors[0], errors[1], errors[2]))
                 
                 return children
@@ -322,8 +297,9 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
     else:
         pass
     return dash.no_update
+#------------------------------------------------------------------------------------------------------------------------------------------
 
-
+#----------Display mae and rmse errors--------------------------------------------------------
 def get_training_summary(mae, rmse, graph_values) -> html.Div :
     itermediate = html.Div([dbc.Row([
         dbc.Row([
@@ -343,9 +319,12 @@ def get_training_summary(mae, rmse, graph_values) -> html.Div :
         ]),]),])
     
     return itermediate
-#----------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------------------
+
+#-------Display summary bar graph----------------------------------------------------------------------------------------------
 def get_bar_graph(data3):
     x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
     fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'frequency'})
     fig.update_xaxes(type='category')
     return fig
+#------------------------------------------------------------------------------------------------------------------------------

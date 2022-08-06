@@ -1,3 +1,5 @@
+#For user to register
+
 from distutils.log import error
 from  dash import html
 from  dash import dcc
@@ -9,11 +11,12 @@ from database.models import Users_tbl
 from database.models import engine
 from pages.login import login
 
-
+#--------------------Main Layout-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create = dbc.Card([
             dbc.CardBody([dcc.Location(id='url_register', refresh=True),
                 html.H1('Sign Up', style={'text-align' : 'center', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem'}),
-                html.Div("Create an account so you can use our prediction modelson your own dataset and compare the results", style={'padding-bottom' : '2rem', 'font-weight' : 'normal', 'color' : '#808080', 'text-align' : 'left', 'width': '18rem'}),
+                html.Div("Create an account so you can use our prediction modelson your own dataset and compare the results", 
+                    style={'padding-bottom' : '2rem', 'font-weight' : 'normal', 'color' : '#808080', 'text-align' : 'left', 'width': '18rem'}),
                 dbc.Row([
                     dcc.Input(id="firstname",
                         type="text",
@@ -54,9 +57,9 @@ create = dbc.Card([
             ])
 
 ], className='register-card')
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
+#--------Store the details in the database--------------------------------------------------------------------------------------
 @app.callback(
     Output('url_register', "pathname")
     , [Input('submit-val', 'n_clicks')]
@@ -73,8 +76,7 @@ def insert_users(n_clicks, fn, ln, un, pw, cn):
         return '/login'
     else:
         pass
-
-
+#---------------------------------------------------------------------------------------------------------------------------------------
 
 
    

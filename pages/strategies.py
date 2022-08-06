@@ -1,3 +1,5 @@
+#Create strategy page 
+
 from operator import itemgetter
 from turtle import width
 from dash import dcc
@@ -13,6 +15,7 @@ from database.models import strategy_tbl
 from flask_login import current_user
 from database.models import engine
 
+#-----------Basic layout of create strategy page------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
             html.H1("My Workspace > Create Strategy", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem', 'padding-top' : '40px'}),
                 dbc.Row([
@@ -48,6 +51,7 @@ strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
                         ])
                     ], width=3), 
 
+                    #display the parameters dynamically
                     dbc.Col([
                         html.Div(
                             id= 'parameters',
@@ -56,36 +60,20 @@ strategy = html.Div([dcc.Location(id = 'new_path', refresh=True),
                     ])
                 ], style={'column-gap' : '20px', 'padding-top' : '40px'}),
                 html.Div(id = "list"),
-                # dbc.Row([
-                #         dbc.Col([
-                #                 html.Button('Back to Home', id = 'go_login_home', n_clicks=0)
-                #             ])
-                #         ])
         ])
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# @app.callback(
-#     Output('new_path', 'pathname'),
-#     [Input('go_login_home', 'n_clicks')]
-# )
-# def go_to_login_home(nclicks):
-#     id = ctx.triggered_id
-#     if id == "go_login_home":
-#         if current_user.is_authenticated:
-#             return '/login_user_1'
-#         else:
-#             pass
-#     else:
-#         pass
-
-
+#-------------Dynamically display the parameters based on the model selected------------------------------------------------------------------------------------------------------------------------
 @app.callback(
     Output('parameters', 'children'),
     Input('ModelSelection', 'value'),
     State('parameters', 'children')
 )
 def set_parameters(value,children):
-    if not value == None:      
+    if not value == None:
+        #get the details from the Strategy_list.py meta data based on the model selected      
         label, parameters, default, dropdown, required = itemgetter('label', 'parameters', 'default', 'dropdown', 'required')(META_DATA_Val[value])
+        #based on the parameters, dynamically fill the parameters and display
         if parameters == None:
             children =  [html.Div("No Hyper parameters", style={'color' : '#686868', 'font-weight' : 'bold', 'padding-bottom' : '0.5rem', 'font-size' : '17px'})]
             new_button = html.Div([
@@ -103,6 +91,7 @@ def set_parameters(value,children):
             i=0
             children = [html.Div("Hyper Parameters:", style={'color' : '#686868', 'font-weight' : 'bold', 'padding-bottom' : '0.5rem', 'font-size' : '17px'})]
             for key in parameters:
+                #if parameter type is dropdown, it fill the dropdown from the values that is written in the metadata.
                 if parameters[key] == 'dropdown':
                     dropdown_values = dropdown[i]
                     v = default[i]
@@ -125,6 +114,7 @@ def set_parameters(value,children):
                                                 ])
                                             ], style={'padding-bottom' : '0.75rem'})
                                     ])
+                    #appends to the previous elements.
                     children.append(new_dropdown)
                 elif parameters[key] == 'input':
                     l = label[i]
@@ -172,17 +162,19 @@ def set_parameters(value,children):
             return children
     else:
         pass
-        
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#-------- Store the strategy name, selected models and the parameters in the database-----------------------------------------------------------------------------
 @app.callback(
     Output('new_path', 'pathname'),
     [Input('strategy-button', 'n_clicks')],
-    [State({'type' : 'dropdown', 'index':ALL}, 'value'),State({'type' : 'input', 'index':ALL}, 'value'), State('strategy_name', 'value'), State('ModelSelection', 'value'),],prevent_initial_call=True
+    [State({'type' : 'dropdown', 'index':ALL}, 'value'),State({'type' : 'input', 'index':ALL}, 'value'), 
+    State('strategy_name', 'value'), State('ModelSelection', 'value'),],
+    prevent_initial_call=True
 )
 def store_database(n_clicks, dropdown, input, strategy_name,value):
     if n_clicks > 0:
         parameters = itemgetter('parameters')(META_DATA_Val[value])
-        print(parameters)
         obj = {}
         s_name = Strategy.query.filter_by(strategy_name = strategy_name).first()
         if value == 'SES':
@@ -202,8 +194,10 @@ def store_database(n_clicks, dropdown, input, strategy_name,value):
                     pass
         json_obj = json.dumps(obj)
         if s_name == None:
+            #insert into database
             ins = strategy_tbl.insert().values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         elif str(s_name.user_id) == current_user.get_id() and s_name.strategy_name == strategy_name:
+            #update the database
             ins = strategy_tbl.update().where(strategy_tbl.c.user_id == current_user.get_id(), strategy_tbl.c.strategy_name == strategy_name).values(user_id=current_user.get_id(), strategy_name = strategy_name, strategy_data = json_obj)
         else:
             pass

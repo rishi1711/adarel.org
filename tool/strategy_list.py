@@ -1,3 +1,7 @@
+# Stored the information of parameters of specific models.
+# Used in Create Strategy page 
+
+
 META_DATA_Val = {
     'SES':{
         'name' : 'Simple Exponential Smoothing',

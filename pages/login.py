@@ -1,3 +1,5 @@
+#user to login layout
+
 from ctypes import alignment
 from turtle import color, width
 from  dash import html
@@ -12,10 +14,12 @@ from database.models import Users
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
 
+#------------Main layout-----------------------------------------------------------------------------------------------------------------------------------------------
 login = dbc.Card([
             dbc.CardBody([dcc.Location(id='url_login', refresh=True),
                 html.H2(''' Sign In ''', id='h1', style={'text-align' : 'center', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem'}),
-                html.Div("Login to access previously created datasets and strategies", style={'padding-bottom' : '2rem', 'font-weight' : 'normal', 'color' : '#808080', 'text-align' : 'left', 'width': '18rem'}),
+                html.Div("Login to access previously created datasets and strategies", 
+                    style={'padding-bottom' : '2rem', 'font-weight' : 'normal', 'color' : '#808080', 'text-align' : 'left', 'width': '18rem'}),
                 dbc.Row([
                         dcc.Input(placeholder='Email Address here',
                         type='email',
@@ -38,8 +42,9 @@ login = dbc.Card([
                 html.Div(children='', id='output-state')
             ])
 ], className='login-card')
-
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    
+#----------------Check if the values match the ones in the database------------------------
 @app.callback(
     Output('url_login', 'pathname')
     , [Input('login-button', 'n_clicks')]
@@ -47,7 +52,7 @@ login = dbc.Card([
 def successful(n_clicks, input1, input2):
     user = Users.query.filter_by(username=input1).first()
     if user:
-        # if user.password == input2:
+        #decode the password got from database
         if check_password_hash(user.password, input2):
             login_user(user)
             return '/first_page'
@@ -55,6 +60,9 @@ def successful(n_clicks, input1, input2):
             pass
     else:
         pass
+#-------------------------------------------------------------------------------------------
+
+#------If there is failure then send the error message to ------------------------
 @app.callback(
     Output('output-state', 'children')
     , [Input('login-button', 'n_clicks')]
@@ -63,7 +71,6 @@ def update_output(n_clicks, input1, input2):
     if n_clicks > 0:
         user = Users.query.filter_by(username=input1).first()
         if user:
-            #if user.password == input2:
             if check_password_hash(user.password, input2):
                 return ''
             else:
@@ -72,3 +79,4 @@ def update_output(n_clicks, input1, input2):
             return 'Incorrect username or password'
     else:
         return ''
+#-------------------------------------------------------------------------------------
