@@ -92,8 +92,7 @@ app.layout = html.Div([
         # create data page
         dcc.Store(id="dataframe", storage_type="session"),
         dcc.Store(id="path", storage_type="session"),
-        dcc.Store(id="filename", storage_type="session"),
-        dcc.Store(id="type", storage_type="session"),
+        dcc.Store(id="oldfilename", storage_type="session"),
 
         dbc.Container([                
             # html.Div([
@@ -161,15 +160,6 @@ def router(pathname, data, training, strategy, testing):
         return create_data
     else:
         return 'Error 404'
-
-
-# if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8050") 
 
 
 if __name__ == '__main__':

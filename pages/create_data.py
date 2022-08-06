@@ -46,8 +46,18 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
     ]),
     dbc.Row([
         dbc.Col([
-            dcc.Input(id="file-type", type="text", placeholder="Type of Data Upload", style = {'border-radius' : '5px', 'height' : '30px', 'width' : '300px', 'padding-left' : '50px'}),
+            # dcc.Input(id="file-type", type="text", placeholder="Type of Data Upload", style = {'border-radius' : '5px', 'height' : '30px', 'width' : '300px', 'padding-left' : '50px'}),
+            dcc.RadioItems(
+                id = "dataset_type",
+                options = [{'label': 'Training', 'value': 'Training'},
+                {'label': 'Testing', 'value': 'Testing'}],
+            )
         ]),
+
+        dbc.Col([
+            dcc.Input(id="file_new_name", type="text", placeholder="Enter the File Name"),
+        ]),
+
         dbc.Col([
             html.Button("Confirm and Upload", 
                         id = 'confirm_upload', 
@@ -64,7 +74,7 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
     Output('preview_data', 'data'),
     Output('dataframe', 'data'),
     Output('path', 'data'),
-    Output('filename', 'data'),
+    Output('oldfilename', 'data'),
     [Input('upload__data', 'filename'),
     Input('upload__data', 'contents')],
     prevent_initial_callback=True
@@ -86,26 +96,29 @@ def data_upload(filename, content):
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
-        file_name=os.path.splitext(filename)[0]
-        return df.to_dict('records'), df.to_json(), path, file_name
+        oldfilename=os.path.splitext(filename)[0]
+        return df.to_dict('records'), df.to_json(), path, oldfilename
     else:
         return dash.no_update
 
 @app.callback(
     Output('url_redirect', 'pathname'),
     Input('confirm_upload', 'n_clicks'),
-    State('type','data'),
+    State('oldfilename', 'data'),
+    State('file_new_name', 'value'),
+    State('dataset_type','value'),
     State('dataframe', 'data'),
     State('path', 'data'),
-    State('filename', 'data'),
     prevent_initial_callback = True
 )
-def upload_confirmation(nclicks, type, df, path, filename):
+def upload_confirmation(nclicks, oldfilename, newfilename, file_type, df, path):
     if nclicks>0:
         df = pd.read_json(df)
+        newfilename = newfilename + '_' + file_type
+        path = path.replace(oldfilename, newfilename)
         df.to_csv (path, index = False, header=True)
-        if filename is not None and current_user.get_id() is not None and path is not None:
-            ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = type, filename = filename)
+        if newfilename is not None and current_user.get_id() is not None and path is not None:
+            ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = file_type, filename = newfilename)
             conn = engine.connect()
             conn.execute(ins)
             conn.close()
@@ -114,10 +127,3 @@ def upload_confirmation(nclicks, type, df, path, filename):
             pass
     else:
         return dash.no_update
-
-@app.callback(
-    Output('type', 'data'),
-    Input('file-type', 'value')
-)
-def gettype(filetype):
-    return filetype

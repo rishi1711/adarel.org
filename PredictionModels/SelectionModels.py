@@ -37,10 +37,10 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
         df = df2
     df_col = list(df.columns)
     if "Unnamed" not in df_col[0]:
-        print("2")
+        # print("2")
         df.to_csv(datasetPath_test, index=True)
     else:
-        print("2")
+        # print("2")
         df.to_csv(datasetPath_test, index=False)   
 
 
