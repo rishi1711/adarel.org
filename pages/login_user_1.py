@@ -69,6 +69,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                     id ="Training Strategy Selection",
                                     options=[],
                                     placeholder = "Select Strategy",
+                                    multi=True,
                                 )
                             ])
                         ]),
@@ -100,27 +101,30 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     ]),
                 ],style = {'padding-bottom':'3rem'}),
 
-                dbc.Row([
-                    dbc.Row([
-                        html.H3(id = 'strategy-title'),
-                    ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
-                    dbc.Row([
-                        dbc.Col([
-                            html.Div(id = 'base-model', style={'text-align' : 'left', 'color' : '#686868'}),
-                            html.Div(id = 'param', style={'text-align' : 'left', 'color' : '#686868'}),
-                        ]),
-                        dbc.Col([
-                            html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
-                        ]),
-                    ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
-                    # dbc.Row([
-                    #     html.Button('Get a Quick Summary of Training Data', id = 'train submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '400px',  'margin-left' : '880px'}),
-                    # ]),
-                ], class_name='first_row'),
+   
+                html.Div(id ='training_details', children=[]),
+        
+                # dbc.Row([
+                #     dbc.Row([
+                #         html.H3(id = 'strategy-title'),
+                #     ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+                #     dbc.Row([
+                #         dbc.Col([
+                #             html.Div(id = 'base-model', style={'text-align' : 'left', 'color' : '#686868'}),
+                #             html.Div(id = 'param', style={'text-align' : 'left', 'color' : '#686868'}),
+                #         ]),
+                #         dbc.Col([
+                #             html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
+                #         ]),
+                #     ], style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+                #     # dbc.Row([
+                #     #     html.Button('Get a Quick Summary of Training Data', id = 'train submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '400px',  'margin-left' : '880px'}),
+                #     # ]),
+                # ], class_name='first_row'),
 
-                dbc.Row([
-                    html.Div(id ='training_summary'),
-                ]),
+                
+                
+                
 
     # dbc.Row([
     #     html.Div("", style={ 'background-color' : '#F8F8F8'}),
@@ -158,6 +162,15 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     ]),
                     dbc.Col([
                         html.Div([
+                            dcc.Dropdown( 
+                                id ="Final Strategy Selection",
+                                options=[],
+                                placeholder = "Select Strategy"
+                            )
+                        ]),
+                    ]),
+                    dbc.Col([
+                        html.Div([
                                 html.Button('Predict Entire Dataset', id = 'custom submit_id', n_clicks=0, style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '250px',  'margin-left' : '440px' }),
                                 html.Div(id="loading_c", className="loader", hidden='HIDDEN')
                         ]),
@@ -173,6 +186,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 @app.callback(
     Output(component_id='Training Data Selection', component_property='options'),
     Output(component_id='Training Strategy Selection', component_property='options'),
+    Output(component_id='Final Strategy Selection', component_property='options'),
     Output(component_id='Custom Data Selection', component_property='options'),
     [Input('file-list', 'children')],
     prevent_initial_callback = True
@@ -194,7 +208,7 @@ def get_training_datasets(filename):
     testing_datasets = testing_datasets.values.tolist()
     testing_datasets = [{'label' : i[1], 'value' : i[0]} for i in testing_datasets] 
 
-    return training_datasets, get_strategy, testing_datasets
+    return training_datasets, get_strategy, get_strategy, testing_datasets
 #---------------------------------------------------------------------------------------------------------------------------#
 
 # @app.callback(
@@ -277,43 +291,80 @@ def store_testingdata(value):
 
 @app.callback(
     Output('sstrategy', 'data'),
-    Output('strategy-title', 'children'),
-    Output('base-model', 'children'),
-    Output('param', 'children'),
-    Input('Training Strategy Selection', 'value'),
+    Input('Final Strategy Selection', 'value'),
     prevent_initial_callback = True
 )
-def store_strategy(value):
-    if value is not None:
-        conn = sqlite3.connect("./database/data.sqlite")
-        strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(value), conn)
-        strategy_title = strategy["strategy_name"].loc[0]
-        strategy_info = strategy["strategy_data"].loc[0]
-        info_dict = json.loads(strategy_info)
-        base_model = "Base Model: " + str(info_dict.get('name'))
-        del info_dict['name']
-        param = "Parameter: " + str(info_dict)
-        return value, strategy_title, base_model, param
-    return dash.no_update
+def store_testingdata(value):
+    return value
+
+# @app.callback(
+#     Output('sstrategy', 'data'), Output('strategy-title', 'children'), Output('base-model', 'children'), Output('param', 'children'),
+#     Input('Training Strategy Selection', 'value'),
+#     prevent_initial_callback = True
+# )
+# def store_strategy(value):
+#     if value is not None:
+#         print(value)
+#         conn = sqlite3.connect("./database/data.sqlite")
+#         strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(value), conn)
+#         strategy_title = strategy["strategy_name"].loc[0]
+#         strategy_info = strategy["strategy_data"].loc[0]
+#         info_dict = json.loads(strategy_info)
+#         base_model = "Base Model: " + str(info_dict.get('name'))
+#         del info_dict['name']
+#         param = "Parameter: " + str(info_dict)
+#         return value, strategy_title, base_model, param
+#     return dash.no_update
 #----------------------------------------------------------------------------------------------------------------------------#
 
 
 #-------------------------------------------------------rmse and mae value update--------------------------------------------#
 @app.callback(
-    # Output('bar_graph_values', 'data'),Output('mae_measure', 'data'), Output('rmse_measure', 'data'), 
-    Output('training_summary', 'children'),
-    Input('training submit_id', 'n_clicks'),
-    [State('trainingdata', 'data'),
-    State('sstrategy', 'data'),
-    State('testingdata', 'data')],
+    Output('training_details', 'children'),
+    [Input('training submit_id', 'n_clicks'),Input('Training Strategy Selection', 'value')],
+    [State('trainingdata', 'data'),State('testingdata', 'data')],
     prevent_initial_callback = True
 )
-def get_error_values(nclicks, t_dataset, strategy, c_dataset):
+def get_error_values(nclicks, value, t_dataset, c_dataset):
     if nclicks>0:
         if current_user.is_authenticated:
-            errors = call_predictions(t_dataset, c_dataset, strategy, "training")
-            # return errors[2], errors[0], errors[1]
-            return get_training_summary(errors[0], errors[1], errors[2])
+            if value is not None:
+                conn = sqlite3.connect("./database/data.sqlite")
+                children = [html.Div([dbc.Row([
+                                dbc.Col([
+                                    html.Div()
+                                ]),
+                                dbc.Col([
+                                    html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",style={'text-align' : 'left', 'color' : '#686868'} ),
+                                ]),
+                            ]),])]
+                for i in value:
+                    strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(i), conn)
+                    strategy_title = strategy["strategy_name"].loc[0]
+                    strategy_info = strategy["strategy_data"].loc[0]
+                    info_dict = json.loads(strategy_info)
+                    base_model = "Base Model: " + str(info_dict.get('name'))
+                    del info_dict['name']
+                    param = "Parameter: " + str(info_dict)
+                    intermediate = html.Div([dbc.Row([
+                                    dbc.Row([
+                                        html.H3(strategy_title),
+                                    ]),#, style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.Div(base_model, style={'text-align' : 'left', 'color' : '#686868'}),
+                                            html.Div(param, style={'text-align' : 'left', 'color' : '#686868'}),
+                                        ]),
+
+                                    ]),#, style= {'padding-bottom':'2rem', 'padding-top':'1rem'}),
+                                ], class_name='first_row'),])
+                    children.append(intermediate)
+                    errors = call_predictions(t_dataset, c_dataset, i, "training")
+                    children.append(get_training_summary(errors[0], errors[1], errors[2]))
+                
+                return children
+            else:
+                pass
         else:
             pass
     else:
@@ -324,7 +375,7 @@ def get_error_values(nclicks, t_dataset, strategy, c_dataset):
 
 
 def get_training_summary(mae, rmse, graph_values) -> html.Div :
-    itermediate = [
+    itermediate = html.Div([dbc.Row([
         dbc.Row([
             html.H3("Training Result Summary"),
         ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
@@ -339,8 +390,8 @@ def get_training_summary(mae, rmse, graph_values) -> html.Div :
                     dcc.Graph(figure= get_bar_graph(graph_values)),
                 ])
             ]),
-        ]),
-    ]
+        ]),]),])
+    
     return itermediate
 #----------------------------------------------------------------------------------------------------------------------------#
 def get_bar_graph(data3):
