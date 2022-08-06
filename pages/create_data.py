@@ -55,7 +55,7 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
         ]),
 
         dbc.Col([
-            dcc.Input(id="file_new_name", type="text", placeholder="Enter the File Name"),
+            dcc.Input(id="dataset_name", type="text", placeholder="Enter the Dataset Name"),
         ]),
 
         dbc.Col([
@@ -105,7 +105,7 @@ def data_upload(filename, content):
     Output('url_redirect', 'pathname'),
     Input('confirm_upload', 'n_clicks'),
     State('oldfilename', 'data'),
-    State('file_new_name', 'value'),
+    State('dataset_name', 'value'),
     State('dataset_type','value'),
     State('dataframe', 'data'),
     State('path', 'data'),
@@ -114,11 +114,12 @@ def data_upload(filename, content):
 def upload_confirmation(nclicks, oldfilename, newfilename, file_type, df, path):
     if nclicks>0:
         df = pd.read_json(df)
+        dataset_name = newfilename
         newfilename = newfilename + '_' + file_type
         path = path.replace(oldfilename, newfilename)
         df.to_csv (path, index = False, header=True)
         if newfilename is not None and current_user.get_id() is not None and path is not None:
-            ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = file_type, filename = newfilename)
+            ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = file_type, datasetname = dataset_name, filename = newfilename)
             conn = engine.connect()
             conn.execute(ins)
             conn.close()
