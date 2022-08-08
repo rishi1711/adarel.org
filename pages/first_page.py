@@ -10,6 +10,7 @@ from flask import g
 import sqlite3
 import dash
 
+#------------------------------------Front end of the logged-in user first page------------------------------------------------------------------------------------------------------------------------------------------#
 first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
     dbc.Row([
             html.H1("My Workspace", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem', 'padding-top' : '40px'}),
@@ -46,7 +47,10 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
                     ),
     ],class_name='button-style'),
     ], style = {'padding-bottom' : '6rem'})
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
+
+#------------------------------------Show the datasets and strategies associated with the user account in the form of table-------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('hi_statement', 'children'),
     Output('datalist', 'data'),
@@ -75,8 +79,10 @@ def showdata(nclicks):
     stratdf = pd.read_sql("""select strategy_name, strategy_data from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
     strategy = stratdf.to_dict('records')
     return data, datasets, strategy
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
+#-----------------------------------Redirect the user to different page-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_new_page','pathname'),
     [Input('create_strat', 'n_clicks'),
@@ -101,6 +107,7 @@ def redirect_to_new_page(nclick1, nclick2, nclicks3):
     else:
         pass
     return dash.no_update
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 

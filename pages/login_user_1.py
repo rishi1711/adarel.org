@@ -27,7 +27,7 @@ import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
 import plotly.express as px
 
-#-----Main layout-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------Front end of the Make New Prediction Page---------------------------------------------------------------------------------------------------------------------------------------------------------------
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                 dbc.Row([
                     html.H1("My Workspace > Make New Predictions", 
@@ -99,6 +99,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     dbc.Row([
                         html.Div(id ='file-list'),
                     ]),
+
                     dbc.Row([
                         html.H4("Step 3: Proceed to Predict!"),
                         html.Div("Select the dataset and strategy to be used for prediction.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
@@ -131,7 +132,8 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
             ])
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
+
+#---------------------------------Function to fetch the uploaded dataset and strategy from database---------------------------------------------------------------------#
 @app.callback(
     Output(component_id='Training Data Selection', component_property='options'),
     Output(component_id='Training Strategy Selection', component_property='options'),
@@ -158,7 +160,7 @@ def get_training_datasets(filename):
     testing_datasets = [{'label' : i[1], 'value' : i[0]} for i in testing_datasets] 
 
     return training_datasets, get_strategy, get_strategy, testing_datasets
-#---------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 #---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -195,6 +197,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
     return dash.no_update
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
 #-------Driver to call the method for training and testing the data-----------------------------------------------------------------------------------------
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     conn = sqlite3.connect("./database/data.sqlite")
@@ -212,6 +215,7 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type)
     return errors
 #--------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #-------------------------------------------------------dcc.store elements update------------------------------------------#
 @app.callback(
@@ -240,7 +244,7 @@ def store_testingdata(value):
 #----------------------------------------------------------------------------------------------------------------------------#
 
 
-#--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('training_details', 'children'),
     [Input('training submit_id', 'n_clicks'),Input('Training Strategy Selection', 'value')],
@@ -297,9 +301,9 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
     else:
         pass
     return dash.no_update
-#------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------#
 
-#----------Display mae and rmse errors--------------------------------------------------------
+#----------Display mae and rmse errors-----------------------------------------------------------------------------------------------------#
 def get_training_summary(mae, rmse, graph_values) -> html.Div :
     itermediate = html.Div([dbc.Row([
         dbc.Row([
@@ -319,12 +323,12 @@ def get_training_summary(mae, rmse, graph_values) -> html.Div :
         ]),]),])
     
     return itermediate
-#----------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------#
 
-#-------Display summary bar graph----------------------------------------------------------------------------------------------
+#-------Display summary bar graph----------------------------------------------------------------------------------------------#
 def get_bar_graph(data3):
     x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
     fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'frequency'})
     fig.update_xaxes(type='category')
     return fig
-#------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------#
