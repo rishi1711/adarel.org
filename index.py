@@ -3,9 +3,8 @@ from waitress import serve
 from dash import html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from navbar import navbar
-
 from app import app
+
 from pages import first_page
 from pages.home_page import home_page
 from pages.data1 import data1
@@ -23,6 +22,8 @@ from pages.first_page import first_page
 from pages.main_page import main_page
 from pages.about import about
 from pages.create_data import create_data
+from pages.logout import logout
+from navbar import navbar
 import sqlite3
 import pandas as pd
 
@@ -72,6 +73,8 @@ def unauthorized_callback():
        return '/login'
 
 #-------------------------------------------------------------------------------------------------------------------
+
+
 
 app.title="AdaRel"
 
@@ -158,6 +161,8 @@ def router(pathname, data, training, strategy, testing):
         return login_user_1
     elif pathname == '/create_data':
         return create_data
+    elif pathname == '/logout':
+        return logout
     else:
         return 'Error 404'
 

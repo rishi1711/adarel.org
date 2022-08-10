@@ -52,8 +52,8 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                         ]),
                         dbc.Col([
                             html.Div([
-                                html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, 
-                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                # html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, 
+                                # style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ],class_name = 'button__style__uploaddata'),
                         dbc.Col([
@@ -88,7 +88,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 
                         dbc.Col([
                             html.Div([
-                                html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                # html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ]),
                     ],style = {'padding-bottom':'3rem'}),
@@ -128,7 +128,10 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                             ]),
                         ]),
                     ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
-                ])
+                    dbc.Row([
+                             html.Button('Back to Home', id = 'home', n_clicks=0, style= {'background-color' : '#2C2B2B', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '150px',  'margin-left' : '440px'}),
+                    ], style={'padding-left':'160px', 'padding-bottom': '1.5rem'}),
+                ], class_name= "page-view")
             ])
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -166,30 +169,36 @@ def get_training_datasets(filename):
 #---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
-    Input('create_strategy', 'n_clicks'),
+    # Input('create_strategy', 'n_clicks'),
     Input('custom submit_id', 'n_clicks'),
-    Input('upload_dataset', 'n_clicks'),
+    # Input('upload_dataset', 'n_clicks'),
+    Input('home', 'n_clicks'),
     State('trainingdata', 'data'),
     State('sstrategy', 'data'),
     State('testingdata', 'data'),
     prevent_initial_callback = True
 )
-def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset):
+def training_redirection(n_clicks1, n_clicks2, t_dataset, strategy, c_dataset):
     id = ctx.triggered_id
-    if id == "upload_dataset":
-        if current_user.is_authenticated:
-            return '/create_data'
-        else:
-            pass
-    elif id == "create_strategy":
-        if current_user.is_authenticated:
-            return '/strategy'
-        else:
-            pass
-    elif id == "custom submit_id":
+    # if id == "upload_dataset":
+    #     if current_user.is_authenticated:
+    #         return '/create_data'
+    #     else:
+    #         pass
+    # elif id == "create_strategy":
+    #     if current_user.is_authenticated:
+    #         return '/strategy'
+    #     else:
+    #         pass
+    if id == "custom submit_id":
         if current_user.is_authenticated:
             call_predictions(t_dataset, c_dataset, strategy, "testing")
             return '/2021data'
+        else:
+            pass
+    elif id == "home":
+        if current_user.is_authenticated:
+            return '/first_page'
         else:
             pass
     else:

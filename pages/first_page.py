@@ -43,7 +43,7 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
         html.Button("Create New Predictions >", 
                     id = 'create_pred', 
                     n_clicks=0,
-                    style= {'background-color' : '#009933', 'color' : 'white', 'border-radius' : '5px'}
+                    style= {'background-color' : '#009933', 'color' : 'white', 'border-radius' : '5px', 'border': 'none', 'width':'500px', 'height':'32px'}
                     ),
     ],class_name='button-style'),
     ], style = {'padding-bottom' : '6rem'})
