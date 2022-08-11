@@ -54,12 +54,14 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
                 id = "dataset_type",
                 options = [{'label': 'Training', 'value': 'Training'},
                 {'label': 'Testing', 'value': 'Testing'}],
+                value = 'Training'
             )
         ]),
 
         dbc.Col([
             #To input the name of the file.
-            dcc.Input(id="dataset_name", type="text", placeholder="Enter the Dataset Name"),
+            # dcc.Input(id="dataset_name", type="text", placeholder="Enter the Dataset Name"),
+            html.Div(id = "choice"),
         ]),
 
         dbc.Col([
@@ -115,16 +117,22 @@ def data_upload(filename, content):
     Output('url_redirect', 'pathname'),
     Input('confirm_upload', 'n_clicks'),
     State('oldfilename', 'data'),
-    State('dataset_name', 'value'),
+    State('inputvalue', 'data'),
+    State('dropdownvalue','data'),
     State('dataset_type','value'),
     State('dataframe', 'data'),
     State('path', 'data'),
     prevent_initial_callback = True
 )
-def upload_confirmation(nclicks, oldfilename, newfilename, file_type, df, path):
+
+def upload_confirmation(nclicks, oldfilename, inputvalue, dropdownvalue, file_type, df, path):
     if nclicks>0:
         df = pd.read_json(df)
-        dataset_name = newfilename
+        if inputvalue is not None:
+            dataset_name = inputvalue
+        else:
+            dataset_name = dropdownvalue
+        newfilename = dataset_name
         newfilename = newfilename + '_' + file_type
         path = path.replace(oldfilename, newfilename)
         df.to_csv (path, index = False, header=True)
@@ -138,4 +146,60 @@ def upload_confirmation(nclicks, oldfilename, newfilename, file_type, df, path):
             pass
     else:
         return dash.no_update
-        
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+#----------------Select/Input dataset name on the basis of radiobutton----------------------------------------------------------------------------------------------------------------#
+@app.callback(
+    Output('choice', 'children'),
+    Input('dataset_type', 'value'),
+    prevent_initial_callback = True
+)
+
+def give_user_choice(value):
+    if value == 'Training':
+        return dcc.Input(id="dataset_nameInput", type="text", placeholder="Enter the Dataset Name")
+    elif value == 'Testing':
+        return dcc.Dropdown(id = "dataset_nameDropdown", options=[], placeholder = "Select Dataset Name", style = {'width': '12rem'})
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+#----------------Fill the dropdown options--------------------------------------------------------------------------------------------------------------------------------------------#
+@app.callback(
+    Output('dataset_nameDropdown', 'options'),
+    Input('choice', 'children'),
+    prevent_initial_callback = True
+)
+
+def get_options_for_dropdown(data):
+    conn = sqlite3.connect("./database/data.sqlite")
+    g.user = current_user.get_id()
+    id = g.user
+
+    name = pd.read_sql("""select datasetname from files where user_id = '{}' and filetype = '{}'""".format(id, "Training"), conn)
+    name = name.values.tolist()
+    name = [{'label' : i[0], 'value' : i[0]} for i in name]
+    return name
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+#----------------Store value selected in dropdown-------------------------------------------------------------------------------------------------------------------------------------#
+@app.callback(
+    Output('dropdownvalue', 'data'),
+    Input('dataset_nameDropdown', 'value')
+)
+
+def getdatanamefromdropdown(value):
+    return value
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+#----------------Store value inputted in textbox--------------------------------------------------------------------------------------------------------------------------------------#
+@app.callback(
+    Output('inputvalue', 'data'),
+    Input('dataset_nameInput', 'value'),
+)
+
+def getdatanamefrominput(value):
+    return value
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#

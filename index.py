@@ -96,6 +96,8 @@ app.layout = html.Div([
         dcc.Store(id="dataframe", storage_type="session"),
         dcc.Store(id="path", storage_type="session"),
         dcc.Store(id="oldfilename", storage_type="session"),
+        dcc.Store(id="inputvalue", storage_type="session"),
+        dcc.Store(id="dropdownvalue", storage_type="session"),
 
         dbc.Container([                
             # html.Div([
