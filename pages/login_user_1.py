@@ -81,13 +81,15 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 
                         dbc.Col([
                             html.Div([
-                                html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
-                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                            #     html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
+                            #     style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ]),
 
                         dbc.Col([
                             html.Div([
+                                html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
+                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                                 # html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ]),
@@ -269,10 +271,10 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                 dbc.Col([
                                     html.Div()
                                 ]),
-                                dbc.Col([
-                                    html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",
-                                    style={'text-align' : 'left', 'color' : '#686868'} ),
-                                ]),
+                                # dbc.Col([
+                                #     html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",
+                                #     style={'text-align' : 'left', 'color' : '#686868'} ),
+                                # ]),
                             ]),])]
                 #based on multiple strategies selected, display appropriate details
                 for i in value:
@@ -301,7 +303,6 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                     errors = call_predictions(t_dataset, c_dataset, i, "training")
                     #the method to display the summary graph
                     children.append(get_training_summary(errors[0], errors[1], errors[2]))
-                
                 return children
             else:
                 pass

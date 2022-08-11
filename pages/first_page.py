@@ -9,6 +9,7 @@ from flask_login import current_user
 from flask import g
 import sqlite3
 import dash
+import json
 
 #------------------------------------Front end of the logged-in user first page------------------------------------------------------------------------------------------------------------------------------------------#
 first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
@@ -27,7 +28,7 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
             html.Button("Create New Data", 
                         id = 'create_data', 
                         n_clicks=0,
-                        style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'margin-left' : '450px'}),
+                        style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'margin-left' : '250px'}),
         ]),
         dbc.Col([
             html.H3("My Strategies"),
@@ -36,7 +37,7 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
             html.Button("Create New Strategy", 
                         id = 'create_strat', 
                         n_clicks=0,
-                        style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'margin-left' : '440px' }),
+                        style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'margin-left' : '250px' }),
         ]),
     ]),
     dbc.Row([
@@ -65,19 +66,22 @@ def showdata(nclicks):
 
     datasets = pd.read_sql("""select filename, filetype from files where user_id = '{}'""".format(current_user.get_id()), conn)
     datasets = datasets.to_dict('records')
-    # df = datasets
-    # df1 = pd.DataFrame(columns = ['Dataset Name', 'Training', 'Testing'])
-    # len(df1)
-    # if df is not None:
-    #     for index in df.index:
-    #         temp = pd.read_sql("""select datasetname, filetype from files where user_id = '{}' and datasetname = '{}'""".format(current_user.get_id(), df['datasetname'][index]), conn) 
-    #         if len(temp) == 2:
-    #             df1.loc[len(df1.index)] = [temp['datasetname'].loc[0], temp['datasetname'].loc[0] + "_Training", temp['datasetname'].loc[0] + "_Testing"]  
-    #             df = df.drop(df[df['datasetname'] == temp['datasetname'].loc[0]].index, inplace = True)
-    # df1 = df1.to_dict('records')
+    
 
-    stratdf = pd.read_sql("""select strategy_name, strategy_data from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
-    strategy = stratdf.to_dict('records')
+    strategy_name = pd.read_sql("""select strategy_name from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
+    strat_data = pd.read_sql("""select strategy_data from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
+    
+
+    l = []
+    for i in strat_data["strategy_data"]:
+        temp = json.loads(str(i))
+        temp = list(temp.values())
+        l.append(str(temp))
+
+    strategy_data = pd.DataFrame(l, columns = ['Strategy Data'])
+
+    strategy = pd.concat([strategy_name, strategy_data], join = 'outer', axis = 1)
+    strategy = strategy.to_dict('records')
     return data, datasets, strategy
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 

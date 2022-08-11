@@ -176,10 +176,14 @@ def get_options_for_dropdown(data):
     g.user = current_user.get_id()
     id = g.user
 
-    name = pd.read_sql("""select datasetname from files where user_id = '{}' and filetype = '{}'""".format(id, "Training"), conn)
-    name = name.values.tolist()
-    name = [{'label' : i[0], 'value' : i[0]} for i in name]
-    return name
+    name = pd.read_sql("""select datasetname from files where user_id = '{}'""".format(id), conn)
+    count = name['datasetname'].value_counts()
+    l = []
+    for item in count.iteritems():
+        if item[1]==1:
+            l.append(item[0])
+    dropdownlist = [{'label' : i, 'value' : i} for i in l]
+    return dropdownlist
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
