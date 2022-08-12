@@ -82,8 +82,12 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                 dbc.Row([
                                     dbc.Col([
                                         dbc.Row([
-                                            html.Div(["Observation Window"])
-                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                            dbc.Col([
+                                                html.H6(["Observation Window"]),
+                                            ]),
+                                            dbc.Col([
+                                                html.Abbr("?",title = "The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on."),
+                                            ]),    
                                         ]),
                                         dbc.Row([
                                             dbc.Col([
@@ -98,10 +102,13 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                         ])    
                                     ]),
                                     dbc.Col([
-                                        # html.Div("The number of consecutive anomaly points to trigger trend change")
                                         dbc.Row([
-                                            html.Div(["Anomaly Window"])
-                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                        dbc.Col([
+                                            html.H6(["Anomaly Window"]),
+                                        ]),
+                                        dbc.Col([
+                                            html.Abbr("?",title = "The number of consecutive anamoly points to trigger trend change."),
+                                        ]),
                                         ]),
                                         dbc.Row([
                                             dbc.Col([
@@ -115,25 +122,24 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                             ])                           
                                         ])
                                     ]),
+        
                                     dbc.Col([
-                                        # html.Div("The coefficient. If the error of current prediction is this number times the average error, the current point will be marked as anomaly as well.")
                                         dbc.Row([
-                                            html.Div(["Thresold"])
-                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                        dbc.Col([
+                                            html.H6(["Threshold"]),
                                         ]),
-                                        dbc.Row([
-                                            dbc.Col([
-                                                dcc.Input(
-                                                    id = "thresold",
-                                                    value = 2,
-                                                    style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '34px', 'width' : '20rem'}
-                                                ),
-                                            ]),                        
-                                        ])
+                                        dbc.Col([
+                                            html.Abbr("?",title = "The coefficient. If the error of the current prediction is larger than this number times the average error, thecurrent point will be marked as anomaly as well."),
+                                        ]),
+                                        ]),
+                                            dcc.Input(
+                                                id = "thresold",
+                                                value = 2,
+                                        ),                     
                                     ])
-                                ]),
+                                ], style = {'padding-bottom':'1rem'}),
                                 dbc.Row([
-                                    html.Div("Anomaly Detection Method:")
+                                    html.H3("Anomaly Detection Method:")
                                 ]),
                                 dbc.Row([
                                     dbc.Col([
@@ -145,13 +151,13 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                         )
                                     ]),
                                     dbc.Col([
-                                        html.Label("Z-value: "),
+                                        html.Label("Z-value : "),
                                         dcc.Input(
                                             id="z-value",
                                             value=1.96,
-                                            style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '34px', 'width' : '20rem'}
+                                            style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '34px', 'width' : '11.5rem'}
                                         )
-                                    ]),                           
+                                    ], style = {'padding-left':'20rem'}),                           
                                 ]),
                                 dbc.Row([
                                     dbc.Col([
@@ -160,10 +166,10 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 
                                     dbc.Col([
                                         html.Div([
-                                            html.Button('confirm',id = "anomaly_confirm",
-                                                style= {'background-color' : '#0000ff', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                            html.Button('Confirm',id = "anomaly_confirm",
+                                                style= {'background-color' : '#0000ff', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '100px', 'margin-left' : '250px'}),
                                         ]),
-                                    ]),
+                                    ], style = {'padding-top':'1rem'}),
 
                                 ]),
                                 
@@ -171,7 +177,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                         ),
                         id="collapse",
                         is_open=False,
-                    ),
+                        style = {'padding-bottom':'1rem'}),
                     html.Div(id="output", children=[]),
 
                     dbc.Row([
