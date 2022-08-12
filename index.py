@@ -93,7 +93,7 @@ app.layout = html.Div([
         dcc.Store(id = "bar_graph_values", storage_type="session"),
 
         # create data page
-        dcc.Store(id="dataframe", storage_type="session"),
+        dcc.Store(id="dataframe", storage_type="memory"),
         dcc.Store(id="path", storage_type="session"),
         dcc.Store(id="oldfilename", storage_type="session"),
         dcc.Store(id="inputvalue", storage_type="session"),
@@ -141,8 +141,8 @@ def router(pathname, data, training, strategy, testing):
         return data3
     elif pathname == '/data4':
         return data4
-    # elif pathname == '/live':
-    #     return live_page
+    elif pathname == '/live':
+        return live_page
     elif pathname == '/2021data_1':
         return p21.dataset_1(data)
     elif pathname == '/2021data_2':
@@ -173,8 +173,8 @@ def router(pathname, data, training, strategy, testing):
 
 
 if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    # DEBUG = True
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    DEBUG = True
     if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
     else:# prod

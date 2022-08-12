@@ -31,6 +31,9 @@ def test():
 #----------------------------------------------Front end of the Demo page------------------------------------------------------------------------------------------------------------------------------------------#
 home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
     dbc.Row([
+        dcc.Link("Connect to LIVE DATA", href = '/live'),
+    ], style = {'padding-top':'2rem'}),
+    dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
         html.H4("DEMO DATA"),
         html.Div("You will be able to see how AdaRel performs on our collected dataset."),
