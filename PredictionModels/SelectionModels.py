@@ -311,19 +311,16 @@ def calculate_anomaly(dataset, anomaly_values, columnName):
             dname = columnName + '_Anomaly'
             if ob_window+i+2 < len(dataset):
                 # First way using lower bound
-                print(lower_bound)
                 if dataset[columnName].iloc[ob_window+i+2] < lower_bound:
                     count=count+1
-                    print("if",count)
                     dataset.loc[dataset.index[ob_window+i+2], dname] = True
                 else:
                     count=0
-                    print("else", count)
                     dataset.loc[dataset.index[ob_window+i+2], dname] = False
                 # Finding if there are consucutive anomalies
                 if count >= a_window:
                     count=0
-                    print(str(a_window) + " consecutive anomalies")
+                    # print(str(a_window) + " consecutive anomalies")
                 else:
                     pass
                 # ## Second way to calculate anomaly using thresold
