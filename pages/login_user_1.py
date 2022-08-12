@@ -1,3 +1,4 @@
+from re import I
 from tkinter import HIDDEN
 from turtle import width
 from dash.exceptions import PreventUpdate
@@ -210,7 +211,9 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                             ]),
                         ]),
                     ],style = {'padding-bottom':'3rem'}),
-
+                    dbc.Row([
+                                    html.H3("Training Result Summary"),
+                    ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
                     #The training summary and the details of the model selected are dynamically filled over here.  
                     html.Div(id ='training_details', children=[]),
 
@@ -393,6 +396,8 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                 # ]),
                             ]),])]
                 #based on multiple strategies selected, display appropriate details
+                err = []
+                strat = []
                 for i in value:
                     strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(i), conn)
                     strategy_title = strategy["strategy_name"].loc[0]
@@ -402,7 +407,8 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                     del info_dict['name']
                     param = "Parameter: " + str(info_dict)
                     #display information of strategy
-                    intermediate = html.Div([dbc.Row([
+                    intermediate = html.Div([                                
+                                dbc.Row([
                                     dbc.Row([
                                         html.H3(strategy_title),
                                     ]),
@@ -418,8 +424,14 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                     data = {}
                     #call method for training the model on training data
                     errors, dataframe = call_predictions(t_dataset, c_dataset, i, "training", data)
+                    err.append(errors[2])
+                    children.append(get_error_plot(errors[0], errors[1]))
+                    strat.append(strategy_title)
                     #the method to display the summary graph
-                    children.append(get_training_summary(errors[0], errors[1], errors[2]))
+                intermediate =  html.Div([
+                    dcc.Graph(figure= get_bar_graph(err, strat)),
+                ])
+                children.append(intermediate)
                 return children
             else:
                 pass
@@ -431,31 +443,31 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
 #------------------------------------------------------------------------------------------------------------------------------------------#
 
 #----------Display mae and rmse errors-----------------------------------------------------------------------------------------------------#
-def get_training_summary(mae, rmse, graph_values) -> html.Div :
+def get_error_plot(mae, rmse) -> html.Div :
     itermediate = html.Div([dbc.Row([
-        dbc.Row([
-            html.H3("Training Result Summary"),
-        ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
-
         dbc.Row([
             dbc.Col([
                 html.Div("Mean Absolute Error:   " + str('{0:.6g}'.format(mae))),
                 html.Div("Root Mean Squared Error:   " + str('{0:.6g}'.format(rmse))),
-            ], width=3),
-            dbc.Col([
-                html.Div([
-                    dcc.Graph(figure= get_bar_graph(graph_values)),
-                ])
-            ]),
-        ]),]),])
-    
+            ], width=3,class_name='first_row' ),
+        ]),]),
+        
+        ])
     return itermediate
 #----------------------------------------------------------------------------------------------------------------------------#
 
 #-------Display summary bar graph----------------------------------------------------------------------------------------------#
-def get_bar_graph(data3):
-    x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
-    fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'frequency'})
+def get_bar_graph(err, strategy):
+    x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']  
+    df1 = pd.DataFrame (x, columns = ['x'])
+    df2 = pd.DataFrame(err)
+    df2 = df2.transpose()
+    i=0
+    for col in df2.columns[:]:
+        df2 = df2.rename(columns={col:strategy[i]})
+        i = i+1
+    df = pd.concat([df1, df2], axis=1)
+    fig = px.bar(df,x=x, y=strategy, labels={'x':'intervals', 'y' : 'frequency'})
     fig.update_xaxes(type='category')
     return fig
 #------------------------------------------------------------------------------------------------------------------------------
