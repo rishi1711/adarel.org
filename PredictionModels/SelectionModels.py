@@ -1,5 +1,4 @@
 # For training and testing of the models
-
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.arima.model import ARIMA
@@ -14,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 #------- Differentiate between whether it is for training or for testing and calls the method accordingly---------------------------------------------------------------- 
-def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, strategyData, type):
+def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, strategyData, type, anomaly_values):
     df = pd.read_csv(datasetPath_train, encoding='utf-8') 
     columnName = strategyName
     if type == "training":
@@ -31,7 +30,7 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
         mae = calculate_mae(value1, value2)
         #calculate root mean squared error
         rmse = calculate_rmse(value1, value2)
-        return [mae, rmse, summary]
+        return [mae, rmse, summary], df
     elif type == "testing":
         df2 = pd.read_csv(datasetPath_test, encoding='utf-8') 
         index2 = len(df)
@@ -45,15 +44,43 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
         if columnName in df2.columns:
             df2.drop([columnName], axis=1, inplace=True)
         df2 = pd.concat([df2, d1], axis=1)
-        df2.drop(['index'], axis=1, inplace=True)
-        df = df2
+        if not anomaly_values == {}:
+            switch = anomaly_values['switch']
+        else:
+            switch = False
+        # anomaly calculation
+        if switch == True:
+            dataset, dname = calculate_anomaly(dataset, anomaly_values, columnName)
+            if dname in df2.columns:
+                df2.drop([dname], axis=1, inplace=True)
+            if dname in df.columns:
+                df.drop([dname], axis=1, inplace=True)
+            d2 = dataset[dname].iloc[index2:]
+            d3 = dataset[dname].iloc[:index2]
+            d2 = d2.reset_index()
+            d3 = d3.reset_index()
+            df2 = pd.concat([df2, d2], axis=1)
+            df = pd.concat([df, d3], axis=1)
+            df.drop(['index'], axis=1, inplace=True)
+        else:
+            pass
 
-    # Writing back to the csv file 
-    df_col = list(df.columns)
-    if "Unnamed" not in df_col[0]:
-        df.to_csv(datasetPath_test, index=True)
+        df2.drop(['index'], axis=1, inplace=True)
+    # Writing back to the testing csv file 
+    df2_col = list(df2.columns)
+    if "Unnamed" not in df2_col[0]:
+        df2.to_csv(datasetPath_test, index=True)
     else:
-        df.to_csv(datasetPath_test, index=False)   
+        df2.to_csv(datasetPath_test, index=False)   
+    if switch == True:
+        # Writing back to the testing csv file 
+        df_col = list(df.columns)
+        if "Unnamed" not in df_col[0]:
+            df.to_csv(datasetPath_train, index=True)
+        else:
+            df.to_csv(datasetPath_train, index=False)  
+    else:
+        pass 
 #------------------------------------------------------------------------------------------------------------------------------
 
 #-----Function to train the model using training data and then predicting the values of testing dataset
@@ -260,4 +287,50 @@ def get_prediction(value1, value2):
         else:
             cnt1[8] += 1
     return cnt1
-        
+#------------------------------------------------------------------------------------------------------------------------------
+
+
+#-----calculate anomaly--------------------------------------------------------------------------------------------------------------
+def calculate_anomaly(dataset, anomaly_values, columnName):
+    ob_window = anomaly_values['ob_window']
+    zvalue = anomaly_values['zvalue']
+    switch = anomaly_values['switch']
+    a_window = anomaly_values['a_window']
+    thresold = anomaly_values['thresold']
+    i=0
+    if switch == True:
+        count = 0
+        while i+ob_window < len(dataset)-1:
+            training_data = dataset[columnName].iloc[i:ob_window+i+1]
+            true_value = dataset['true value'].iloc[i:ob_window+i+1]
+            i=i+1
+            mean = np.average(training_data)
+            std = np.std(training_data)
+            lower_bound = max( mean - zvalue * std/(len(training_data)**0.5) , 0)
+            mae = calculate_mae(training_data, true_value)
+            dname = columnName + '_Anomaly'
+            if ob_window+i+2 < len(dataset):
+                # First way using lower bound
+                print(lower_bound)
+                if dataset[columnName].iloc[ob_window+i+2] < lower_bound:
+                    count=count+1
+                    print("if",count)
+                    dataset.loc[dataset.index[ob_window+i+2], dname] = True
+                else:
+                    count=0
+                    print("else", count)
+                    dataset.loc[dataset.index[ob_window+i+2], dname] = False
+                # Finding if there are consucutive anomalies
+                if count >= a_window:
+                    count=0
+                    print(str(a_window) + " consecutive anomalies")
+                else:
+                    pass
+                # ## Second way to calculate anomaly using thresold
+                # if dataset[columnName].iloc[ob_window+i+2] < thresold * mae and dataset.loc[dataset.index[ob_window+i+2], dname] == False:
+                #     dataset.loc[dataset.index[ob_window+i+2], dname] = True
+                # else:
+                #     pass
+    else: 
+        pass
+    return dataset, dname

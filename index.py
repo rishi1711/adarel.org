@@ -10,7 +10,7 @@ from pages import first_page
 from pages.home_page import home_page
 from pages.data1 import data1
 from pages.data2 import data2
-from pages.data3 import data3
+from pages.data3 import data3 
 from pages.data4 import data4
 from pages import playground
 from pages import pages2021 as p21
@@ -94,6 +94,9 @@ app.layout = html.Div([
         dcc.Store(id="path", storage_type="session"),
         dcc.Store(id="oldfilename", storage_type="session"),
 
+        #anomalyDetection
+        dcc.Store(id="anomaly_values", storage_type="session"),
+
         dbc.Container([                
             # html.Div([
             #     html.H1("AdaRel"),
@@ -162,20 +165,20 @@ def router(pathname, data, training, strategy, testing):
         return 'Error 404'
 
 
-# if __name__ == '__main__':
-#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#     # DEBUG = True
-#     if DEBUG:
-#         app.run_server(debug=True, host='0.0.0.0') # Development 
-#     else:# prod
-#         serve(app.server, host="0.0.0.0", port="8050") 
-
-
 if __name__ == '__main__':
-    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-   DEBUG = True
-   if DEBUG:
+    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+    # DEBUG = True
+    if DEBUG:
         app.run_server(debug=True, host='0.0.0.0') # Development 
-   else:# prod
+    else:# prod
         serve(app.server, host="0.0.0.0", port="8050") 
-        # remember to clear the cache-directory on startup in prod 
+
+
+# if __name__ == '__main__':
+#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#    DEBUG = True
+#    if DEBUG:
+#         app.run_server(debug=True, host='0.0.0.0') # Development 
+#    else:# prod
+#         serve(app.server, host="0.0.0.0", port="8050") 
+#         # remember to clear the cache-directory on startup in prod 

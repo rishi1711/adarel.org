@@ -65,6 +65,116 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     ],style = {'padding-bottom':'3rem', 'padding-top':'1rem'}),
 
                     dbc.Row([
+                        html.H4("Optional: Use Anomaly Detection?"),
+                        html.Div("Anomaly Detection allows you to eliminate outliers and improve the performance of the prediction",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
+                        dbc.Col([
+                            dbc.Switch(
+                                id = "switch",
+                                label = "Anomaly Detection off",
+                                value=False
+                            ),
+                        ]),
+                    ]),
+                    
+                    dbc.Collapse(
+                        dbc.Card(
+                            dbc.CardBody([
+                                dbc.Row([
+                                    dbc.Col([
+                                        dbc.Row([
+                                            html.Div(["Observation Window"])
+                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                        ]),
+                                        dbc.Row([
+                                            dbc.Col([
+                                                dbc.Input(
+                                                    id = "observation_window",
+                                                    value = 24,
+                                                ),
+                                            ]),
+                                            dbc.Col([
+                                                html.Div("hr")
+                                            ])                           
+                                        ])    
+                                    ]),
+                                    dbc.Col([
+                                        # html.Div("The number of consecutive anomaly points to trigger trend change")
+                                        dbc.Row([
+                                            html.Div(["Anomaly Window"])
+                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                        ]),
+                                        dbc.Row([
+                                            dbc.Col([
+                                                dbc.Input(
+                                                    id = "anomly_window",
+                                                    value = 3,
+                                                ),
+                                            ]),
+                                            dbc.Col([
+                                                html.Div("hr")
+                                            ])                           
+                                        ])
+                                    ]),
+                                    dbc.Col([
+                                        # html.Div("The coefficient. If the error of current prediction is this number times the average error, the current point will be marked as anomaly as well.")
+                                        dbc.Row([
+                                            html.Div(["Thresold"])
+                                            # html.Div("The observation window determines the length of cycle, and the window size where the number of samples will be performed anomaly detection on.")
+                                        ]),
+                                        dbc.Row([
+                                            dbc.Col([
+                                                dcc.Input(
+                                                    id = "thresold",
+                                                    value = 2,
+                                                    style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '34px', 'width' : '20rem'}
+                                                ),
+                                            ]),                        
+                                        ])
+                                    ])
+                                ]),
+                                dbc.Row([
+                                    html.Div("Anomaly Detection Method:")
+                                ]),
+                                dbc.Row([
+                                    dbc.Col([
+                                        dcc.Dropdown(
+                                            id= "detection_method",
+                                            placeholder="Select Detection method",
+                                            options=["CIAnomaly"],
+                                            value = "CIAnomaly"
+                                        )
+                                    ]),
+                                    dbc.Col([
+                                        html.Label("Z-value: "),
+                                        dcc.Input(
+                                            id="z-value",
+                                            value=1.96,
+                                            style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '34px', 'width' : '20rem'}
+                                        )
+                                    ]),                           
+                                ]),
+                                dbc.Row([
+                                    dbc.Col([
+
+                                    ]),
+
+                                    dbc.Col([
+                                        html.Div([
+                                            html.Button('confirm',id = "anomaly_confirm",
+                                                style= {'background-color' : '#0000ff', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                        ]),
+                                    ]),
+
+                                ]),
+                                
+                            ])
+                        ),
+                        id="collapse",
+                        is_open=False,
+                    ),
+                    html.Div(id="output", children=[]),
+
+                    dbc.Row([
                         html.H4("Step 2: Select a Prediction Strategy"),
                         html.Div("A Strategy is the collection of prediction models and its parameters.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : ''}),
                         html.Div("Either select an existing strategy or create a new one.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
@@ -160,19 +270,16 @@ def get_training_datasets(filename):
     return training_datasets, get_strategy, get_strategy, testing_datasets
 #---------------------------------------------------------------------------------------------------------------------------#
 
-
 #---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
     Input('create_strategy', 'n_clicks'),
     Input('custom submit_id', 'n_clicks'),
     Input('upload_dataset', 'n_clicks'),
-    State('trainingdata', 'data'),
-    State('sstrategy', 'data'),
-    State('testingdata', 'data'),
+    [State('trainingdata', 'data'), State('sstrategy', 'data'), State('testingdata', 'data'), State('anomaly_values', 'data')],
     prevent_initial_callback = True
 )
-def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset):
+def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset, anomaly_values):
     id = ctx.triggered_id
     if id == "upload_dataset":
         if current_user.is_authenticated:
@@ -186,7 +293,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
             pass
     elif id == "custom submit_id":
         if current_user.is_authenticated:
-            call_predictions(t_dataset, c_dataset, strategy, "testing")
+            call_predictions(t_dataset, c_dataset, strategy, "testing", anomaly_values)
             return '/2021data'
         else:
             pass
@@ -196,7 +303,7 @@ def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #-------Driver to call the method for training and testing the data-----------------------------------------------------------------------------------------
-def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
+def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type, anomaly_values):
     conn = sqlite3.connect("./database/data.sqlite")
     df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(train_dataset_id), conn)
     df_strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(strategy_id), conn)
@@ -209,7 +316,7 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type):
     strategyName = df_strategy["strategy_name"].loc[0]
     strategyData = df_strategy["strategy_data"].loc[0]
     json_val = json.loads(strategyData)
-    errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type)
+    errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type, anomaly_values)
     return errors
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -238,7 +345,6 @@ def store_testingdata(value):
 def store_testingdata(value):
     return value
 #----------------------------------------------------------------------------------------------------------------------------#
-
 
 #--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
@@ -284,11 +390,11 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                     ]),
                                 ], class_name='first_row'),])
                     children.append(intermediate)
+                    data = {}
                     #call method for training the model on training data
-                    errors = call_predictions(t_dataset, c_dataset, i, "training")
+                    errors, dataframe = call_predictions(t_dataset, c_dataset, i, "training", data)
                     #the method to display the summary graph
                     children.append(get_training_summary(errors[0], errors[1], errors[2]))
-                
                 return children
             else:
                 pass
@@ -328,3 +434,39 @@ def get_bar_graph(data3):
     fig.update_xaxes(type='category')
     return fig
 #------------------------------------------------------------------------------------------------------------------------------
+
+#------Anomaly Detection Card------------------------------------------------------------------------------------------------------------
+@app.callback(
+    Output("collapse", "is_open"), Output("switch", "label"),
+    Input("switch", "value"),
+    State("collapse", "is_open")
+)
+def fill_card(value, is_open):
+    if value == True:
+        return True, "Anomaly Detection On"
+    else:
+        return False, "Anomaly Detection Off" 
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+#---Store Anomaly Detection Data---------------------------------------------------------------------------------------------------------------------------
+
+@app.callback(
+    Output('anomaly_values', 'data'), 
+    [Input('anomaly_confirm', 'n_clicks'), Input("observation_window", "value"), Input("anomly_window", "value"), 
+    Input("thresold", "value"), Input("detection_method", "value"), Input("z-value", "value"), Input("switch", "value")],
+    prevent_initial_call=True
+)
+def get_data(n_clicks, ob_window, a_window, thresold, detection, zvalue, switch):
+    data = {}
+    if switch == True:
+        if not n_clicks == None and n_clicks>0:
+            data = {'switch' : switch, 'ob_window' : ob_window, 'a_window' : a_window, 'thresold' : thresold, 'detection_method' : detection, 'zvalue' : zvalue}
+            return data
+        else:
+            pass
+    else:
+        return {}
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        
