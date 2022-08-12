@@ -1,4 +1,3 @@
-#from asyncio.windows_events import NULL
 from cProfile import label
 from dash import dcc
 from dash import html, ctx
@@ -29,8 +28,7 @@ def test():
     fig = px.line(df, x="year", y="lifeExp", title='Life expectancy in Canada')
     return fig
 
-#----------------------------------------------------------Demo Page----------------------------------------------------#
-
+#----------------------------------------------Front end of the Demo page------------------------------------------------------------------------------------------------------------------------------------------#
 home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
     dbc.Row([
         #---------------------------------------First Dropdown(DataSet Selection)---------------------------------------#
@@ -67,6 +65,7 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
                 ])
         ]),
         #--------------------------------------------------------------------------------------------------------------#
+        
         dbc.Col([
             html.Div([
                     html.Button('Predict',
@@ -76,34 +75,11 @@ home_page = html.Div([dcc.Location(id = 'url_new', refresh=True),
             ])
         ])
     ],class_name="demo-card", style={"column-gap" : "10px"}),
-
-
-# #------------------------------------------------------Sign Up Redirection-----------------------------------------------#
-#     dbc.Row([
-#         dbc.Col([
-#             html.H4("Have your own Data?"),
-#             html.Div("Do you have your own data that you want to try out? Then you come to the right place!", className = "description"),
-#             html.Div([
-#                 dbc.Button("Click here!", color="info", id='userplayground')
-#             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
-            
-#         ], width=6, class_name="notice-card"),
-
-#         dbc.Col([
-#             html.H4("Do you want to create your own strategy?"),
-#             html.Div([
-#                 dbc.Button("Click here!", color="info", id='strategy')
-#             ],style={"display": "flex", "flexFlow": "row-reverse nowrap"})
-            
-#         ], width=5, class_name="notice-card")
-
-#     ], style={"padding" : "20px", "column-gap" : "30px"})
-# ],)
-# #------------------------------------------------------------------------------------------------------------------------#
 ])
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
-#------------------------Enable the second dropdown after first dropdown value is selected------------------- -----------#
+#------------------------Enable the second dropdown after first dropdown value is selected-------------------------------#
 @app.callback(
     Output(component_id='Model Selection', component_property='disabled'), Input('Data Selection', 'value')
 )
@@ -113,8 +89,6 @@ def show_next_dropdown(value):
     else:
         return False
 #-------------------------------------------------------------------------------------------------------------------------#
-
-
 
 
 #------------------------------------Selection of Models on basis of DataSet selected-------------------------------------#
@@ -141,33 +115,16 @@ def show_next_dropdown(value):
         return []
 #-------------------------------------------------------------------------------------------------------------------------#
 
-@app.callback(
-    Output('datasetName', 'data'),
-    Input('Data Selection', 'value')
-)
-def set_dataset(value):
-    return value
 
-
-#--------------------------------------------Redirect to Demo Dataset Page------------------------------------------------#
+#--------------------------------------------Redirect to a different page--------------------------------------------------#
 @app.callback(
    [Output('url_new', 'pathname'), Output('modelsList', 'data')],
-    [Input('submit_id', 'n_clicks'), 
-    # Input('userplayground', 'n_clicks'), 
-    # Input('strategy', 'n_clicks')
-    ],
+    [Input('submit_id', 'n_clicks')],
     [State('Data Selection', 'value'), State('Model Selection', 'value')]
 )
 
-# def submit_dataset(n_clicks1, n_clicks2, n_clicks3, value1, value2):
 def submit_dataset(n_clicks1, value1, value2):
     id = ctx.triggered_id
-    # if id == "strategy":
-    #     if current_user.is_authenticated:
-    #         return '/strategy', None
-    #     else:
-    #         return '/signup', None
-    # elif id == "submit_id":
     if id == "submit_id":
         if value1 == '1':
             return "/2021data_1", value2
@@ -179,11 +136,6 @@ def submit_dataset(n_clicks1, value1, value2):
             return "/2021data_sec", value2     
         else:
             return "/home_page", None
-    # elif id == "userplayground":
-    #     if current_user.is_authenticated:
-    #         return '/userplayground', None
-    #     else:
-    #         return '/signup', None
     else:
         pass
 

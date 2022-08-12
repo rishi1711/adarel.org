@@ -4,6 +4,9 @@ import dash
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import os
+from app import app
+from dash.dependencies import Input, Output, State
+from flask_login import current_user
 
 
 __location__ = os.path.realpath(
@@ -14,7 +17,7 @@ def test():
     fig = px.line(df, x="year", y="lifeExp", title='Life expectancy in Canada')
     return fig
 
-
+#-----------------------Front end of the Home Page------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 main_page = html.Div([dcc.Location(id = 'url_home', refresh=True),
     html.Div([
         html.H1("AdaRel"),
@@ -38,9 +41,22 @@ main_page = html.Div([dcc.Location(id = 'url_home', refresh=True),
                 html.Div("2021 DatasetSEC"),
             ]),
             dbc.Col([
-                html.Div(dcc.Link('Sign Up', href='/signup')),
+                html.Div(dcc.Link(id = 'show_link', children = 'Sign Up', href='/signup')),
                 html.Div("for an account and test the prediction model on your dataset"),
             ])
         ], class_name="main_page-card2")
 ])
 ])
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+@app.callback(
+    Output('show_link', 'children'),
+    Output('show_link', 'href'),
+    Input('index-title', 'children')
+)
+
+def change_link(data):
+    if current_user.is_authenticated:
+        return 'My Workspace', '/first_page'
+    else:
+        return 'Sign Up', '/signup'

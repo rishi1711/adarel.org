@@ -33,6 +33,7 @@ class Uploadedfiles(db.Model):
     filename = db.Column(db.String(80), nullable = False)
 Uploaded_files_tbl = Table('files', Uploadedfiles.metadata)
 
+#class for the table Strategy
 class Strategy(db.Model):
     __tablename__ = 'strategy'
     strategy_id = db.Column(db.Integer, primary_key=True)

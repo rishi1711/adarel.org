@@ -3,9 +3,8 @@ from waitress import serve
 from dash import html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from navbar import navbar
-
 from app import app
+
 from pages import first_page
 from pages.home_page import home_page
 from pages.data1 import data1
@@ -23,6 +22,8 @@ from pages.first_page import first_page
 from pages.main_page import main_page
 from pages.about import about
 from pages.create_data import create_data
+from pages.logout import logout
+from navbar import navbar
 import sqlite3
 import pandas as pd
 
@@ -73,6 +74,8 @@ def unauthorized_callback():
 
 #-------------------------------------------------------------------------------------------------------------------
 
+
+
 app.title="AdaRel"
 
 app.layout = html.Div([
@@ -93,6 +96,8 @@ app.layout = html.Div([
         dcc.Store(id="dataframe", storage_type="session"),
         dcc.Store(id="path", storage_type="session"),
         dcc.Store(id="oldfilename", storage_type="session"),
+        dcc.Store(id="inputvalue", storage_type="session"),
+        dcc.Store(id="dropdownvalue", storage_type="session"),
 
         #anomalyDetection
         dcc.Store(id="anomaly_values", storage_type="session"),
@@ -161,6 +166,8 @@ def router(pathname, data, training, strategy, testing):
         return login_user_1
     elif pathname == '/create_data':
         return create_data
+    elif pathname == '/logout':
+        return logout
     else:
         return 'Error 404'
 

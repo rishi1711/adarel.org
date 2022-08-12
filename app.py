@@ -3,8 +3,6 @@ import dash
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
-
-from navbar import navbar
 from flask_caching import Cache
 
 

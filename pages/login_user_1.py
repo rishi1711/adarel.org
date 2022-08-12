@@ -27,7 +27,7 @@ import numpy as np
 from PredictionModels.SelectionModels import predictOnSelectedModel
 import plotly.express as px
 
-#-----Main layout-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------Front end of the Make New Prediction Page---------------------------------------------------------------------------------------------------------------------------------------------------------------
 login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                 dbc.Row([
                     html.H1("My Workspace > Make New Predictions", 
@@ -52,8 +52,8 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                         ]),
                         dbc.Col([
                             html.Div([
-                                html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, 
-                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                # html.Button('Upload Data', id = 'upload_dataset', n_clicks=0, 
+                                # style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ],class_name = 'button__style__uploaddata'),
                         dbc.Col([
@@ -191,14 +191,16 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 
                         dbc.Col([
                             html.Div([
-                                html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
-                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                            #     html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
+                            #     style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ]),
 
                         dbc.Col([
                             html.Div([
-                                html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                html.Button('Train Data', id = 'training submit_id', n_clicks=0, 
+                                style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
+                                # html.Button('Create a New Strategy', id = 'create_strategy', n_clicks=0, style= {'background-color' : '#6E6E6E', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'width' : '200px', 'margin-left' : '200px'}),
                             ]),
                         ]),
                     ],style = {'padding-bottom':'3rem'}),
@@ -209,6 +211,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                     dbc.Row([
                         html.Div(id ='file-list'),
                     ]),
+
                     dbc.Row([
                         html.H4("Step 3: Proceed to Predict!"),
                         html.Div("Select the dataset and strategy to be used for prediction.",style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '','padding-bottom':'10px'}),
@@ -237,11 +240,15 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                             ]),
                         ]),
                     ],style = {'padding-top':'1rem', 'padding-bottom':'2rem'}),
-                ])
+                    dbc.Row([
+                             html.Button('Back to Home', id = 'home', n_clicks=0, style= {'background-color' : '#2C2B2B', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '35px', 'width' : '150px',  'margin-left' : '440px'}),
+                    ], style={'padding-left':'160px', 'padding-bottom': '1.5rem'}),
+                ], class_name= "page-view")
             ])
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#---------------------------------Function to fetch the uploaded dataset and strategy from database-----------------------#
+
+#---------------------------------Function to fetch the uploaded dataset and strategy from database---------------------------------------------------------------------#
 @app.callback(
     Output(component_id='Training Data Selection', component_property='options'),
     Output(component_id='Training Strategy Selection', component_property='options'),
@@ -268,39 +275,49 @@ def get_training_datasets(filename):
     testing_datasets = [{'label' : i[1], 'value' : i[0]} for i in testing_datasets] 
 
     return training_datasets, get_strategy, get_strategy, testing_datasets
-#---------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
-    Input('create_strategy', 'n_clicks'),
+    # Input('create_strategy', 'n_clicks'),
     Input('custom submit_id', 'n_clicks'),
-    Input('upload_dataset', 'n_clicks'),
-    [State('trainingdata', 'data'), State('sstrategy', 'data'), State('testingdata', 'data'), State('anomaly_values', 'data')],
+    # Input('upload_dataset', 'n_clicks'),
+    Input('home', 'n_clicks'),
+    State('trainingdata', 'data'),
+    State('sstrategy', 'data'),
+    State('testingdata', 'data'),
+    State('anomaly_values', 'data'),
     prevent_initial_callback = True
 )
-def training_redirection(n_clicks1, n_clicks2, n_clicks3, t_dataset, strategy, c_dataset, anomaly_values):
+def training_redirection(n_clicks1, n_clicks2, t_dataset, strategy, c_dataset, anomaly_values):
     id = ctx.triggered_id
-    if id == "upload_dataset":
-        if current_user.is_authenticated:
-            return '/create_data'
-        else:
-            pass
-    elif id == "create_strategy":
-        if current_user.is_authenticated:
-            return '/strategy'
-        else:
-            pass
-    elif id == "custom submit_id":
+    # if id == "upload_dataset":
+    #     if current_user.is_authenticated:
+    #         return '/create_data'
+    #     else:
+    #         pass
+    # elif id == "create_strategy":
+    #     if current_user.is_authenticated:
+    #         return '/strategy'
+    #     else:
+    #         pass
+    if id == "custom submit_id":
         if current_user.is_authenticated:
             call_predictions(t_dataset, c_dataset, strategy, "testing", anomaly_values)
             return '/2021data'
+        else:
+            pass
+    elif id == "home":
+        if current_user.is_authenticated:
+            return '/first_page'
         else:
             pass
     else:
         pass
     return dash.no_update
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #-------Driver to call the method for training and testing the data-----------------------------------------------------------------------------------------
 def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type, anomaly_values):
@@ -319,6 +336,7 @@ def call_predictions(train_dataset_id, test_dataset_id, strategy_id, type, anoma
     errors = predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, json_val, type, anomaly_values)
     return errors
 #--------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #-------------------------------------------------------dcc.store elements update------------------------------------------#
 @app.callback(
@@ -346,7 +364,8 @@ def store_testingdata(value):
     return value
 #----------------------------------------------------------------------------------------------------------------------------#
 
-#--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('training_details', 'children'),
     [Input('training submit_id', 'n_clicks'),Input('Training Strategy Selection', 'value')],
@@ -362,10 +381,10 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                 dbc.Col([
                                     html.Div()
                                 ]),
-                                dbc.Col([
-                                    html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",
-                                    style={'text-align' : 'left', 'color' : '#686868'} ),
-                                ]),
+                                # dbc.Col([
+                                #     html.Div("Based on the selected base model, the strategy should account for high seasonal variations. Refer below for more information.",
+                                #     style={'text-align' : 'left', 'color' : '#686868'} ),
+                                # ]),
                             ]),])]
                 #based on multiple strategies selected, display appropriate details
                 for i in value:
@@ -403,9 +422,9 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
     else:
         pass
     return dash.no_update
-#------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------#
 
-#----------Display mae and rmse errors--------------------------------------------------------
+#----------Display mae and rmse errors-----------------------------------------------------------------------------------------------------#
 def get_training_summary(mae, rmse, graph_values) -> html.Div :
     itermediate = html.Div([dbc.Row([
         dbc.Row([
@@ -425,9 +444,9 @@ def get_training_summary(mae, rmse, graph_values) -> html.Div :
         ]),]),])
     
     return itermediate
-#----------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------#
 
-#-------Display summary bar graph----------------------------------------------------------------------------------------------
+#-------Display summary bar graph----------------------------------------------------------------------------------------------#
 def get_bar_graph(data3):
     x = ['0-0.0005', '0.0005-0.001', '0.001-0.005', '0.005-0.01', '0.01-0.05', '0.05-0.1', '0.1-0.5', '0.5-1','>=1']      
     fig = px.bar(x=x, y=data3, labels={'x':'intervals', 'y' : 'frequency'})
