@@ -14,6 +14,7 @@ import dash
 import base64
 import os
 import io
+from io import BytesIO, StringIO
 import json
 
 #----------------------------------------------Front end of the Upload Data Page-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -21,12 +22,24 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
     dbc.Row([
             html.H1("My Workspace > Create Data", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '3rem', 'padding-bottom' : '1rem', 'padding-top' : '40px'}),
             html.Div("You will be able to upload new data here." ,style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : ''}),
-            html.Div("The current supported data format are csv, xls files with specific headers or raw Nginx/Apache error files.", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '2rem'}),
+            html.Div("The current supported data format are csv, xlsx, txt and log files. The file must have timestamp and truevalue as a header.", style={'text-align' : 'left', 'color' : '#686868', 'font-size' : '', 'padding-bottom' : '2rem'}),
     ]),
+    dbc.Row([
+        dbc.Col([
+            html.H6("Select the format of the file you want to Upload:")
+        ]),
+        dbc.Col([
+            html.Button(".csv/.xlsx", id = "csv", n_clicks=0, style = {'background-color' : '#009933', 'color' : 'white', 'border-radius' : '5px', 'border': 'none', 'width':'300px', 'height':'32px' }),
+        ]),
+        dbc.Col([
+            html.Button(".log/.txt", id = "log_txt", n_clicks=0, style = {'background-color' : '#009933', 'color' : 'white', 'border-radius' : '5px', 'border': 'none', 'width':'300px', 'height':'32px' }),
+        ]),
+    ]),
+    html.Div([
     dbc.Row([
         dcc.Upload(
             id = "upload__data",
-            children=html.Div("Drag and Drop or Click here to select a file to upload.", style={'text-align' : 'center', 'padding-top' : '2rem'}
+            children=html.Div("Drag and Drop or Click here to select a file to upload.", id = 'div_detail', style={'text-align' : 'center', 'padding-top' : '2rem'}
             ),
             style={
                 "width": "100%",
@@ -47,8 +60,6 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
     ]),
     dbc.Row([
         dbc.Col([
-            # dcc.Input(id="file-type", type="text", placeholder="Type of Data Upload", style = {'border-radius' : '5px', 'height' : '30px', 'width' : '300px', 'padding-left' : '50px'}),
-
             #For the selection of the type of data being uploaded.
             dcc.RadioItems(
                 id = "dataset_type",
@@ -60,7 +71,6 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
 
         dbc.Col([
             #To input the name of the file.
-            # dcc.Input(id="dataset_name", type="text", placeholder="Enter the Dataset Name"),
             html.Div(id = "choice"),
         ]),
 
@@ -74,12 +84,14 @@ create_data = html.Div([dcc.Location(id = 'url_redirect', refresh=True),
     dbc.Row([
             dash_table.DataTable(id = 'preview_data'),
     ]),
+    ],id = 'upload_div', hidden = True),
 ]),
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 #-------------------------To temporary store and display the name, path and content of the file being uploaded by user----------------------------------------------#
 @app.callback(
+    Output('div_detail', 'children'),
     Output('preview_data', 'data'),
     Output('dataframe', 'data'),
     Output('path', 'data'),
@@ -92,21 +104,36 @@ def data_upload(filename, content):
     if filename is not None and content is not None:
         path = os.getcwd()+"/data2021/"+filename
         content_type, content_string = content.split(',')
-        decoded = base64.b64decode(content_string)
+        decoded = base64.b64decode(content_string)          #byte data
         if 'txt' in filename:
             data = content.encode("utf8").split(b";base64,")[1]
-            with open(path, "wb") as fp:
-                fp.write(base64.decodebytes(data))
+            data = base64.decodebytes(data)
+            data = BytesIO(data)
+            df = pd.read_csv(data)
+
         elif 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-            # df.to_csv (path, index = False, header=True)
-        elif 'xls' in filename:
+
+        elif 'xlsx' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
+        
+        elif 'log' in filename:
+            data = content.encode("utf8").split(b";base64,")[1]
+            data = base64.decodebytes(data)
+            data = BytesIO(data)
+            df = pd.read_csv(data)
+
         oldfilename=os.path.splitext(filename)[0]
-        return df.to_dict('records'), df.to_json(), path, oldfilename
+        column = df.columns.values.tolist()
+        for i in range(len(column)):
+            column[i] = column[i].lower()
+        if "timestamp" and "true value" in column:
+            return "File header matches the requirement, you can preview your data. ", df.to_dict('records'), df.to_json(), path, oldfilename
+        else:
+            return "File Header are not appropriate. Please make necessary Changes and upload again.", None, None, "", ""
     else:
         return dash.no_update
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -126,22 +153,27 @@ def data_upload(filename, content):
 )
 
 def upload_confirmation(nclicks, oldfilename, inputvalue, dropdownvalue, file_type, df, path):
-    if nclicks>0:
-        df = pd.read_json(df)
-        if inputvalue is not None:
-            dataset_name = inputvalue
-        else:
-            dataset_name = dropdownvalue
-        newfilename = dataset_name
-        newfilename = newfilename + '_' + file_type
-        path = path.replace(oldfilename, newfilename)
-        df.to_csv (path, index = False, header=True)
-        if newfilename is not None and current_user.get_id() is not None and path is not None:
-            ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = file_type, datasetname = dataset_name, filename = newfilename)
-            conn = engine.connect()
-            conn.execute(ins)
-            conn.close()
-            return '/first_page'
+    if df is not None:
+        if nclicks>0:
+            df = pd.read_json(df)
+            if inputvalue is not None:
+                dataset_name = inputvalue
+            else:
+                dataset_name = dropdownvalue
+            newfilename = dataset_name
+            newfilename = newfilename + '_' + file_type
+            path = path.replace(oldfilename, newfilename)
+
+            df.to_csv (path, index = False, header=True)
+            if newfilename is not None and current_user.get_id() is not None and path is not None:
+                ins = Uploaded_files_tbl.insert().values(user_id = current_user.get_id(), filepath = path, filetype = file_type, datasetname = dataset_name, filename = newfilename)
+                conn = engine.connect()
+                conn.execute(ins)
+                conn.close()
+                df.drop(df.index, inplace=True)
+                return '/first_page'
+            else:
+                pass
         else:
             pass
     else:
@@ -207,3 +239,20 @@ def getdatanamefromdropdown(value):
 def getdatanamefrominput(value):
     return value
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+@app.callback(
+    Output('upload_div', 'hidden'),
+    Input('csv', 'n_clicks'),
+    Input('log_txt', 'n_clicks'),
+    prevent_initial_callback = True
+)
+
+def show_upload_div(n1, n2):
+    id = ctx.triggered_id
+    if id == "csv":
+        return False
+    elif id == "log_txt":
+        return False 
+    else:
+      return True

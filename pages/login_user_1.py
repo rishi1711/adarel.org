@@ -220,7 +220,7 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                         ]),
                     ],style = {'padding-bottom':'3rem'}),
                     dbc.Row([
-                                    html.H3("Training Result Summary"),
+                        html.H3("Training Result Summary"),
                     ], style= {'padding-bottom':'0.1rem', 'padding-top':'1rem'}),
                     #The training summary and the details of the model selected are dynamically filled over here.  
                     html.Div(id ='training_details', children=[]),

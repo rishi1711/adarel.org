@@ -62,13 +62,13 @@ live_page = html.Div([
         ),
     dbc.Row([
         dbc.Col(
-            html.H3("Live data from one of our servers."),
+            html.H3("Live Data from one of our servers."),
             width=5,
         ),
         dbc.Col(html.Div(id="next-prediction-div"),
             width=5,
         )
-    ],
+    ],style = {'padding-top':'2rem'},
     justify="between",),
 
     dbc.Row([
