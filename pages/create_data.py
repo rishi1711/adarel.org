@@ -104,27 +104,27 @@ def data_upload(filename, content):
     if filename is not None and content is not None:
         path = os.getcwd()+"/data2021/"+filename
         content_type, content_string = content.split(',')
-        decoded = base64.b64decode(content_string)
-        format = ""
+        decoded = base64.b64decode(content_string)          #byte data
         if 'txt' in filename:
             data = content.encode("utf8").split(b";base64,")[1]
             data = base64.decodebytes(data)
             data = BytesIO(data)
             df = pd.read_csv(data)
-            format = "txt"
-
-            # with open(path, "wb") as fp:
-            #     fp.write(base64.decodebytes(data))
 
         elif 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-            format = "csv"
 
         elif 'xlsx' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
+        
+        elif 'log' in filename:
+            data = content.encode("utf8").split(b";base64,")[1]
+            data = base64.decodebytes(data)
+            data = BytesIO(data)
+            df = pd.read_csv(data)
 
         oldfilename=os.path.splitext(filename)[0]
         column = df.columns.values.tolist()
