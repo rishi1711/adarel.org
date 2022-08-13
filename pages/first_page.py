@@ -40,6 +40,15 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
                         style= {'background-color' : '#714FFF', 'color' : 'white', 'border' : 'none', 'border-radius' : '5px', 'display' : 'inline-block', 'height' : '30px', 'margin-left' : '250px' }),
         ]),
     ]),
+
+    dbc.Row([
+        dbc.Col([
+            html.H3("My Previous Predictions"),
+            html.Div("Below shows the list of predictions that you have made before. For viewing previous predictions, click on that particular cell of the [Dataset Name] column."),
+            dash_table.DataTable(id = 'predictions'),
+        ]),
+    ]),
+
     dbc.Row([
         html.Button("Create New Predictions >", 
                     id = 'create_pred', 
@@ -53,9 +62,8 @@ first_page = html.Div([dcc.Location(id = 'url_new_page', refresh=True),
 
 #------------------------------------Show the datasets and strategies associated with the user account in the form of table-------------------------------------------------------------------------------------------------------------#
 @app.callback(
-    Output('hi_statement', 'children'),
-    Output('datalist', 'data'),
-    Output('strat_tbl', 'data'),
+    [Output('hi_statement', 'children'), Output('datalist', 'data'), Output('strat_tbl', 'data'),
+    Output('predictions', 'data'), Output('dataframe_prediction', 'data')],
     Input('create_pred', 'nclicks'),
 )
 def showdata(nclicks):
@@ -67,10 +75,43 @@ def showdata(nclicks):
     datasets = pd.read_sql("""select filename, filetype from files where user_id = '{}'""".format(current_user.get_id()), conn)
     datasets = datasets.to_dict('records')
     
-
     strategy_name = pd.read_sql("""select strategy_name from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
     strat_data = pd.read_sql("""select strategy_data from strategy where user_id = '{}'""".format(current_user.get_id()), conn)
-    
+    predictions = pd.read_sql("""select * from PreviousPredictions where user_id = '{}'""".format(current_user.get_id()), conn)
+    s= []
+    d = []
+    f0 = []
+    f1 = []
+    f2 = []
+    m = []
+    r = []
+    s_i =[] 
+    for i in predictions.values:
+        strategyName = pd.read_sql("""select strategy_id, strategy_name from strategy where strategy_id = '{}'""".format(i[1]), conn)
+        s_data = pd.read_sql("""select strategy_data from strategy where strategy_id = '{}'""".format(i[1]), conn)
+        file = pd.read_sql("""select file_id, datasetname, filepath from files where file_id = '{}'""".format(i[3]), conn)
+        mae = i[4]
+        rmse = i[5]
+        s.append(strategyName.values[0][1])
+        d.append(s_data.values[0][0])
+        f0.append(file.values[0][0])
+        f1.append(file.values[0][1])
+        f2.append(file.values[0][2])
+        m.append(mae)
+        r.append(rmse)
+        s_i.append(strategyName.values[0][0])
+    s_name = pd.DataFrame(s, columns = ['Strategy Name'])
+    s_data = pd.DataFrame(d, columns = ['Strategy Data'])
+    d_name = pd.DataFrame(f1, columns = ['Dataset Name'])
+    d_path = pd.DataFrame(f2, columns = ['Dataset Path'])
+    mae = pd.DataFrame(m, columns = ['MAE'])
+    rmse = pd.DataFrame(r, columns = ['RMSE'])
+    file_id = pd.DataFrame(f0, columns = ['File Id'])
+    strategy_id = pd.DataFrame(s_i, columns = ['Strategy Id'])
+    df = pd.concat([d_name,s_name, s_data, mae, rmse], axis=1)
+    df1 = pd.concat([d_name, d_path, s_name, s_data, mae, rmse, file_id, strategy_id], axis=1)
+    predictions = df.to_dict('records')
+    df1 = df1.to_dict('records')
 
     l = []
     for i in strat_data["strategy_data"]:
@@ -82,37 +123,48 @@ def showdata(nclicks):
 
     strategy = pd.concat([strategy_name, strategy_data], join = 'outer', axis = 1)
     strategy = strategy.to_dict('records')
-    return data, datasets, strategy
+    return data, datasets, strategy, predictions, df1
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 #-----------------------------------Redirect the user to different page-----------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
-    Output('url_new_page','pathname'),
+    [Output('url_new_page','pathname'), Output('strategy_id', 'data'), Output('testing_id', 'data')],
     [Input('create_strat', 'n_clicks'),
     Input('create_pred', 'n_clicks'),
-    Input('create_data', 'n_clicks'),],
+    Input('create_data', 'n_clicks'),
+    Input('predictions', 'active_cell')],
+    State('dataframe_prediction', 'data'),
     prevent_initial_callback = True
 )
-def redirect_to_new_page(nclick1, nclick2, nclicks3):
+def redirect_to_new_page(nclick1, nclick2, nclicks3, active_cell, df):
     id = ctx.triggered_id
-    if id == "create_strat":
+    if id == "predictions":
+        columnName = active_cell['column_id']
+        if columnName == 'Dataset Name':
+            row = active_cell['row']
+            file_id = df[row]['File Id']
+            strategy_id = df[row]['Strategy Id']
+            return '/previous_prediction', strategy_id, file_id
+        else:
+            pass
+    elif id == "create_strat":
         if current_user.is_authenticated:
-            return '/strategy'
+            return '/strategy', None, None
         else:
             pass
     elif id == "create_pred":
         if current_user.is_authenticated:
-            return '/login_user_1'
+            return '/login_user_1', None, None
         else:
             pass
-    elif id == "create_data":
-        return '/create_data'
+        
+    elif nclicks3>0 and id == "create_data":
+        return '/create_data', None, None
     else:
         pass
     return dash.no_update
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
 
 
 

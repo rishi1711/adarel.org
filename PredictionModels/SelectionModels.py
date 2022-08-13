@@ -30,6 +30,11 @@ def predictOnSelectedModel(datasetPath_train, datasetPath_test, strategyName, st
         mae = calculate_mae(value1, value2)
         #calculate root mean squared error
         rmse = calculate_rmse(value1, value2)
+        df_col = list(df.columns)
+        if "Unnamed" not in df_col[0]:
+            df.to_csv(datasetPath_train, index=True)
+        else:
+            df.to_csv(datasetPath_train, index=False)  
         return [mae, rmse, summary], df
     elif type == "testing":
         df2 = pd.read_csv(datasetPath_test, encoding='utf-8') 
@@ -169,7 +174,6 @@ def train_models(df, index, strategyData, columnName):
             model = SVR(kernel=a, C=b, gamma=c, epsilon=d).fit(trainX, trainY)
              #predicting the values
             data = np.array(model.predict([[df['true value'].iloc[i]]]))
-            print(data)
             # storing in the dataframe
             df.loc[df.index[i], columnName] =  data[0]    
         return df    

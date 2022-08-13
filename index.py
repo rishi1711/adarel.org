@@ -83,14 +83,17 @@ app.layout = html.Div([
         dcc.Store(id="datasetName", storage_type="session"),
         dcc.Store(id="modelsList", storage_type="session"),  
         dcc.Store(id="strategyData", storage_type="session"),
-        dcc.Store(id="mae_measure", storage_type="session"),
-        dcc.Store(id="rmse_measure", storage_type="session"),
+        dcc.Store(id="strategies", storage_type="session"),
 
         # make prediction page
         dcc.Store(id="trainingdata", storage_type="session"),
         dcc.Store(id="testingdata", storage_type="session"),
         dcc.Store(id="sstrategy", storage_type="session"),
+        dcc.Store(id="strategy_id", storage_type="session"),
+        dcc.Store(id="testing_id", storage_type="session"),
+        dcc.Store(id="mae_rmse", storage_type="session"),
         dcc.Store(id = "bar_graph_values", storage_type="session"),
+        dcc.Store(id="dataframe_prediction", storage_type="session"),
 
         # create data page
         dcc.Store(id="dataframe", storage_type="session"),
@@ -98,7 +101,7 @@ app.layout = html.Div([
         dcc.Store(id="oldfilename", storage_type="session"),
         dcc.Store(id="inputvalue", storage_type="session"),
         dcc.Store(id="dropdownvalue", storage_type="session"),
-
+        
         #anomalyDetection
         dcc.Store(id="anomaly_values", storage_type="session"),
 
@@ -118,13 +121,14 @@ app.layout = html.Div([
 # https://dash.plotly.com/live-updates
 @app.callback(Output('page-content', 'children'), 
 [Input('url', 'pathname')], 
-State('modelsList', 'data'),
-[State('trainingdata', 'data'),
+[State('modelsList', 'data'),
+State('trainingdata', 'data'),
 State('sstrategy', 'data'),
-State('testingdata', 'data')],
+State('testingdata', 'data'),State('testing_id', 'data'), State('strategy_id', 'data')
+],
 prevent_initial_call=True )
 
-def router(pathname, data, training, strategy, testing):
+def router(pathname, data, training, strategy, testing, testing_id, strategy_id):
     if pathname == '/':
         return main_page
     elif pathname == '/first_page':
@@ -153,7 +157,8 @@ def router(pathname, data, training, strategy, testing):
         return p21.dataset_sec(data)
     elif pathname == '/2021data':
         return p21.custom_dataset(training, strategy, testing)
-
+    elif pathname == '/previous_prediction':
+        return p21.previous_prediction_dataset(strategy_id, testing_id)
     elif pathname == '/userplayground':
         return playground.page
     elif pathname == '/signup':
@@ -172,20 +177,20 @@ def router(pathname, data, training, strategy, testing):
         return 'Error 404'
 
 
-if __name__ == '__main__':
-    DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-    # DEBUG = True
-    if DEBUG:
-        app.run_server(debug=True, host='0.0.0.0') # Development 
-    else:# prod
-        serve(app.server, host="0.0.0.0", port="8050") 
-
-
 # if __name__ == '__main__':
-#     # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
-#    DEBUG = True
-#    if DEBUG:
+#     DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+#     # DEBUG = True
+#     if DEBUG:
 #         app.run_server(debug=True, host='0.0.0.0') # Development 
-#    else:# prod
+#     else:# prod
 #         serve(app.server, host="0.0.0.0", port="8050") 
-#         # remember to clear the cache-directory on startup in prod 
+
+
+if __name__ == '__main__':
+    # DEBUG = (os.getenv('DASH_DEBUG_MODE', 'False') == 'True')
+   DEBUG = True
+   if DEBUG:
+        app.run_server(debug=True, host='0.0.0.0') # Development 
+   else:# prod
+        serve(app.server, host="0.0.0.0", port="8050") 
+        # remember to clear the cache-directory on startup in prod 

@@ -1,3 +1,5 @@
+from cProfile import label
+from optparse import Values
 from re import I
 from tkinter import HIDDEN
 from turtle import width
@@ -14,7 +16,7 @@ import base64
 from urllib.parse import quote as urlquote
 from sqlalchemy import true
 from app import app
-from database.models import Uploaded_files_tbl
+from database.models import PreviousPredictions, Uploaded_files_tbl, previousPredictions_tbl
 from database.models import engine
 from flask_login import current_user
 from flask import g
@@ -98,9 +100,12 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                                 ),
                                             ]),
                                             dbc.Col([
-                                                html.Div("hr")
-                                            ])                           
-                                        ])    
+                                                dcc.Dropdown(id = "o_dropdown",
+                                                options=['Minutes', 'Hours', 'Days', 'Weeks'],
+                                                value = 'Hours'
+                                                )                          
+                                             ])    
+                                        ]),
                                     ]),
                                     dbc.Col([
                                         dbc.Row([
@@ -119,7 +124,10 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
                                                 ),
                                             ]),
                                             dbc.Col([
-                                                html.Div("hr")
+                                                dcc.Dropdown(id = "a_dropdown",
+                                                options=['Minutes', 'Hours', 'Days', 'Weeks'],
+                                                value = 'Hours'
+                                                )
                                             ])                           
                                         ])
                                     ]),
@@ -261,10 +269,9 @@ login_user_1 = html.Div([dcc.Location(id = 'url_path_1', refresh=True),
 @app.callback(
     Output(component_id='Training Data Selection', component_property='options'),
     Output(component_id='Training Strategy Selection', component_property='options'),
-    Output(component_id='Final Strategy Selection', component_property='options'),
     Output(component_id='Custom Data Selection', component_property='options'),
     [Input('file-list', 'children')],
-    prevent_initial_callback = True
+
 )
 def get_training_datasets(filename):
     conn = sqlite3.connect("./database/data.sqlite")
@@ -283,34 +290,42 @@ def get_training_datasets(filename):
     testing_datasets = testing_datasets.values.tolist()
     testing_datasets = [{'label' : i[1], 'value' : i[0]} for i in testing_datasets] 
 
-    return training_datasets, get_strategy, get_strategy, testing_datasets
+    return training_datasets, get_strategy, testing_datasets
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 #---------Function to redirect to different pages based the input provided--------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
     Output('url_path_1', 'pathname'),
-    # Input('create_strategy', 'n_clicks'),
     Input('custom submit_id', 'n_clicks'),
-    # Input('upload_dataset', 'n_clicks'),
     Input('home', 'n_clicks'),
-    State('trainingdata', 'data'),
-    State('sstrategy', 'data'),
-    State('testingdata', 'data'),
-    State('anomaly_values', 'data'),
+    [State('trainingdata', 'data'), State('sstrategy', 'data'), State('testingdata', 'data'), State('mae_rmse', 'data'),
+    State('strategies', 'data'), State('bar_graph_values', 'data'), State('anomaly_values', 'data')],
     prevent_initial_callback = True
 )
-def training_redirection(n_clicks1, n_clicks2, t_dataset, strategy, c_dataset, anomaly_values):
+def training_redirection(n_clicks1, n_clicks2, t_dataset, strategy, c_dataset, mae_rmse, strategies, graph_values, anomaly_values):
+    if not c_dataset == None and not strategy == None and not mae_rmse == None and not strategies == None and not graph_values == None and not current_user.get_id() == None:
+        print(strategies)
+        p_data = PreviousPredictions.query.filter_by(file_id = c_dataset, strategy_id=strategy).first()
+        for i in mae_rmse:
+            if i[0] == strategy:
+                mae = i[1]
+                rmse = i[2]
+            else:
+                pass
+        if p_data == None:
+                #insert into database
+            ins = previousPredictions_tbl.insert().values(user_id=current_user.get_id(), strategy_id = strategy, file_id = c_dataset, mae = mae, rmse = rmse, graph_values=str(graph_values))
+        elif str(p_data.user_id) == current_user.get_id() and p_data.strategy_id == strategy and p_data.file_id == c_dataset:
+                #update the database
+            ins = previousPredictions_tbl.update().where(previousPredictions_tbl.c.user_id == current_user.get_id(), previousPredictions_tbl.c.strategy_id == strategy).values(user_id=current_user.get_id(), strategy_id = strategy, file_id = c_dataset, mae = mae, rmse = rmse, graph_values=str(graph_values))
+        conn = engine.connect()
+        conn.execute(ins)
+        conn.close()
+    else:
+        pass
     id = ctx.triggered_id
-    # if id == "upload_dataset":
-    #     if current_user.is_authenticated:
-    #         return '/create_data'
-    #     else:
-    #         pass
-    # elif id == "create_strategy":
-    #     if current_user.is_authenticated:
-    #         return '/strategy'
-    #     else:
-    #         pass
     if id == "custom submit_id":
         if current_user.is_authenticated:
             call_predictions(t_dataset, c_dataset, strategy, "testing", anomaly_values)
@@ -376,7 +391,7 @@ def store_testingdata(value):
 
 #--------Driver method to get mae, rmse and summary bar graph---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 @app.callback(
-    Output('training_details', 'children'),
+    [Output('training_details', 'children'), Output('strategies', 'data'), Output('mae_rmse', 'data'), Output('bar_graph_values', 'data'), Output('Final Strategy Selection', 'options')],
     [Input('training submit_id', 'n_clicks'),Input('Training Strategy Selection', 'value')],
     [State('trainingdata', 'data'),State('testingdata', 'data')],
     prevent_initial_callback = True
@@ -396,8 +411,15 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                                 # ]),
                             ]),])]
                 #based on multiple strategies selected, display appropriate details
+                s = []
+                for i in value:
+                    strategy = pd.read_sql("""select strategy_id, strategy_name from strategy where strategy_id = '{}'""".format(i), conn)
+                    strategy = strategy.values.tolist()
+                    if not strategy == []:
+                        s.append({'label' : strategy[0][1], 'value' : strategy[0][0]})
                 err = []
                 strat = []
+                e = []
                 for i in value:
                     strategy = pd.read_sql("""select strategy_name, strategy_data from strategy where strategy_id = '{}'""".format(i), conn)
                     strategy_title = strategy["strategy_name"].loc[0]
@@ -427,12 +449,14 @@ def get_error_values(nclicks, value, t_dataset, c_dataset):
                     err.append(errors[2])
                     children.append(get_error_plot(errors[0], errors[1]))
                     strat.append(strategy_title)
+                    e.append([i, errors[0], errors[1]])
                     #the method to display the summary graph
                 intermediate =  html.Div([
                     dcc.Graph(figure= get_bar_graph(err, strat)),
                 ])
                 children.append(intermediate)
-                return children
+                print("get_error", value)
+                return children, value, e, err, s
             else:
                 pass
         else:
@@ -467,7 +491,7 @@ def get_bar_graph(err, strategy):
         df2 = df2.rename(columns={col:strategy[i]})
         i = i+1
     df = pd.concat([df1, df2], axis=1)
-    fig = px.bar(df,x=x, y=strategy, labels={'x':'intervals', 'y' : 'frequency'})
+    fig = px.bar(df,x=x, y=strategy, labels={'x':'intervals', 'y' : 'frequency'}, barmode='group')
     fig.update_xaxes(type='category')
     return fig
 #------------------------------------------------------------------------------------------------------------------------------

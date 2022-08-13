@@ -15,7 +15,7 @@ META_DATA_Val = {
         'name' : 'Holtwinter',
         'label' : ["Select the trend:", "Select the seasonal:", "Enter the seasonality_periods:"],
         'parameters' : {'trend' : 'dropdown', 'seasonal' : 'dropdown', 'seasonality_periods' : 'input'},
-        'default' : ['add', 'add', '0'],
+        'default' : ['add', 'add', '2'],
         'dropdown' : [['add', 'mul', 'additive', 'multiplicative', None], ['add', 'mul', 'additive', 'multiplicative', None]],
         'required' : ['seasonality_periods']
     },

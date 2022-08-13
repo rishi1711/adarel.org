@@ -119,3 +119,11 @@ def custom_dataset(training, strategy, testing):
     path = df_dataset["filepath"].loc[0]
     strat_name = df_strategy["strategy_name"].loc[0]
     return get_graph_from_custom_dataset("Empirical Study", None, path, strat_name) 
+
+def previous_prediction_dataset(strategy, testing):
+    conn = sqlite3.connect("./database/data.sqlite")
+    df_dataset = pd.read_sql("""select filepath from files where file_id = '{}'""".format(testing), conn)
+    df_strategy = pd.read_sql("""select strategy_name from strategy where strategy_id = '{}'""".format(strategy), conn)
+    path = df_dataset["filepath"].loc[0]
+    strat_name = df_strategy["strategy_name"].loc[0]
+    return get_graph_from_custom_dataset("Empirical Study", None, path, strat_name) 
