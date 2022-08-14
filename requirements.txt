@@ -20,4 +20,5 @@ Flask-SQLAlchemy==2.5.1
 flask-login==0.6.1
 sqlalchemy_utils==0.38.2 
 sklearn
- dash-renderer==1.9.1
+dash-renderer==1.9.1
+Werkzeug==2.1.2
