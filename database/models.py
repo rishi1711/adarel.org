@@ -6,7 +6,7 @@ from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import database_exists, create_database
 import pandas as pd
-conn = sqlite3.connect('./database/data.sqlite')
+
 
 engine = create_engine('sqlite:///database/data.sqlite')
 insp = inspect(engine)
@@ -78,8 +78,4 @@ if not database_exists('sqlite:////database/data.sqlite'):
     create_upload_table()
     create_strategy_table()
     create_previousPrediction_table()
-else:
-    c = conn.cursor()
-    df = pd.read_sql('select * from users', conn)
-    print(df)
 
