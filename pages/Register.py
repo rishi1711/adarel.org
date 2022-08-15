@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import Users_tbl
 from database.models import engine
 from pages.login import login
+from database.models import Users
 
 #--------------------Main Layout-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create = dbc.Card([
@@ -49,6 +50,9 @@ create = dbc.Card([
                         style={'border-color' : '#D3D3D3', 'border-width' : '0.025px', 'border-radius' : '5px', 'height' : '30px'})
                 ], style={'padding-bottom' : '0.75rem' }),
                 dbc.Row([
+                    html.Div(id="value", style={'color' : '#ff0000'})
+                ]),
+                dbc.Row([
                      html.Button('Register', 
                         id='submit-val', 
                         n_clicks=0,
@@ -61,21 +65,25 @@ create = dbc.Card([
 
 #--------Store the details in the database--------------------------------------------------------------------------------------
 @app.callback(
-    Output('url_register', "pathname")
+    Output('url_register', "pathname"), Output('value', 'children')
     , [Input('submit-val', 'n_clicks')]
     , [State('firstname', 'value'), State('lastname', 'value'), State('username', 'value'), 
         State('password', 'value'), State('companyName', 'value')])
 def insert_users(n_clicks, fn, ln, un, pw, cn):
     if pw is not None:
         hashed_password = generate_password_hash(pw, method='pbkdf2:sha256', salt_length=16)
+        user = Users.query.filter_by(username=un).first()
     if fn is not None and ln is not None and un is not None and pw is not None and cn is not None:
-        ins = Users_tbl.insert().values(firstname=fn, lastname=ln, username=un,  password=hashed_password, companyName=cn)
-        conn = engine.connect()
-        conn.execute(ins)
-        conn.close()
-        return '/login'
+        if user is None:
+            ins = Users_tbl.insert().values(firstname=fn, lastname=ln, username=un,  password=hashed_password, companyName=cn)
+            conn = engine.connect()
+            conn.execute(ins)
+            conn.close()
+            return '/login', ""
+        else:
+            return '/signup', 'Email already exists'
     else:
-        pass
+         return '/signup', ""
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 
